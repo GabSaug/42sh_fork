@@ -2,11 +2,8 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "options.h"
-
-
-
-static int read_options(int argc, char *argv[], char options)
+static struct option opt(int argc, char *argv[], struct hash_table *ht,
+                         struct option options)
 {
   if (argc > 1)
   {
@@ -15,44 +12,51 @@ static int read_options(int argc, char *argv[], char options)
       if (argc < 3)
         errx(2, "-c: option requires an argument");
       else
-        printf("execute a command\n");
-        // TODO EXECUTE argv[2]
-      return 0;
+      {
+        options.input_mode = COMMAND_LINE;
+        return options;
+      }
     }
     else if (!strcmp(argv[1], "--version"))
     {
       printf("Version 0.5\n");
-      return 0;
+      destroy_hash(ht);
+      exit(0);
     }
     else if (!strcmp(argv[1], "--norc"))
     {
       options = options | 1;
-      return read_options(argc - 1, argv + 1, options);
+      return opt(argc - 1, argv + 1, ht, options);
     }
     else if(!strcmp(argv[1], "--ast-print"))
     {
       options = options | (1 << 1);
-      return read_options(argc - 1, argv + 1, options);
+      return opt(argc - 1, argv + 1, ht, options);
     }
     else if (!strcmp(argv[1], "-O") || !strcmp(argv[1], "+O"))
     {
       printf("Set environment variables\n");
       // TODO set environment variables
-      return read_options(argc - 2, argv + 2, options);
+      return opt(argc - 2, argv + 2, ht, options);
     }
     else if (argv[1][0] && argv[1][0] == '-')
       errx(2, "%s: invalid option", argv[1]);
     else
     {
-      printf("execute a file\n");
-      return 0;
-      // TODO execute instructions from given file
+      options.input_mode = INPUT_FILE;
+      return options;
     }
   }
   else
   {
-    printf("launch interpreter\n");
-    return 0;
-    // TODO interpreter
+    option.input_mode = INTERACTIVE;
+    return options;
   }
+}
+
+struct option parse_options(int argc, char *argv[], struct hash_table *ht)
+{
+  // TODO initialize env var
+  struct option options;
+  return opt(argc, argv, ht, options);
 }

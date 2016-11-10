@@ -99,7 +99,7 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
   return ht;
 }
 
-void *get_hash(struct hash_table *ht, char *key)
+void *get_data(struct hash_table *ht, char *key)
 {
   size_t pos = hash_func(key, ht->capacity);
   struct elt_hash *found = ht->table[pos];
