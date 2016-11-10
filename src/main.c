@@ -1,18 +1,5 @@
 #include "42.sh"
 
-enum input_mode
-{
-  INTERACTIVE,
-  COMMAND_LINE,
-  INPUT_FILE
-};
-
-struct option
-{
-  int norc;
-  enum input_mode intput_mode;
-};
-
 int main(int argc, char* argv[])
 {
   //declare hasttable

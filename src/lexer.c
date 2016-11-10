@@ -45,12 +45,12 @@ char** get_token(char* s)
       else
         append_token(v_token, EOF, NULL, NULL);
     }
-    else if (part_of_operator && !is_quoted) // Rule 2
+    else if (part_of_operator && !is_quoted(quoted)) // Rule 2
     {
       continue;
     }
     // Rule 3
-    else if (part_of_operator && !is_in(start, s + i - start, control_operator))
+    else if (part_of_operator && !is_in(start, s + i, control_operator))
     {
       new_token = create_new_token(start, s + i - 1);
       list_append(token_list, new_token);
