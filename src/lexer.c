@@ -1,20 +1,49 @@
+#include "lexer.h"
+#include "my_malloc.h"
+#include "vector.h"
 
 char** control_operator = { "||", "&&", .. };
+
+void append_token(vector v_token, enum token_id, char* start, char* end)
+{
+  struct token* new_token = my_malloc(sizeof(struct token));
+  new_token->id = token_id;
+  if (start)
+  {
+    size_t s_size = (end - start) + 1;
+    char* s = my_malloc(s_size);
+    for (size_t i = 0; i < end - start; ++i)
+      s = start[i];
+    s[s_size] = '\0';
+    new_token->s = s;
+  }
+  else
+    new_token->s = NULL;
+  vector_append(v_token, new_token);
+}
+
+int is_quoted(char quoted[3])
+{
+  for (int i = 0; i < 3; i++)
+    if (quoted[i])
+      return 1;
+  return 0;
+}
 
 char** get_token(char* s)
 {
   char* start = s;
   char part_of_operator = 0;
-  char is_quoted[3] = 0;
+  char quoted[3] = 0;
   // Contain { is_backslah_quoted, is_single_quoted, is double_quoted }
   for (size_t i = 0; s[i]; ++i)
   {
     if (s[i] == "EOF") // Rule 1
     {
       if (start != s) // There is a current token
-        append_token(token_list, EOF, start, s + i);
-      
-      start = s + i;
+        append_token(v_token,
+      else
+        append_token(v_token, EOF, NULL, NULL);
     }
     else if (part_of_operator && !is_quoted) // Rule 2
     {

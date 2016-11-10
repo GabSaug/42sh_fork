@@ -10,14 +10,15 @@ enum input_mode
 struct option
 {
   int norc;
-  int mode;
+  enum input_mode intput_mode;
 };
 
 int main(int argc, char* argv[])
 {
-  declare hasttable;
+  //declare hasttable
+  // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_option(hashtable);
-  if (interactive)
+  if (option.input_mode == INTERACTIVE)
   {
     while (1)
     {
