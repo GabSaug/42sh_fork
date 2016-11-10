@@ -19,7 +19,7 @@ void get_token(char* s)
     if (quoted[BACKSLASH] > 0)
       quoted[BACKSLASH]--;
     // Rule 1
-    if (s[i] == "EOF") 
+    if (s[i] == "EOF")
     {
       if (start == s) // There is not any token
         append_token(v_token, EOF, NULL, NULL);
