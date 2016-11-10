@@ -1,5 +1,17 @@
 #include "hash_table.h"
 
+static size_t hash_func(char *key, size_t capacity)
+{
+  size_t res = 5381;
+  for (size_t i = 0; key[i]; i++)
+  {
+    size_t n = key[i];
+    res = res * 33 + n;
+  }
+
+  return res % capacity;
+}
+
 struct hash_table *create_hash(size_t capacity)
 {
   struct hash_table *new = malloc(sizeof (struct hash_table));
@@ -7,18 +19,13 @@ struct hash_table *create_hash(size_t capacity)
     return NULL;
 
   new->nb_elt = 0;
-  new->table = malloc(capacity * sizeof (struct elt_hash *));
+  new->table = calloc(capacity, sizeof (struct elt_hash *));
   if (!new->table)
   {
     free(new);
     return NULL;
   }
   new->capacity = capacity;
-
-  for (size_t i = 0; i < new->capacity; i++)
-  {
-    new->table[i] = NULL;
-  }
 
   return new;
 }
@@ -44,10 +51,27 @@ void destroy_hash(struct hash_table *ht)
   }
 }
 
+static struct hash_table *rehash(struct hash_table *ht)
+{
+  struct elt_hash **temp =
+                  calloc(2 * ht->capacity, sizeof (struct elt_hash *));
+
+  size_t tmp_nb = ht->nb_elt;
+  for (size_t i = 0; i < ht->capacity && tmp_nb > 0; i++)
+  {
+    // TODO
+  }
+
+  ht->capacity *= 2;
+  free(ht->table);
+  ht->table = temp;
+  return ht;
+}
+
 struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
 {
-  if (/* TODO compare nb_elt with capacity */)
-    // TODO expand hash table
+  if (ht->nb_elt >= ht->capacity)
+    ht = rehash(ht);
 
   struct elt_hash *new = malloc(sizeof (struct elt_hash));
   if (!new)
@@ -56,7 +80,7 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
   new->key = key;
   new->data = data;
 
-  size_t pos = ;// TODO hash function
+  size_t pos = hash_func(key, ht->capacity);
   if (ht->table[pos])
     new->next = ht->table[pos];
   ht->table[pos] = new;
@@ -66,7 +90,7 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
 
 void *get_hash(struct hash_table *ht, char *key)
 {
-  size_t pos = ;// TODO hash function
+  size_t pos = hash_func(key, ht->capacity);
   struct elt_hash found = ht->table[pos];
 
   while (found && strcmp(key, found->key) != 0)
