@@ -3,6 +3,4 @@
 
 #include <string.h>
 
-
-
 #endif /* !OPTIONS_H */
