@@ -1,5 +1,6 @@
 #include "main.h"
-#include "option_paser.h"
+#include "option_parser.h"
+#include "hash_table.h"
 
 int main(int argc, char* argv[])
 {

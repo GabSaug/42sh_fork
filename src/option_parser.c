@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "option_parser.h"
 #include "hash_table.h"
 
 static void set_o(int o, char *str, struct hash_table *ht)
