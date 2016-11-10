@@ -2,6 +2,7 @@
 # define HASH_TABLE_H
 
 #include <stdlib.h>
+#include <string.h>
 
 struct elt_hash
 {
@@ -21,5 +22,6 @@ struct hash_table *create_hash(size_t capacity);
 void destroy_hash(struct hash_table *ht);
 struct hash_table *add_hash(struct hash_table *ht, char *key, void *data);
 void *get_hash(struct hash_table *ht, char *key);
+int del_hash(struct hash_table *ht, char *key);
 
 #endif

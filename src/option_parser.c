@@ -56,8 +56,3 @@ static int read_options(int argc, char *argv[], char options)
     // TODO interpreter
   }
 }
-
-int main(int argc, char *argv[])
-{
-  return read_options(argc, argv, 0);
-}

@@ -40,6 +40,8 @@ void destroy_hash(struct hash_table *ht)
       {
         struct elt_hash *temp = ht->table[i]->next;
         ht->table[i] = ht->table[i]->next;
+        free(temp->key);
+        free(temp->data);
         free(temp);
         temp = NULL;
         ht->nb_elt -= 1;
@@ -59,7 +61,16 @@ static struct hash_table *rehash(struct hash_table *ht)
   size_t tmp_nb = ht->nb_elt;
   for (size_t i = 0; i < ht->capacity && tmp_nb > 0; i++)
   {
-    // TODO
+    struct elt_hash *tmp = ht->table[i];
+    while (tmp)
+    {
+      struct elt_hash *tmp2 = tmp;
+      tmp = tmp->next;
+      size_t pos = hash_func(tmp->key, 2 * ht->capacity);
+      tmp2->next = temp[pos];
+      temp[pos] = tmp2;
+      tmp_nb--;
+    }
   }
 
   ht->capacity *= 2;
@@ -91,7 +102,7 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
 void *get_hash(struct hash_table *ht, char *key)
 {
   size_t pos = hash_func(key, ht->capacity);
-  struct elt_hash found = ht->table[pos];
+  struct elt_hash *found = ht->table[pos];
 
   while (found && strcmp(key, found->key) != 0)
     found = found->next;
@@ -100,4 +111,37 @@ void *get_hash(struct hash_table *ht, char *key)
     return found->data;
   else
     return NULL;
+}
+
+int del_hash(struct hash_table *ht, char *key)
+{
+  size_t pos = hash_func(key, ht->capacity);
+  struct elt_hash *found = ht->table[pos];
+
+  if (!found)
+    return 0;
+
+  if (strcmp(key, found->key) == 0)
+  {
+    ht->table[pos] = ht->table[pos]->next;
+    free(found->key);
+    free(found->data);
+    free(found);
+    return 1;
+  }
+  else
+  {
+    while (strcmp(key, found->next->key) != 0)
+      found = found->next;
+
+    if (!found->next)
+      return 0;
+
+    struct elt_hash *temp = found->next;
+    found->next = temp->next;
+    free(temp->key);
+    free(temp->data);
+    free(temp);
+    return 1;
+  }
 }
