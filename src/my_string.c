@@ -9,7 +9,7 @@
 ** s_list must be null terminated
 ** The element of s_list must be null terminated
 */
-int is_in(char* start, char* end, char** s_list)
+int begin_as(char* start, char* end, char** s_list)
 {
   size_t len = end - start;
   for (int i = 0; s_list[i]; ++i)

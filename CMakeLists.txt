@@ -6,7 +6,11 @@ set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 
 set(SRC
-    src/main.c)
+    src/main.c
+    src/my_malloc.c
+    src/my_string.h
+    src/lexer.c
+    src/hash_table.c)
 
 include_directories(src/include)
 

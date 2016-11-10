@@ -34,6 +34,10 @@ enum token_id
   BANG, // !
   IN,
   FUNCTION,
+  WORD,
+  ASSIGNMENT_WORD,
+  NAME,
+  IO_NUMBER
 };
 
 struct token
