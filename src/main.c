@@ -1,9 +1,9 @@
 #include <stdio.h>
 #include <unistd.h>
 
-#include "main.h"
-#include "vector.h"
+//#include "main.h"
 #include "option_parser.h"
+#include "vector.h"
 #include "hash_table.h"
 #include "lexer.h"
 

@@ -10,8 +10,10 @@ set(SRC
     src/my_malloc.c
     src/my_string.h
     src/lexer.c
-    src/hash_table.c)
+    src/hash_table.c
+    src/vector.c
+    src/option_parser.c)
 
-include_directories(src/include)
+include_directories(src/)
 
 add_executable(42sh ${SRC})

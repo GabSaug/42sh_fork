@@ -1,3 +1,6 @@
+#ifndef LEXER_H
+# define LEXER_H
+
 #include "vector.h"
 
 enum token_id
@@ -55,3 +58,5 @@ enum quote_type
 };
 
 void lexer(char* s, struct vector* v_token);
+
+#endif /* !LEXER_H */
