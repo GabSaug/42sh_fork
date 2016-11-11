@@ -1,7 +1,21 @@
 #include <stdlib.h>
 
+#include <stdio.h>
+#include "lexer.h"
+
 #include "vector.h"
 #include "my_malloc.h"
+
+void v_print(struct vector* v)
+{
+  for (size_t i = 0; i < v->size; ++i)
+  {
+    struct token* token = v_get(v, i);
+
+    printf("%i, ", token->id);
+  }
+  printf("\n");
+}
 
 struct vector* v_create(void)
 {

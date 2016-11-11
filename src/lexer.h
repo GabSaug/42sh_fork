@@ -5,7 +5,8 @@
 
 enum token_id
 {
-  NEWLINE = 1,
+  UNDIFINED = -1,
+  NEWLINE,
   SEMI, // ;
   AND, // &
   PIPE,

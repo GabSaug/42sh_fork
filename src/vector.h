@@ -12,6 +12,8 @@ struct vector
   void** data;
 };
 
+void v_print(struct vector* v);
+
 struct vector* v_create(void);
 size_t v_size(struct vector* v);
 int v_is_empty(struct vector* v);

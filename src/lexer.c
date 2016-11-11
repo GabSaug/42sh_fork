@@ -6,14 +6,18 @@
 
 char operator_list[][10] =
 {
-  "", "\n", ";", "&", "|", "&&", "||", ";;", "<<", ">>", "<&", ">&", "<>",
-  "<<-", ">|", "if", "then", "else", "elif", "fi", "do", "done", "case",
-  "esac", "while", "until", "for", "{", "}", "(", ")", "!", "in", "function"
+  "\n", ";", "&", "|", "&&", "||", ";;", "<<", ">>", "<&", ">&", "<>",
+  "<<-", ">|", ""
+};
+char reserved_word[][10] =
+{
+  "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
+  "until", "for", "{", "}", "(", ")", "!", "in", "function", ""
 };
 
 char quote_symbol[][10] =
 {
-  "\\", "'", "\""
+  "\\", "'", "\"", "\0"
 };
 
 char blank_list[][10] =
@@ -32,10 +36,11 @@ void lexer(char* s, struct vector* v_token)
   char part_of_operator = 0;
   char part_of_word = 0;
   char quoted[3] = {0};
-  enum token_id curr_token = WORD;
+  enum token_id curr_token = UNDIFINED;
   // Contain { is_backslah_quoted, is_single_quoted, is double_quoted }
   for (size_t i = 0; s[i]; ++i)
   {
+    v_print(v_token);
     if (quoted[BACKSLASH] > 0)
       quoted[BACKSLASH]--;
     // Rule 1
@@ -48,17 +53,29 @@ void lexer(char* s, struct vector* v_token)
       return;
     }
     // Rule 2
-    else if (part_of_operator && !is_quoted(quoted)
+    if (part_of_operator && !is_quoted(quoted)
              && begin_as(start, s + i, operator_list) != -1)
-      curr_token = begin_as(start, s + i, operator_list);
-    // Rule 3
-    else if (part_of_operator && begin_as(start, s + i, operator_list) == -1)
     {
-      append_token(v_token, curr_token, start, s + i - 1);
-      start = s + i;
+      curr_token = begin_as(start, s + i, operator_list);
+      continue;
+    }
+    // Rule 3
+    if (part_of_operator && begin_as(start, s + i, operator_list) == -1)
+    {
+      if (is_in(start, s + i - 1, operator_list) != -1)
+      {
+        append_token(v_token, curr_token, start, s + i - 1);
+        curr_token = UNDIFINED;
+        start = s + i;
+        part_of_operator = 0;
+      }
+      else
+      {
+        part_of_operator = 0;
+      } 
     }
     // Rule 4
-    else if (begin_as(s + i, s + i + 1, quote_symbol) >= 0)
+    if (begin_as(s + i, s + i, quote_symbol) >= 0)
     {
       if (s[i] == '\\' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
         quoted[BACKSLASH] = 2; // Decrease at each loop iteration
@@ -68,37 +85,44 @@ void lexer(char* s, struct vector* v_token)
         quoted[DOUBLE_QUOTE] = 1;
     }
     // Rule 5
-    else if (s[i] == '$' || s[i] == '`')
+    if (s[i] == '$' || s[i] == '`')
     {
       i = tokenize_expansion(s + i);
+      continue;
     }
     // Rule 6
-    else if (!is_quoted(quoted) && begin_as(s + i, s + i + 1, operator_list) != -1)
+    if (!is_quoted(quoted) && begin_as(s + i, s + i, operator_list) != -1
+        && curr_token == UNDIFINED)
     {
       append_token(v_token, curr_token, start, s + i - 1);
       start = s + i;
       part_of_operator = 1;
-      curr_token = begin_as(s + i, s + i + 1, operator_list);
+      curr_token = begin_as(s + i, s + i, operator_list);
+      continue;
     }
     // Rule 7
-    else if (begin_as(s + i, s + i + 1, blank_list) >= 0 && !is_quoted(quoted))
+    if (begin_as(s + i, s + i, blank_list) >= 0 && !is_quoted(quoted))
     {
       append_token(v_token, curr_token, start, s + i - 1);
-      append_token(v_token, NEWLINE, NULL, NULL);
+      if (s[i] == '\n')
+        append_token(v_token, NEWLINE, NULL, NULL);
+      part_of_operator = 0;
+      part_of_word = 0;
       start = s + i + 1;
+      continue;
     }
-    /*else if (begin_as(s + i, 1, blank_list) != -1 && !is_quoted[])
+    /*if (begin_as(s + i, 1, blank_list) != -1 && !is_quoted[])
     {
       append_token(v_token, curr_token, start, s + i - 1);
       start = s + i + 1;
     }*/
     // Rule 8
-    else if (part_of_word)
+    if (part_of_word)
     {
       continue;
     }
     // Rule 9
-    else if (s[i] == '#')
+    if (s[i] == '#')
       i += tokenize_comment(s, i);
     // Rule 10
     else
@@ -118,6 +142,7 @@ size_t tokenize_comment(char* s, size_t i)
   return j - 1;
 }
 
+// Return the number of character in the expansion
 static size_t tokenize_exp_normal(char *s)
 {
   size_t i = 2;
@@ -207,8 +232,16 @@ size_t tokenize_expansion(char* s)
 void append_token(struct vector* v_token, enum token_id token_id,
                   char* start, char* end)
 {
+  if (token_id == UNDIFINED)
+    return;
   struct token* new_token = my_malloc(sizeof(struct token));
   new_token->id = token_id;
+  if (token_id == WORD)
+  {
+    int index_reserved_word = is_in(start, end, reserved_word);
+    if (index_reserved_word != -1)
+      new_token->id = IF + index_reserved_word;
+  }
   if (start)
   {
     size_t s_size = (end - start) + 1;
