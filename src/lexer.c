@@ -23,7 +23,7 @@ char blank_list[][10] =
 
 void append_token(struct vector* v_token, enum token_id, char* start, char* end);
 int is_quoted(char quoted[3]);
-size_t tokenize_expansion(struct vector* v_token, char* s, size_t i);
+size_t tokenize_expansion(char* s);
 size_t tokenize_comment(char* s, size_t i);
 
 void lexer(char* s, struct vector* v_token)
@@ -70,7 +70,7 @@ void lexer(char* s, struct vector* v_token)
     // Rule 5
     else if (s[i] == '$' || s[i] == '`')
     {
-      i = tokenize_expansion(v_token, s, i);
+      i = tokenize_expansion(s + i);
     }
     // Rule 6
     else if (!is_quoted(quoted) && begin_as(s + i, s + i + 1, operator_list) != -1)
@@ -118,15 +118,90 @@ size_t tokenize_comment(char* s, size_t i)
   return j - 1;
 }
 
-// Return the number of character in the expansion
-size_t tokenize_expansion(struct vector* v_token, char* s, size_t i)
+static size_t tokenize_exp_normal(char *s)
 {
-  /*if (!strncmp(s, "$((", 3))
+  size_t i = 2;
+  while (s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n' && s[i] != '$')
   {
+    if (s[i] == '\\')
+      i++;
+    else if (s[i] == '\'')
+    {
+      i++;
+      while (s[i] && s[i] != '\'')
+        i++;
+    }
+    else if (s[i] == '\"')
+    {
+      i++;
+      while (s[i] && s[i] != '\"')
+        i++;
+    }
 
-  }*/
-  v_token = v_token; s = s; i = i;
-  return 0;
+    i++;
+  }
+
+  return i;
+}
+
+static size_t tokenize_exp_other(char *s, char b, char d)
+{
+  int count = 0;
+  size_t i = 2;
+  while (s[i] && (s[i] != d || count > 0))
+  {
+    if (s[i] == b)
+      count++;
+    else if (s[i] == d)
+      count--;
+
+    if (s[i] == '\\')
+      i++;
+    else if (s[i] == '\'')
+    {
+      i++;
+      while (s[i] && s[i] != '\'')
+        i++;
+    }
+    else if (s[i] == '\"')
+    {
+      i++;
+      while (s[i] && s[i] != '\"')
+        i++;
+    }
+
+    i++;
+  }
+
+  return i;
+}
+
+// Return the number of character in the expansion
+size_t tokenize_expansion(char* s)
+{
+  char b = '{';
+  char d = '{';
+  if (s[0] == '`')
+  {
+    d = '`';
+    b = '`';
+  }
+  else
+  {
+    b = s[1];
+    switch (s[1])
+    {
+    case '{':
+      d = '}';
+      break;
+    case '(':
+      d = ')';
+      break;
+    default:
+      return tokenize_exp_normal(s);
+    }
+  }
+  return tokenize_exp_other(s, b, d);
 }
 
 void append_token(struct vector* v_token, enum token_id token_id,
