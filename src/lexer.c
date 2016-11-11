@@ -85,7 +85,7 @@ void lexer(char* s, struct vector* v_token)
         quoted[DOUBLE_QUOTE] = 1;
     }
     // Rule 5
-    if (s[i] == '$' || s[i] == '`')
+    if (s[i] == '$' || s[i] == '`' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
     {
       i = tokenize_expansion(s + i);
       continue;

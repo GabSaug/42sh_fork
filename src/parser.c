@@ -1,16 +1,5 @@
 #include "parser.h"
 
-enum symbol* 
-
-struct simple_rule
-{
-  enum symbol* symbol;
-}
-
-struct rule
-{
-  struct simple_rule* simple_rule
-}
 
 struct rule rules[] =
 {
@@ -21,67 +10,217 @@ struct rule rules[] =
   ...
 };
 
+struct rule** init_all_rule(void)
+{
+  struct rule** rules = my_malloc(sizeof(rule*) * NB_RULE);
+  rules[INPUT] = init_rule_input();
+  init_rule_list(rules[LIST]);
+  ...
+}
+
+struct rule* init_rule_input(struct )
+{
+  struct rule* rule = my_malloc(sizeof (struct rule));
+  rule->s_r = my_malloc(sizeof (struct simple_rule*) * 5);
+  // Rule 1
+  rule->s_r[0]->sym_arr = my_malloc(sizeof (struct symbol*) * 3);
+  rule->s_r[0]->sym_arr[0] = create_sym(0, MANDATORY, LIST, 0);
+  rule->s_r[0]->sym_arr[1] = create_sym(1, 0, 0, NEW_LINE);
+  rule->s_r[0]->sym_arr[2] = NULL;
+
+  // Rule 2
+  rule->s_r[1]->sym_arr = my_malloc(sizeof (struct symbol*) * 3);
+  rule->s_r[1]->sym_arr[0] = create_sym(0, MANDATORY, LIST, 0);
+  rule->s_r[1]->sym_arr[1] = create_sym(1, 0, 0, EOF);
+  rule->s_r[1]->sym_arr[2] = NULL;
+
+  // Rule 3
+  rule->s_r[2]->sym_arr = my_malloc(sizeof (struct symbol*) * 2);
+  rule->s_r[2]->sym_arr[0] = create_sym(1, 0, 0, NEW_LINE);
+  rule->s_r[2]->sym_arr[1] = NULL;
+  
+  // Rule 4
+  rule->s_r[3]->sym_arr = my_malloc(sizeof (struct symbol*) * 2);
+  rule->s_r[3]->sym_arr[0] = create_sym(1, 0, 0, EOF);
+  rule->s_r[3]->sym_arr[1] = NULL;
+  
+  rule->s_r[4] = NULL;
+  return rule;
+}
+
+struct rule* init_rule_list(void)
+{
+  struct rule* rule = my_malloc(sizeof (struct rule));
+  rule->s_r = my_malloc(sizeof (struct simple_rule*) * 2);
+  // Rule 1
+  rule->s_r[0]->sym_arr = my_malloc(sizeof (struct symbol*) * 4);
+  rule->s_r[0]->sym_arr[0] = create_sym(0, MANDATORY, AND_OR, 0);
+  rule->s_r[0]->sym_arr[1] = create_sym(0, STAR, LIST_AUX, 0);
+  rule->s_r[0]->sym_arr[2] = create_sym(0, OPTIONAL, COM_AMP, 0);
+  rule->s_r[0]->sym_arr[3] = NULL;
+
+   rule->s_r[1] = NULL;
+  return rule;
+}
+
+struct rule* init_rule_list_aux(void)
+{
+  struct rule* rule = my_malloc(sizeof (struct rule));
+  rule->s_r = my_malloc(sizeof (struct simple_rule*) * 2);
+  // Rule 1
+  rule->s_r[0]->sym_arr = my_malloc(sizeof (struct symbol*) * 3);
+  rule->s_r[0]->sym_arr[0] = create_sym(0, MANDATORY, COM_AMP, 0);
+  rule->s_r[0]->sym_arr[1] = create_sym(0, MANDATORY, AND_OR, 0);
+  rule->s_r[0]->sym_arr[2] = NULL;
+
+  rule->s_r[1] = NULL;
+  return rule;
+}
+
+struct rule* init_rule_com_amp(void)
+{
+  struct rule* rule = my_malloc(sizeof (struct rule));
+  rule->s_r = my_malloc(sizeof (struct simple_rule*) * 3);
+  // Rule 1
+  rule->s_r[0]->sym_arr = my_malloc(sizeof (struct symbol*) * 2);
+  rule->s_r[0]->sym_arr[0] = create_sym(1, 0, 0, SEMI);
+  rule->s_r[0]->sym_arr[1] = NULL;
+
+  // Rule 2
+  rule->s_r[1]->sym_arr = my_malloc(sizeof (struct symbol*) * 2);
+  rule->s_r[1]->sym_arr[0] = create_sym(1, 0, 0, AND);
+  rule->s_r[1]->sym_arr[1] = NULL;
+
+  rule->s_r[2] = NULL;
+  return rule;
+}
+
+
 // return -1 if no rules fit
 // return the length of the string it has accepted otherwise
-int parse(struct vector* v_token, enum symbol symbol)
+struct tree* parse(struct vector* v_token, enum symbol symbol, int* nb_token_read)
 {
-  create_tree(symbol);
-  initial_string = string; initial_length = length;
-  for rule in rules_list[symbol]
+  struct tree* tree = tree_create(symbol);
+  int nb_init_token_read = *nb_token_read;
+//  initial_string = string; initial_length = length;i
+  for (size_t i = 0; rules[symbol]->s_r[i]; ++i)
   {
+    struct simple_rule* s_r = &(rules[symbol]->s_r[i]);
+
     delete_all_child(tree);
-    string = inital_string; length = inital_length;
-    for token in rule
+    *nb_token_read = nb_init_token_read; 
+    //string = inital_string; length = inital_length;
+    size_t j;
+    for (j = 0; s_r->sym_arr[j]; ++j)
     {
-      if (token.operator == atomic)
+      struct symbol* sym = &(s_r->sym_arr[j]);
+      if (sym->terminal)
       {
-        if (token.sym == non_terminal)
+        if (sym->terminal_symbol == v_get(v_token, nb_token_read))
         {
-          int l;
-          ret = parse(token.sym, string, length, &l);
-          if (ret == NULL) break; // exit and check next rule
-          string += l; length -= l;
-          add_child(tree, ret);
+          *nb_token_read += 1;
+          tree_add_child(tree, sym_terminal_symbol);
+          continue;
         }
-        else
+        break;
+      }
+      else // nonterminal
+      {
+        if (sym->repeat == MANDATORY)
         {
-          if (strncmp(string, token.string) == 0)
-            string += token.string.length;
-          else
+          struct tree* child = parse(v_token, sym->rule, nb_token_read);
+          if (child == NULL)
           {
-            ret = -1;
-            break;
+            tree_destroy(tree);
+            *nb_token_read = nb_init_token_read;
+            return NULL;
+          }
+          *nb_token_read += 1;
+          tree_add_child(tree, child);
+        }
+        else if (sym->repeat == STAR)
+        {
+          while (1)
+          {
+            struct tree* child = parse(v_token, sym->rule, nb_token_read);
+            if (child == NULL)
+              break;
+            *nb_token_read += 1;
+            tree_add_child(tree, child);
           }
         }
-      }
-      else if (token.operator == star)
-      {
-        do {
-          ret = parse(token.sym, string, length);
-        } while (ret > 0)
-        string += ret; length -= ret;
-      }
-      else if (token.operator == braket)
-      {
-        for sym in token.list
+        else if (sym->repeat == OPTIONAL)
         {
-          ret = parse(sym, string, length);
-          if (ret > 0)
+          struct tree* child = parse(v_token, sym->rule, nb_token_read);
+          if (child != NULL)
           {
-            string += ret; length -= ret;
-            break;
+            *nb_token_read += 1;
+            tree_add_child(tree, child);
+          }
+        }
+        else // PLUS
+        {
+          struct tree* child = parse(v_token, sym->rule, nb_token_read);
+          if (child == NULL)
+          {
+            tree_destroy(tree);
+            *nb_token_read = nb_init_token_read;
+            return NULL;
+          }
+          *nb_token_read += 1;
+          tree_add_child(tree, child);
+          while (1)
+          {
+            struct tree* child = parse(v_token, sym->rule, nb_token_read);
+            if (child == NULL)
+              break;
+            *nb_token_read += 1;
+            tree_add_child(tree, child);
           }
         }
       }
     }
-    if (ret != -1)
+    if (s_r->sym_arr[j] == NULL) // Rule match
     {
       // All symbol passed
-      return inital_length - length;
+      return tree;
     }
   }
   // No rules fit
-  return -1;
+  tree_destroy(tree);
+  *nb_token_read = nb_init_token_read;
+  return NULL;
 }
+
+
+/*struct tree* rule_input(char* s, size_t len, size_t* b_read)
+{
+  tree_create(INPUT);
+  struct tree* child = rule_list(s, len);
+  if (child == NULL)
+    return 
+}
+
+struct tree* rule_list(char* s, size_t len, size_t* b_read)
+{
+  struct tree* tree = tree_create(LIST);
+  struct tree* child_1 = rule_and_or(s, len, b_read);
+  if (child_1 == NULL)
+    return NULL;
+  tree_add_child(tree, child_1);
+  
+  {
+    int b_read_2 = 0;
+    struct tree* child = rule_comma_esp(s + b_read, len, &b_read_2);
+    if (child == NULL)
+      break;
+    struct tree* child = rule_and_or(s + b_read, len, &b_read_2);
+    if (child == NULL)
+      break;
+
+  } while (1)
+
+
+}*/
 
 

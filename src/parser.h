@@ -3,41 +3,47 @@
 
 enum non_terminal_symbol
 {
-  input,
-  list,
-  and_or,
-  pipeline,
-  command,
-  simple_command,
-  shell_command,
-  funcdec,
-  redirection,
-  prefix,
-  element,
-  compound_list,
-  rule_for,
-  rule_while,
-  rule_until,
-  rule_case,
-  rule_if,
-  else_clause,
-  do_group,
-  case_clause,
-  case_item
+  INPUT,
+  LIST,
+  AND_OR,
+  PIPELINE,
+  COMMAND,
+  SIMPLE_COMMAND,
+  SHELL_COMMAND,
+  FUNCDEC,
+  REDIRECTION,
+  PREFIX,
+  ELEMENT,
+  COMPOUND_LIST,
+  RULE_FOR,
+  RULE_WHILE,
+  RULE_UNTIL,
+  RULE_CASE,
+  RULE_IF,
+  ELSE_CLAUSE,
+  DO_GROUP,
+  CASE_CLAUSE,
+  CASE_ITEM,
+  
 };
 
 struct symbol
 {
   int terminal; // if true read only terminal_symbol
-  enum repeat repeat; // mandatory, optional, star
-  struct rule* rule;
+  enum repeat repeat; // mandatory, optional, star, plus
+  struct non_terminal_symbol rule;
   enum terminal_symbol;
+};
+
+struct simple_rule
+{
+  enum symbol* sym_arr;
 };
 
 struct rule
 {
-  enum symbol* symbol_array;
-}
+  struct simple_rule* s_r;
+};
 
 
   /*rules_list[LIST][0] =
@@ -71,3 +77,6 @@ rule_list[RULE_IF] =
 
 
 #endif /* !PARSER_H */
+
+
+
