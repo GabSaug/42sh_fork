@@ -8,7 +8,7 @@ set(CMAKE_C_FLAGS_RELEASE "-O2")
 set(SRC
     src/main.c
     src/my_malloc.c
-    src/my_string.h
+    src/my_string.c
     src/lexer.c
     src/hash_table.c
     src/vector.c
