@@ -1,6 +1,11 @@
+#include <stdio.h>
+#include <unistd.h>
+
 #include "main.h"
+#include "vector.h"
 #include "option_parser.h"
 #include "hash_table.h"
+#include "lexer.h"
 
 int main(int argc, char* argv[])
 {
@@ -11,11 +16,12 @@ int main(int argc, char* argv[])
   {
     while (1)
     {
-      print_PS();
-      char* buff[100]; // A MODIFER
+      //print_PS();
+      char buff[100]; // A MODIFER
       buff[read(STDOUT_FILENO, buff, 90)] = '\0';
       struct vector* v_token = v_create();
-      lexer(v_token);
+      lexer(buff, v_token);
+      v_destroy(v_token);
       /*ast = parse_command(token_list);
       char* ast_print = get_data(ht, "ast_print");
       if (ast_print && !strcmp("0", ast_print))
@@ -25,7 +31,11 @@ int main(int argc, char* argv[])
   }
   else
   {
-    token_list = lexer();
+    char buff[100]; // A MODIFER
+    buff[read(STDOUT_FILENO, buff, 90)] = '\0';
+    struct vector* v_token = v_create();
+    lexer(buff, v_token);
+    v_destroy(v_token);
     /*ast = parse_file();
     if (print_AST)
       print_AST(ast);
@@ -33,8 +43,8 @@ int main(int argc, char* argv[])
   }
 }
 
-void print_PS(void)
+/*void print_PS(void)
 {
   printf(">");
   fflush(stdout);
-}
+}*/

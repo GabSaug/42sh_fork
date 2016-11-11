@@ -1,17 +1,31 @@
+#include <stdio.h>
+
 #include "lexer.h"
 #include "my_malloc.h"
-#include "vector.h"
+#include "my_string.h"
 
-char** control_operator = { "||", "&&", .. };
+char operator_list[][10] =
+{
+  "", "\n", ";", "&", "|", "&&", "||", ";;", "<<", ">>", "<&", ">&", "<>",
+  "<<-", ">|", "if", "then", "else", "elif", "fi", "do", "done", "case",
+  "esac", "while", "until", "for", "{", "}", "(", ")", "!", "in", "function"
+};
 
-void append_token(struct ector v_token, enum token_id, char* start, char* end);
+char quote_symbol[][10] =
+{
+  "\\", "'", "\""
+};
+
+void append_token(struct vector* v_token, enum token_id, char* start, char* end);
 int is_quoted(char quoted[3]);
+size_t tokenize_expansion(struct vector v_token, char* s, size_t i);
 
-void get_token(char* s)
+void lexer(char* s, struct vector* v_token)
 {
   char* start = s;
   char part_of_operator = 0;
-  char quoted[3] = 0;
+  char part_of_word = 0;
+  char quoted[3] = {0};
   enum token_id curr_token = WORD;
   // Contain { is_backslah_quoted, is_single_quoted, is double_quoted }
   for (size_t i = 0; s[i]; ++i)
@@ -19,7 +33,7 @@ void get_token(char* s)
     if (quoted[BACKSLASH] > 0)
       quoted[BACKSLASH]--;
     // Rule 1
-    if (s[i] == "EOF")
+    if (s[i] == EOF)
     {
       if (start == s) // There is not any token
         append_token(v_token, EOF, NULL, NULL);
@@ -38,11 +52,11 @@ void get_token(char* s)
       start = s + i;
     }
     // Rule 4
-    else if (begin_as(s + i, 1, quoted_symbol) >= 0)
+    else if (begin_as(s + i, s + i + 1, quote_symbol) >= 0)
     {
-      if (s[i] == '\' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
+      if (s[i] == '\\' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
         quoted[BACKSLASH] = 2; // Decrease at each loop iteration
-      if (s[i] == ''' && !quoted[BACKSLASH] && !quoted[DOUBLE_QUOTE])
+      if (s[i] == '\'' && !quoted[BACKSLASH] && !quoted[DOUBLE_QUOTE])
         quoted[SINGLE_QUOTE] = 1;
       if (s[i] == '"' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
         quoted[DOUBLE_QUOTE] = 1;
@@ -61,18 +75,18 @@ void get_token(char* s)
       curr_token = begin_as(s + i, 1, operator_list);
     }
     // Rule 7
-    else if (s[i] == '\n' && !is_quoted(quoted))
+    else if (is_in(s, 1, blank_list) >= 0 && !is_quoted(quoted))
     {
       append_token(v_token, curr_token, start, s + i - 1);
       append_token(v_token, NEWLINE, NULL, NULL);
       start = s + i + 1;
     }
     // Rule 8
-    else if (begin_as(s + i, 1, blank_list) != -1 && !is_quoted[])
+    /*else if (begin_as(s + i, 1, blank_list) != -1 && !is_quoted[])
     {
       append_token(v_token, curr_token, start, s + i - 1);
       start = s + i + 1;
-    }
+    }*/
     // Rule 9
     else if (part_of_word)
     {
@@ -99,7 +113,7 @@ size_t tokenize_comment(char* s, size_t i)
 }
 
 // Return the number of character in the expansion
-size_t parse_expansion(struct vector v_token, char* s, size_t i)
+size_t tokenize_expansion(struct vector v_token, char* s, size_t i)
 {
   /*if (!strncmp(s, "$((", 3))
   {
@@ -108,7 +122,7 @@ size_t parse_expansion(struct vector v_token, char* s, size_t i)
   return 0;
 }
 
-void append_token(vector v_token, enum token_id, char* start, char* end)
+void append_token(struct vector* v_token, enum token_id, char* start, char* end)
 {
   struct token* new_token = my_malloc(sizeof(struct token));
   new_token->id = token_id;

@@ -1,7 +1,8 @@
+#include "vector.h"
+
 enum token_id
 {
-  EOF,
-  NEWLINE,
+  NEWLINE = 1,
   SEMI, // ;
   AND, // &
   PIPE,
@@ -46,3 +47,11 @@ struct token
   char* s;
 };
 
+enum quote_type
+{
+  BACKSLASH,
+  SINGLE_QUOTE,
+  DOUBLE_QUOTE
+};
+
+void lexer(char* s, struct vector* v_token);
