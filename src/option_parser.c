@@ -1,10 +1,4 @@
-#include <err.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "option_parser.h"
-#include "hash_table.h"
 
 static void set_o(int o, char *str, struct hash_table *ht)
 {
@@ -75,7 +69,7 @@ static struct option opt(int argc, char *argv[], struct hash_table *ht,
   else
   {
     ht = add_hash(ht, "expand_aliases", strdup("1"));
-    option.input_mode = INTERACTIVE;
+    options.input_mode = INTERACTIVE;
     return options;
   }
 }

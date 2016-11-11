@@ -1,6 +1,14 @@
 #ifndef OPTION_PARSER_H
 # define OPTION_PARSER_H
 
+#define _DEFAULT_SOURCE
+#include <string.h>
+
+#include <err.h>
+#include <stdio.h>
+#include <stdlib.h>
+
+
 #include "hash_table.h"
 
 enum input_mode
