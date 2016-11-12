@@ -91,6 +91,13 @@ void* v_remove_last(struct vector* v)
   return res;
 }
 
+void v_erase(struct vector *v)
+{
+  v->size = 0;
+  v->data = realloc(v->data, MIN_CAPACITY * sizeof (void*));
+  v->capacity = MIN_CAPACITY;
+}
+
 void v_destroy(struct vector* v)
 {
   if (v->data != NULL)

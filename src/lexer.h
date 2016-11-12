@@ -6,6 +6,7 @@
 enum terminal_symbol
 {
   UNDIFINED = -1,
+  EOF_SYM,
   NEWLINE,
   SEMI, // ;
   AND, // &

@@ -13,7 +13,8 @@ set(SRC
     src/hash_table.c
     src/vector.c
     src/option_parser.c
-    src/parser.c)
+    src/parser.c
+    src/tree.c)
 
 include_directories(src/)
 

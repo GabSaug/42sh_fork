@@ -47,7 +47,7 @@ void lexer(char* s, struct vector* v_token)
     if (s[i] == EOF)
     {
       if (start == s) // There is not any token
-        append_token(v_token, EOF, NULL, NULL);
+        append_token(v_token, EOF_SYM, NULL, NULL);
       else
         append_token(v_token, WORD, start, s + i - 1);
       return;
@@ -85,7 +85,7 @@ void lexer(char* s, struct vector* v_token)
         quoted[DOUBLE_QUOTE] = 1;
     }
     // Rule 5
-    if (s[i] == '$' || s[i] == '`' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
+    if ((s[i] == '$' || s[i] == '`') && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
     {
       i = tokenize_expansion(s + i);
       continue;
