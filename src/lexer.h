@@ -13,6 +13,8 @@ enum terminal_symbol
   AND_IF,
   OR_IF,
   DSEMI,
+  LESS,
+  GREAT,
   DLESS,
   DGREAT,
   LESSAND,
