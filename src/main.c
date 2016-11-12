@@ -28,9 +28,11 @@ int main(int argc, char* argv[])
       struct vector* v_token = v_create();
       lexer(buff, v_token);
       v_print(v_token);
-      int nb_token_read = 0;
-      struct tree* ast = parse(rules, v_token, INPUT, &nb_token_read);
-      tree_print(ast, 0);
+      struct tree* ast = parse(rules, v_token);
+      if (ast == NULL)
+        printf("Grammar error\n");
+      else
+        tree_print(ast);
       v_destroy(v_token);
       tree_destroy(ast);
       /*ast = parse_command(token_list);

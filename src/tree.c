@@ -5,7 +5,8 @@
 #include "vector.h"
 #include "tree.h"
 
-void tree_print(struct tree* tree, int indent)
+
+static void tree_print_rec(struct tree* tree, int indent)
 {
   if (tree == NULL)
     return;
@@ -19,9 +20,14 @@ void tree_print(struct tree* tree, int indent)
     for (size_t i = 0; i < tree->child->size; ++i)
     {
       printf("%*sch %zu : ", 8*indent, "", i);
-      tree_print(v_get(tree->child, i), indent + 1);
+      tree_print_rec(v_get(tree->child, i), indent + 1);
     }
   }
+}
+
+void tree_print(struct tree* tree)
+{
+  tree_print_rec(tree, 0);
 }
 
 struct tree* tree_create(enum non_terminal_symbol nts)
@@ -55,6 +61,8 @@ void tree_delete_all_child(struct tree* tree)
 
 void tree_destroy(struct tree* tree)
 {
+  if (!tree)
+    return;
   v_destroy(tree->child);
   free(tree);
 }

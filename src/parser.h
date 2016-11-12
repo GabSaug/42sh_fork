@@ -4,8 +4,7 @@
 # include "rules.h"
 # include "lexer.h"
 
-struct tree* parse(struct rule** rules, struct vector* v_token,
-                   enum non_terminal_symbol symbol, int* nb_token_read);
+struct tree* parse(struct rule** rules, struct vector* v_token);
 
 #endif /* !PARSER_H */
 
