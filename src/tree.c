@@ -16,10 +16,10 @@ char nts2string[][20] =
 
 static char ts2string[][20] =
 {
-  "<new_line>", ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&", "<>",
+  ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&", "<>",
   "<<-", ">|", "EOF",
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
-  "until", "for", "{", "}", "(", ")", "!", "in", "function", "word",
+  "until", "for", "{", "}", "(", ")", "!", "in", "function", "<new_line>", "word",
   "assignment_word", "name", "IO_number"
 };
 

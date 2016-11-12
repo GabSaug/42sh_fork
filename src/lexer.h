@@ -6,7 +6,6 @@
 enum terminal_symbol
 {
   UNDIFINED = -1,
-  NEWLINE,
   SEMI, // ;
   AND, // &
   PIPE,
@@ -42,6 +41,7 @@ enum terminal_symbol
   BANG, // !
   IN,
   FUNCTION,
+  NEWLINE,
   WORD,
   ASSIGNMENT_WORD,
   NAME,
