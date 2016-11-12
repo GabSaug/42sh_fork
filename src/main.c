@@ -32,7 +32,10 @@ int main(int argc, char* argv[])
       if (ast == NULL)
         printf("Grammar error\n");
       else
+      {
         tree_print(ast);
+        tree_print_dot(ast);
+      }
       v_destroy(v_token);
       tree_destroy(ast);
       /*ast = parse_command(token_list);

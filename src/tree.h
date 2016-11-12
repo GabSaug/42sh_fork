@@ -11,6 +11,7 @@ struct tree
   struct vector* child;
 };
 
+void tree_print_dot(struct tree* tree);
 void tree_print(struct tree* tree);
 
 struct tree* tree_create(enum non_terminal_symbol nts);
