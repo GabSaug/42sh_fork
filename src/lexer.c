@@ -75,7 +75,7 @@ void lexer(char* s, struct vector* v_token)
       } 
     }
     // Rule 4
-    if (begin_as(s + i, s + i, quote_symbol) >= 0)
+    if (begin_as(s + i, s + i, quote_symbol) >= 0) // inverse boolean
     {
       if (s[i] == '\\' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
         quoted[BACKSLASH] = 2; // Decrease at each loop iteration

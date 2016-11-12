@@ -34,10 +34,14 @@ struct rule* init_rule_input(void)
   rule->nb_s_r = 4;
   rule->s_r = my_malloc(sizeof (struct simple_rule) * rule->nb_s_r);
   // Rule 1
-  rule->s_r[0].nb_sym = 2;
+  rule->s_r[0].nb_sym = 1;
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * rule->s_r[0].nb_sym);
   create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, LIST, 0);
-  create_sym(rule->s_r[0].sym_arr + 1, 1, 0, 0, NEWLINE);
+
+  /*rule->s_r[0].nb_sym = 2;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * rule->s_r[0].nb_sym);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, LIST, 0);
+  create_sym(rule->s_r[0].sym_arr + 1, 1, 0, 0, NEWLINE);*/
 
   // Rule 2
   rule->s_r[1].nb_sym = 2;
@@ -90,7 +94,6 @@ struct rule* init_rule_list_aux(void)
 struct rule* init_rule_com_amp(void)
 {
   struct rule* rule = my_malloc(sizeof (struct rule));
-<<<<<<< HEAD
   rule->nb_s_r = 3;
   rule->s_r = my_malloc(sizeof (struct simple_rule) * rule->nb_s_r);
   // Rule 1
@@ -99,14 +102,14 @@ struct rule* init_rule_com_amp(void)
   create_sym(rule->s_r[0].sym_arr, 1, 0, 0, SEMI);
 
   // Rule 2
-  rule->s_r[1].nb_sym = 1
+  rule->s_r[1].nb_sym = 1;
   rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
   create_sym(rule->s_r[1].sym_arr, 1, 0, 0, AND);
 
   // Rule 3
   rule->s_r[2].nb_sym = 1;
   rule->s_r[2].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[2].sym_arr, 1, 0, 0, NEW_LINE);
+  create_sym(rule->s_r[2].sym_arr, 1, 0, 0, NEWLINE);
 
   return rule;
 }
