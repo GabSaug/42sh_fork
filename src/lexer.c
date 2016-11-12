@@ -167,6 +167,9 @@ static size_t tokenize_exp_normal(char *s)
     i++;
   }
 
+  if (!s[i])
+    errx(2, "Not end of expansion");
+
   return i;
 }
 
@@ -198,6 +201,9 @@ static size_t tokenize_exp_other(char *s, char b, char d)
 
     i++;
   }
+
+  if (!s[i])
+    errx(2, "Not end of expansion");
 
   return i;
 }
