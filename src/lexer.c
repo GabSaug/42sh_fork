@@ -25,7 +25,7 @@ char blank_list[][10] =
   "\n", " ", "\t"
 };
 
-void append_token(struct vector* v_token, enum token_id, char* start, char* end);
+void append_token(struct vector* v_token, enum terminal_symbol id, char* start, char* end);
 int is_quoted(char quoted[3]);
 size_t tokenize_expansion(char* s);
 size_t tokenize_comment(char* s, size_t i);
@@ -36,7 +36,7 @@ void lexer(char* s, struct vector* v_token)
   char part_of_operator = 0;
   char part_of_word = 0;
   char quoted[3] = {0};
-  enum token_id curr_token = UNDIFINED;
+  enum terminal_symbol curr_token = UNDIFINED;
   // Contain { is_backslah_quoted, is_single_quoted, is double_quoted }
   for (size_t i = 0; s[i]; ++i)
   {
@@ -229,7 +229,7 @@ size_t tokenize_expansion(char* s)
   return tokenize_exp_other(s, b, d);
 }
 
-void append_token(struct vector* v_token, enum token_id token_id,
+void append_token(struct vector* v_token, enum terminal_symbol token_id,
                   char* start, char* end)
 {
   if (token_id == UNDIFINED)

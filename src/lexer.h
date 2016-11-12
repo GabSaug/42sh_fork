@@ -3,7 +3,7 @@
 
 #include "vector.h"
 
-enum token_id
+enum terminal_symbol
 {
   UNDIFINED = -1,
   NEWLINE,
@@ -47,7 +47,7 @@ enum token_id
 
 struct token
 {
-  enum token_id id;
+  enum terminal_symbol id;
   char* s;
 };
 

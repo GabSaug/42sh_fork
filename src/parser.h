@@ -24,25 +24,35 @@ enum non_terminal_symbol
   DO_GROUP,
   CASE_CLAUSE,
   CASE_ITEM,
-  
+  NB_RULE
+};
+
+enum repeat
+{
+  MANDATORY,
+  STAR,
+  OPTIONAL,
+  PLUS
 };
 
 struct symbol
 {
   int terminal; // if true read only terminal_symbol
   enum repeat repeat; // mandatory, optional, star, plus
-  struct non_terminal_symbol rule;
-  enum terminal_symbol;
+  enum non_terminal_symbol rule;
+  enum terminal_symbol terminal_symbol;
 };
 
 struct simple_rule
 {
-  enum symbol* sym_arr;
+  struct symbol* sym_arr;
+  size_t nb_sym;
 };
 
 struct rule
 {
   struct simple_rule* s_r;
+  size_t nb_s_r;
 };
 
 
