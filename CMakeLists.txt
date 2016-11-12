@@ -14,7 +14,8 @@ set(SRC
     src/vector.c
     src/option_parser.c
     src/parser.c
-    src/tree.c)
+    src/tree.c
+    src/rules.c)
 
 include_directories(src/)
 

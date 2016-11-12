@@ -3,11 +3,12 @@
 #include "parser.h"
 #include "vector.h"
 #include "tree.h"
+#include "rules.h"
 
 // return -1 if no rules fit
 // return the length of the string it has accepted otherwise
-struct tree* parse(struct vector* v_token, enum terminal_symbol symbol,
-                   int* nb_token_read)
+struct tree* parse(struct rule** rules, struct vector* v_token,
+                   enum non_terminal_symbol symbol, int* nb_token_read)
 {
   struct tree* tree = tree_create(symbol);
   int nb_init_token_read = *nb_token_read;
@@ -26,7 +27,7 @@ struct tree* parse(struct vector* v_token, enum terminal_symbol symbol,
       if (sym->terminal)
       {
         struct token* token = v_get(v_token, *nb_token_read);
-        if (sym->terminal_symbol == token->id)
+        if (token && sym->terminal_symbol == token->id)
         {
           *nb_token_read += 1;
           tree_add_terminal_child(tree, sym->terminal_symbol);
@@ -38,53 +39,53 @@ struct tree* parse(struct vector* v_token, enum terminal_symbol symbol,
       {
         if (sym->repeat == MANDATORY)
         {
-          struct tree* child = parse(v_token, sym->rule, nb_token_read);
+          struct tree* child = parse(rules, v_token, sym->rule, nb_token_read);
           if (child == NULL)
           {
             tree_destroy(tree);
             *nb_token_read = nb_init_token_read;
             return NULL;
           }
-          *nb_token_read += 1;
+          //*nb_token_read += 1;
           tree_add_non_terminal_child(tree, child);
         }
         else if (sym->repeat == STAR)
         {
           while (1)
           {
-            struct tree* child = parse(v_token, sym->rule, nb_token_read);
+            struct tree* child = parse(rules, v_token, sym->rule, nb_token_read);
             if (child == NULL)
               break;
-            *nb_token_read += 1;
+            //*nb_token_read += 1;
             tree_add_non_terminal_child(tree, child);
           }
         }
         else if (sym->repeat == OPTIONAL)
         {
-          struct tree* child = parse(v_token, sym->rule, nb_token_read);
+          struct tree* child = parse(rules, v_token, sym->rule, nb_token_read);
           if (child != NULL)
           {
-            *nb_token_read += 1;
+            //*nb_token_read += 1;
             tree_add_non_terminal_child(tree, child);
           }
         }
         else // PLUS
         {
-          struct tree* child = parse(v_token, sym->rule, nb_token_read);
+          struct tree* child = parse(rules, v_token, sym->rule, nb_token_read);
           if (child == NULL)
           {
             tree_destroy(tree);
             *nb_token_read = nb_init_token_read;
             return NULL;
           }
-          *nb_token_read += 1;
+          //*nb_token_read += 1;
           tree_add_non_terminal_child(tree, child);
           while (1)
           {
-            struct tree* child = parse(v_token, sym->rule, nb_token_read);
+            struct tree* child = parse(rules, v_token, sym->rule, nb_token_read);
             if (child == NULL)
               break;
-            *nb_token_read += 1;
+            //*nb_token_read += 1;
             tree_add_non_terminal_child(tree, child);
           }
         }

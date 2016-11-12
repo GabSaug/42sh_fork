@@ -6,9 +6,12 @@
 
 struct tree
 {
+  enum terminal_symbol ts;
   enum non_terminal_symbol nts;
   struct vector* child;
 };
+
+void tree_print(struct tree* tree, int indent);
 
 struct tree* tree_create(enum non_terminal_symbol nts);
 void tree_add_terminal_child(struct tree* tree, enum terminal_symbol ts);

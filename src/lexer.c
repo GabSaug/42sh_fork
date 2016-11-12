@@ -108,6 +108,7 @@ void lexer(char* s, struct vector* v_token)
         append_token(v_token, NEWLINE, NULL, NULL);
       part_of_operator = 0;
       part_of_word = 0;
+      curr_token = UNDIFINED;
       start = s + i + 1;
       continue;
     }
@@ -240,19 +241,20 @@ void append_token(struct vector* v_token, enum terminal_symbol token_id,
   {
     int index_reserved_word = is_in(start, end, reserved_word);
     if (index_reserved_word != -1)
+    {
       new_token->id = IF + index_reserved_word;
+      new_token->s = NULL;
+    }
+    else
+    {
+      size_t s_size = (end - start) + 1;
+      char* s = my_malloc(s_size + 1); // +1 for '\0'
+      for (size_t i = 0; i < s_size + 1; ++i)
+        s[i] = start[i];
+      s[s_size] = '\0';
+      new_token->s = s;
+    }
   }
-  if (start)
-  {
-    size_t s_size = (end - start) + 1;
-    char* s = my_malloc(s_size + 1); // +1 for '\0'
-    for (size_t i = 0; i < s_size + 1; ++i)
-      s[i] = start[i];
-    s[s_size] = '\0';
-    new_token->s = s;
-  }
-  else
-    new_token->s = NULL;
   v_append(v_token, new_token);
 }
 

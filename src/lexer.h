@@ -6,7 +6,6 @@
 enum terminal_symbol
 {
   UNDIFINED = -1,
-  EOF_SYM,
   NEWLINE,
   SEMI, // ;
   AND, // &
@@ -23,6 +22,7 @@ enum terminal_symbol
   LESSGREAT,
   DLESSDASH,
   CLOBBER,
+  EOF_SYM,
   IF,
   THEN,
   ELSE,
