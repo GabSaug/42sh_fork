@@ -37,58 +37,134 @@ struct rule* init_rule_input(void)
   
   // Rule 4
   rule->s_r[3].nb_sym = 1;
-  rule->s_r[3].sym_arr = my_malloc(sizeof (struct symbol*) * rule->s_r[3].nb_sym);
-  create_sym(rule->s_r[2].sym_arr + 0, 1, 0, 0, EOF);
+  rule->s_r[3].sym_arr = my_malloc(sizeof (struct symbol) * rule->s_r[3].nb_sym);
+  create_sym(rule->s_r[3].sym_arr + 0, 1, 0, 0, EOF);
   
   return rule;
 }
 
-/*struct rule* init_rule_list(void)
+struct rule* init_rule_list(void)
 {
   struct rule* rule = my_malloc(sizeof (struct rule));
-  rule->s_r = my_malloc(sizeof (struct simple_rule*) * 2);
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule) * rule->nb_s_r);
   // Rule 1
-  rule->s_r[0]->sym_arr = my_malloc(sizeof (struct symbol*) * 4);
-  rule->s_r[0]->sym_arr[0] = create_sym(0, MANDATORY, AND_OR, 0);
-  rule->s_r[0]->sym_arr[1] = create_sym(0, STAR, LIST_AUX, 0);
-  rule->s_r[0]->sym_arr[2] = create_sym(0, OPTIONAL, COM_AMP, 0);
-  rule->s_r[0]->sym_arr[3] = NULL;
+  rule->s_r[0].nb_sym = 3;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 3);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, AND_OR, 0);
+  create_sym(rule->s_r[0].sym_arr + 1, 0, STAR, LIST_AUX, 0);
+  create_sym(rule->s_r[0].sym_arr + 2, 0, OPTIONAL, COM_AMP, 0);
 
-   rule->s_r[1] = NULL;
   return rule;
 }
 
 struct rule* init_rule_list_aux(void)
 {
   struct rule* rule = my_malloc(sizeof (struct rule));
-  rule->s_r = my_malloc(sizeof (struct simple_rule*) * 2);
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule));
   // Rule 1
-  rule->s_r[0]->sym_arr = my_malloc(sizeof (struct symbol*) * 3);
-  rule->s_r[0]->sym_arr[0] = create_sym(0, MANDATORY, COM_AMP, 0);
-  rule->s_r[0]->sym_arr[1] = create_sym(0, MANDATORY, AND_OR, 0);
-  rule->s_r[0]->sym_arr[2] = NULL;
+  rule->s_r[0].nb_sym = 2
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 2);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, COM_AMP, 0);
+  create_sym(rule->s_r[0].sym_arr + 1, 0, MANDATORY, AND_OR, 0);
 
-  rule->s_r[1] = NULL;
   return rule;
 }
 
 struct rule* init_rule_com_amp(void)
 {
   struct rule* rule = my_malloc(sizeof (struct rule));
-  rule->s_r = my_malloc(sizeof (struct simple_rule*) * 3);
+  rule->nb_s_r = 2;
+  rule->s_r = my_malloc(sizeof (struct simple_rule) * 2);
   // Rule 1
-  rule->s_r[0]->sym_arr = my_malloc(sizeof (struct symbol*) * 2);
-  rule->s_r[0]->sym_arr[0] = create_sym(1, 0, 0, SEMI);
-  rule->s_r[0]->sym_arr[1] = NULL;
+  rule->s_r[0].nb_sym = 1;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[0].sym_arr, 1, 0, 0, SEMI);
 
   // Rule 2
-  rule->s_r[1]->sym_arr = my_malloc(sizeof (struct symbol*) * 2);
-  rule->s_r[1]->sym_arr[0] = create_sym(1, 0, 0, AND);
-  rule->s_r[1]->sym_arr[1] = NULL;
+  rule->s_r[1].nb_sym = 1
+  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[1].sym_arr, 1, 0, 0, AND);
 
-  rule->s_r[2] = NULL;
   return rule;
-}*/
+}
+
+struct rule *init_rule_and_or(void)
+{
+  struct rule *rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule));
+  // Rule 1
+  rule->s_r[0].nb_sym = 2;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 2);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, PIPELINE, 0);
+  create_sym(rule->s_r[0].sym_arr + 1, 0, STAR, AND_OR_AUX, 0);
+
+  return rule;
+}
+
+struct rule *init_rule_and_or_aux(void)
+{
+  struct rule *rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule));
+  // Rule 1
+  rule->s_r[0].nb_sym = 3
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 3);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, BOOL_OP, 0);
+  create_sym(rule->s_r[0].sym_arr + 1, 0, STAR, NEW_LINE_RULE, 0);
+  create_sym(rule->s_r[0].sym_arr + 2, 0, MANDATORY, PIPELINE, 0);
+
+  return rule;
+}
+
+struct rule *init_rule_bool_op(void)
+{
+  struct rule *rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 2;
+  rule->s_r = my_malloc(sizeof (struct simple_rule) * 2);
+  // Rule 1
+  rule->s_r[0].nb_sym = 1;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, NULL, AND_IF);
+
+  // Rule 2
+  rule->s_r[1].nb_s_r = 1;
+  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[1].sym_arr, 1, MANDATORY, NULL, OR_IF);
+
+  return rule;
+}
+
+struct rule *init_rule_new_line(void)
+{
+  struct rule *rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule));
+  // Rule 1
+  rule->s_r[0].nb_sym = 1;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, NULL, NEW_LINE);
+
+  return rule;
+}
+
+struct rule *init_rule_pipeline(void)
+{
+  struct rule *rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule));
+  // Rule 1
+  rule->s_r[0].nb_sym = 3;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 3);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, OPTIONNAL, BANG_RULE, 0);
+  create_sym(rule->s_r[0].sym_arr + 1, 0, MANDATORY, COMMAND, 0);
+  create_sym(rule->s_r[0].sym_arr + 2, 0, STAR, PIPELINE_AUX, 0);
+
+  return rule;
+}
+
 
 
 // return -1 if no rules fit
