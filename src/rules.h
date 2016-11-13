@@ -31,7 +31,7 @@ enum non_terminal_symbol
   COMPOUND_LIST_AUX_2,
   RULE_FOR,
   FOR_RULE_AUX,
-  WORD_RULE
+  WORD_RULE,
   FOR_RULE_AUX_2,
   RULE_WHILE,
   RULE_UNTIL,

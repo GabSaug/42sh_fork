@@ -15,7 +15,12 @@ set(SRC
     src/option_parser.c
     src/parser.c
     src/tree.c
-    src/rules.c)
+    src/rules.c
+    src/rules2.c
+    src/rules3.c
+    src/rules4.c
+    src/rules5.c
+    src/rules6.c)
 
 include_directories(src/)
 

@@ -104,7 +104,7 @@ static struct rule *init_rule_prefix(void)
   // Rule 1
   rule->s_r[0].nb_sym = 1;
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, 0, ASSIGNEMENT_WORD);
+  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, 0, ASSIGNMENT_WORD);
 
   // Rule 2
   rule->s_r[1].nb_sym = 1;
@@ -143,7 +143,7 @@ static struct rule *init_rule_compound_list(void)
   create_sym(rule->s_r[0].sym_arr + 0, 0, STAR, NEW_LINE_RULE, 0);
   create_sym(rule->s_r[0].sym_arr + 1, 0, MANDATORY, AND_OR, 0);
   create_sym(rule->s_r[0].sym_arr + 2, 0, STAR, COMPOUND_LIST_AUX, 0);
-  create_sym(rule->s_r[0].sym_arr + 3, 0, OPTIONAL, COMPOUND_AUX_2, 0);
+  create_sym(rule->s_r[0].sym_arr + 3, 0, OPTIONAL, COMPOUND_LIST_AUX_2, 0);
 
   return rule;
 }
@@ -163,7 +163,7 @@ static struct rule *init_rule_compound_list_aux(void)
   return rule;
 }
 
-static struct rule *init_rule_compound_aux_2(void)
+static struct rule *init_rule_compound_list_aux_2(void)
 {
   struct rule *rule = my_malloc(sizeof (struct rule));
   rule->nb_s_r = 1;
@@ -177,13 +177,13 @@ static struct rule *init_rule_compound_aux_2(void)
   return rule;
 }
 
-struct rules **init_all_rules(struct rule **rules)
+struct rule **init_all_rules4(struct rule **rules)
 {
   rules[REDIRECTION] = init_rule_redirection();
   rules[IO_NUMBER_RULE] = init_rule_io_number();
   rules[PREFIX] = init_rule_prefix();
   rules[ELEMENT] = init_rule_element();
-  rules[COMPOUD_LIST] = init_rule_compoud_list();
+  rules[COMPOUND_LIST] = init_rule_compound_list();
   rules[COMPOUND_LIST_AUX] = init_rule_compound_list_aux();
   rules[COMPOUND_LIST_AUX_2] = init_rule_compound_list_aux_2();
 

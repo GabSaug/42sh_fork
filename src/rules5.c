@@ -62,9 +62,9 @@ static struct rule *init_rule_for_aux_2(void)
   create_sym(rule->s_r[0].sym_arr, 1, 0, 0, SEMI);
 
   // Rule 2
-  rule->s_r[1].nb_sym = 1
+  rule->s_r[1].nb_sym = 1;
   rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[1].sym_arr, 1, 0, 0, NEW_LINE);
+  create_sym(rule->s_r[1].sym_arr, 1, 0, 0, NEWLINE);
 
   return rule;
 }
@@ -136,10 +136,10 @@ static struct rule *init_rule_if(void)
   return rule;
 }
 
-struct rules **init_all_rules5(struct rule **rules)
+struct rule **init_all_rules5(struct rule **rules)
 {
   rules[RULE_FOR] = init_rule_for();
-  rules[FOR_RULE_AUX] = init_rules_for_aux();
+  rules[FOR_RULE_AUX] = init_rule_for_aux();
   rules[WORD_RULE] = init_rule_word();
   rules[FOR_RULE_AUX_2] = init_rule_for_aux_2();
   rules[RULE_WHILE] = init_rule_while();

@@ -56,7 +56,7 @@ static struct rule *init_rule_pipeline_aux(void)
 static struct rule *init_rule_command(void)
 {
   struct rule *rule = my_malloc(sizeof (struct rule));
-  rule->nb_s_r = 3
+  rule->nb_s_r = 3;
   rule->s_r = my_malloc(sizeof (struct simple_rule) * rule->nb_s_r);
   // Rule 1
   rule->s_r[0].nb_sym = 1;
@@ -70,7 +70,7 @@ static struct rule *init_rule_command(void)
   create_sym(rule->s_r[1].sym_arr + 1, 0, STAR, REDIRECTION, 0);
 
   // Rule 3
-  rule->s_r[2].nb_sym = 2
+  rule->s_r[2].nb_sym = 2;
   rule->s_r[2].sym_arr = my_malloc(sizeof (struct symbol) * 2);
   create_sym(rule->s_r[2].sym_arr + 0, 0, MANDATORY, FUNCDEC, 0);
   create_sym(rule->s_r[2].sym_arr + 1, 0, STAR, REDIRECTION, 0);
@@ -84,7 +84,7 @@ static struct rule *init_rule_simple_command(void)
   rule->nb_s_r = 2;
   rule->s_r = my_malloc(sizeof (struct simple_rule) * 2);
   // Rule 1
-  rule->s_r[0].nb_sym = 1
+  rule->s_r[0].nb_sym = 1;
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
   create_sym(rule->s_r[0].sym_arr, 0, PLUS, PREFIX, 0);
 
