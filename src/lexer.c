@@ -155,13 +155,13 @@ static size_t tokenize_exp_normal(char *s)
     else if (s[i] == '\'')
     {
       i++;
-      while (s[i] && s[i] != '\'')
+      while (s[i] && s[i] != '\'' && s[i - 1] != '\\')
         i++;
     }
     else if (s[i] == '\"')
     {
       i++;
-      while (s[i] && s[i] != '\"')
+      while (s[i] && s[i] != '\"' && s[i - 1] != '\\')
         i++;
     }
 
