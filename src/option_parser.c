@@ -99,12 +99,12 @@ static void set_env(struct hash_table *ht)
   char *data2 = strdup("42sh$ ");
   ht = add_hash(ht, temp2, data2);
 
-  char *temp2 = strdup("PS2");
-  char *data2 = strdup("> ");
+  temp2 = strdup("PS2");
+  data2 = strdup("> ");
   ht = add_hash(ht, temp2, data2);
 
-  char *temp2 = strdup("PS4");
-  char *data2 = strdup("+ ");
+  temp2 = strdup("PS4");
+  data2 = strdup("+ ");
   ht = add_hash(ht, temp2, data2);
 
 }
