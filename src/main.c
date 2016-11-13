@@ -65,6 +65,7 @@ int main(int argc, char* argv[])
     if (print_AST)
       print_AST(ast);
     execute_command(ast);*/
+    destroy_hash(ht);
   }
 }
 
