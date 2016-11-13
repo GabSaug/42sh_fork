@@ -1,6 +1,7 @@
 #ifndef LEXER_H
 # define LEXER_H
 
+#include <err.h>
 #include "vector.h"
 
 enum terminal_symbol

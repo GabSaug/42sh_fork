@@ -87,7 +87,7 @@ static void set_env(struct hash_table *ht)
     "LC_MESSAGES", "LINENO", "NLSPATH", "PATH", "PPID", "PWD"
   };
 
-  for (int i = 0; i < 16; i++)
+  for (size_t i = 0; i < sizeof (var) / sizeof (char *); i++)
   {
     char *temp = strdup(var[i]);
     char *data = getenv(var[i]);
