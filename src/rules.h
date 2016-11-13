@@ -16,15 +16,23 @@ enum non_terminal_symbol
   BOOL_OP,
   NEW_LINE_RULE,
   PIPELINE,
+  BANG_RULE,
+  PIPELINE_AUX,
   COMMAND,
   SIMPLE_COMMAND,
   SHELL_COMMAND,
   FUNCDEC,
   REDIRECTION,
+  IO_NUMBER_RULE,
   PREFIX,
   ELEMENT,
   COMPOUND_LIST,
+  COMPOUND_LIST_AUX,
+  COMPOUND_LIST_AUX_2,
   RULE_FOR,
+  FOR_RULE_AUX,
+  WORD_RULE
+  FOR_RULE_AUX_2,
   RULE_WHILE,
   RULE_UNTIL,
   RULE_CASE,
@@ -32,7 +40,11 @@ enum non_terminal_symbol
   ELSE_CLAUSE,
   DO_GROUP,
   CASE_CLAUSE,
+  CASE_CLAUSE_AUX,
+  DSEMI_RULE,
   CASE_ITEM,
+  L_PAR_RULE,
+  CASE_ITEM_AUX,
   NB_RULE
 };
 
@@ -68,14 +80,10 @@ void create_sym(struct symbol* sym, int terminal, enum repeat repeat,
                 enum non_terminal_symbol rule,
                 enum terminal_symbol terminal_symbol);
 struct rule** init_all_rules(void);
-struct rule* init_rule_input(void);
-struct rule* init_rule_list(void);
-struct rule* init_rule_list_aux(void);
-struct rule* init_rule_com_amp(void);
-struct rule *init_rule_and_or(void);
-struct rule *init_rule_and_or_aux(void);
-struct rule *init_rule_bool_op(void);
-struct rule *init_rule_new_line(void);
-struct rule *init_rule_pipeline(void);
+struct rule** init_all_rules2(struct rule **rules);
+struct rule** init_all_rules3(struct rule **rules);
+struct rule** init_all_rules4(struct rule **rules);
+struct rule** init_all_rules5(struct rule **rules);
+struct rule** init_all_rules6(struct rule **rules);
 
 #endif /* !RULES_H */
