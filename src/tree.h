@@ -6,7 +6,7 @@
 
 struct tree
 {
-  enum terminal_symbol ts;
+  struct token* token;
   enum non_terminal_symbol nts;
   struct vector* child;
 };
@@ -15,7 +15,7 @@ void tree_print_dot(struct tree* tree);
 void tree_print(struct tree* tree);
 
 struct tree* tree_create(enum non_terminal_symbol nts);
-void tree_add_terminal_child(struct tree* tree, enum terminal_symbol ts);
+void tree_add_terminal_child(struct tree* tree, struct token* token);
 void tree_add_non_terminal_child(struct tree* tree, struct tree* child);
 void tree_delete_all_child(struct tree* tree);
 void tree_destroy(struct tree* tree);

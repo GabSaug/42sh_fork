@@ -46,7 +46,7 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
         if (token && sym->terminal_symbol == token->id)
         {
           *nb_token_read += 1;
-          tree_add_terminal_child(tree, sym->terminal_symbol);
+          tree_add_terminal_child(tree, token);
           continue;
         }
         break;

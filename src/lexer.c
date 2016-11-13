@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <err.h>
 
 #include "lexer.h"
 #include "my_malloc.h"
@@ -95,8 +94,8 @@ int lexer(char* s, struct vector* v_token)
       continue;
     }
     // Rule 6
-    if (!is_quoted(quoted) && begin_as(s + i, s + i, operator_list) != -1
-        && curr_token == UNDIFINED)
+    if (!is_quoted(quoted) && begin_as(s + i, s + i, operator_list) != -1)
+        //&& curr_token == UNDIFINED)
     {
       append_token(v_token, curr_token, start, s + i - 1);
       start = s + i;
@@ -172,6 +171,9 @@ static size_t tokenize_exp_normal(char *s)
     i++;
   }
 
+  if (!s[i])
+    errx(2, "Not end of expansion");
+
   return i;
 }
 
@@ -205,12 +207,9 @@ static size_t tokenize_exp_other(char *s, char b, char d)
   }
 
   if (!s[i])
-  {
-    warnx("Unexpected EOF, expected '%c'", d);
-    return 0;
-  }
-  else
-    return i;
+    errx(2, "Not end of expansion");
+
+  return i;
 }
 
 // Return the number of character in the expansion

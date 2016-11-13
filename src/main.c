@@ -10,7 +10,7 @@
 #include "tree.h"
 #include "rules.h"
 
-void print_PS(void);
+void print_PS(struct hash_table* ht);
 
 int main(int argc, char* argv[])
 {
@@ -22,7 +22,7 @@ int main(int argc, char* argv[])
   {
     while (1)
     {
-      print_PS();
+      print_PS(ht);
       char buff[100]; // A MODIFER
       buff[read(STDOUT_FILENO, buff, 90)] = '\0';
       struct vector* v_token = v_create();
@@ -38,7 +38,8 @@ int main(int argc, char* argv[])
       else
       {
         tree_print(ast);
-        tree_print_dot(ast);
+        if (!strcmp(get_data(ht, "ast-print"), "1"))
+          tree_print_dot(ast);
       }
       v_destroy(v_token);
       tree_destroy(ast);
@@ -63,8 +64,13 @@ int main(int argc, char* argv[])
   }
 }
 
-void print_PS(void)
+void print_PS(struct hash_table* ht)
 {
-  printf(">");
+  char* ps1 = get_data(ht, "PS1");
+  if (ps1)
+    printf("%s", ps1);
+  char *ps2 = get_data(ht, "PS2");
+  if (ps2)
+    printf("%s", ps2);
   fflush(stdout);
 }

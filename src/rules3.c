@@ -2,7 +2,7 @@
 
 static struct rule *init_rule_pipeline(void)
 {
-  struct rule *rule = my_malloc(sizeof (struct rule));
+  /*struct rule *rule = my_malloc(sizeof (struct rule));
   rule->nb_s_r = 1;
   rule->s_r = my_malloc(sizeof (struct simple_rule));
   // Rule 1
@@ -10,9 +10,9 @@ static struct rule *init_rule_pipeline(void)
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
   create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, 0, IF);
 
-  return rule;
+  return rule;*/
 
-  /*struct rule *rule = my_malloc(sizeof (struct rule));
+  struct rule *rule = my_malloc(sizeof (struct rule));
   rule->nb_s_r = 1;
   rule->s_r = my_malloc(sizeof (struct simple_rule));
   // Rule 1
@@ -22,7 +22,7 @@ static struct rule *init_rule_pipeline(void)
   create_sym(rule->s_r[0].sym_arr + 1, 0, MANDATORY, COMMAND, 0);
   create_sym(rule->s_r[0].sym_arr + 2, 0, STAR, PIPELINE_AUX, 0);
 
-  return rule;*/
+  return rule;
 }
 
 static struct rule *init_rule_bang(void)
