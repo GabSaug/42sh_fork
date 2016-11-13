@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <err.h>
 
 #include "lexer.h"
 #include "my_malloc.h"
@@ -167,9 +168,6 @@ static size_t tokenize_exp_normal(char *s)
     i++;
   }
 
-  if (!s[i])
-    errx(2, "Not end of expansion");
-
   return i;
 }
 
@@ -203,9 +201,12 @@ static size_t tokenize_exp_other(char *s, char b, char d)
   }
 
   if (!s[i])
-    errx(2, "Not end of expansion");
-
-  return i;
+  {
+    warnx("Unexpected EOF, expected '%c'", d);
+    return 0;
+  }
+  else
+    return i;
 }
 
 // Return the number of character in the expansion
