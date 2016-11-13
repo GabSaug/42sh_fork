@@ -57,13 +57,7 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
         {
           struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
           if (child == NULL)
-          {
-            /*tree_destroy(tree);
-            *nb_token_read = nb_init_token_read;
-            return NULL;*/
             break;
-          }
-          //*nb_token_read += 1;
           tree_add_non_terminal_child(tree, child);
         }
         else if (sym->repeat == STAR)
@@ -73,7 +67,6 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
             struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
             if (child == NULL)
               break;
-            //*nb_token_read += 1;
             tree_add_non_terminal_child(tree, child);
           }
         }
@@ -81,28 +74,19 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
         {
           struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
           if (child != NULL)
-          {
-            //*nb_token_read += 1;
             tree_add_non_terminal_child(tree, child);
-          }
         }
         else // PLUS
         {
           struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
           if (child == NULL)
-          {
-            tree_destroy(tree);
-            *nb_token_read = nb_init_token_read;
-            return NULL;
-          }
-          //*nb_token_read += 1;
+            break;
           tree_add_non_terminal_child(tree, child);
           while (1)
           {
             struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
             if (child == NULL)
               break;
-            //*nb_token_read += 1;
             tree_add_non_terminal_child(tree, child);
           }
         }
