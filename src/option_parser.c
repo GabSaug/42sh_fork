@@ -84,8 +84,7 @@ static void set_env(struct hash_table *ht)
   char *var[] =
   {
     "ENV", "HOME", "IFS", "LANG", "LC_ALL", "LC_COLLATE", "LC_CTYPE",
-    "LC_MESSAGES", "LINENO", "NLSPATH", "PATH", "PPID", "PS1", "PS2", "PS4",
-    "PWD"
+    "LC_MESSAGES", "LINENO", "NLSPATH", "PATH", "PPID", "PWD"
   };
 
   for (int i = 0; i < 16; i++)
@@ -95,6 +94,19 @@ static void set_env(struct hash_table *ht)
     if (data)
       ht = add_hash(ht, temp, strdup(data));
   }
+
+  char *temp2 = strdup("PS1");
+  char *data2 = strdup("42sh$ ");
+  ht = add_hash(ht, temp2, data2);
+
+  char *temp2 = strdup("PS2");
+  char *data2 = strdup("> ");
+  ht = add_hash(ht, temp2, data2);
+
+  char *temp2 = strdup("PS4");
+  char *data2 = strdup("+ ");
+  ht = add_hash(ht, temp2, data2);
+
 }
 
 static void init_opt(struct hash_table *ht)
