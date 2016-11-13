@@ -61,6 +61,6 @@ enum quote_type
   DOUBLE_QUOTE
 };
 
-void lexer(char* s, struct vector* v_token);
+int lexer(char* s, struct vector* v_token);
 
 #endif /* !LEXER_H */

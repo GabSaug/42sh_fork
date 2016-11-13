@@ -31,7 +31,7 @@ int is_quoted(char quoted[3]);
 size_t tokenize_expansion(char* s);
 size_t tokenize_comment(char* s, size_t i);
 
-void lexer(char* s, struct vector* v_token)
+int lexer(char* s, struct vector* v_token)
 {
   char* start = s;
   char part_of_operator = 0;
@@ -51,7 +51,7 @@ void lexer(char* s, struct vector* v_token)
         append_token(v_token, EOF_SYM, NULL, NULL);
       else
         append_token(v_token, WORD, start, s + i - 1);
-      return;
+      return 1;
     }
     // Rule 2
     if (part_of_operator && !is_quoted(quoted)
@@ -88,7 +88,10 @@ void lexer(char* s, struct vector* v_token)
     // Rule 5
     if ((s[i] == '$' || s[i] == '`') && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
     {
-      i = tokenize_expansion(s + i);
+      int ret = tokenize_expansion(s + i);
+      if (ret == 0)
+        return 0;
+      i += ret - 1;
       continue;
     }
     // Rule 6
@@ -133,6 +136,7 @@ void lexer(char* s, struct vector* v_token)
       curr_token = WORD;
     }
   }
+  return 1;
 }
 
 // Return the number of character in the comment

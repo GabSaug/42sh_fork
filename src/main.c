@@ -26,7 +26,11 @@ int main(int argc, char* argv[])
       char buff[100]; // A MODIFER
       buff[read(STDOUT_FILENO, buff, 90)] = '\0';
       struct vector* v_token = v_create();
-      lexer(buff, v_token);
+      if (!lexer(buff, v_token))
+      {
+        v_destroy(v_token);
+        continue;
+      }
       v_print(v_token);
       struct tree* ast = parse(rules, v_token);
       if (ast == NULL)
