@@ -50,7 +50,7 @@ class Test
         test_content =~ /<stderr>(.*)<\/stderr>/m
         @ref_stderr = File.read(path.lines("/")[0] + $1)
         test_content =~ /<exit_code>(.*)<\/exit_code>/
-        @ref_exit_code = $1
+        @ref_exit_code = $1.to_i
       else
         self.run_ref
       end
@@ -163,7 +163,9 @@ class TestGroup
         fails += 1
       end
     end
-    puts("")
+    if !out then
+      puts("")
+    end
     if fails == 0 then
       puts("  Sucess : All tests passed.")
     else
@@ -206,6 +208,7 @@ class GroupList
   def run(out)
     @groups.map do |group|
       group.run_tests(out)
+      puts("")
     end
   end
 end
