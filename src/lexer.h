@@ -42,7 +42,7 @@ enum terminal_symbol
   BANG, // !
   IN,
   FUNCTION,
-  NEWLINE,
+  NL, // \n
   WORD,
   ASSIGNMENT_WORD,
   NAME,

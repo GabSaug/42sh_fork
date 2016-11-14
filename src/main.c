@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <unistd.h>
-
+#include <readline/readline.h>
+#include <readline/history.h>
 //#include "main.h"
 #include "option_parser.h"
 #include "vector.h"
@@ -10,11 +11,11 @@
 #include "tree.h"
 #include "rules.h"
 
-void print_PS(struct hash_table* ht);
+char* get_PS(struct hash_table* ht);
 
 int main(int argc, char* argv[])
 {
-  struct hash_table *ht = create_hash(256);
+  struct hash_table* ht = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv, ht);
   struct rule** rules = init_all_rules();
@@ -22,9 +23,11 @@ int main(int argc, char* argv[])
   {
     while (1)
     {
-      print_PS(ht);
-      char buff[100]; // A MODIFER
-      buff[read(STDOUT_FILENO, buff, 90)] = '\0';
+      char* prompt = get_PS(ht);
+      char* buff;
+      buff = readline(prompt);
+      printf(buff);
+      add_history(buff);
       struct vector* v_token = v_create();
       if (!lexer(buff, v_token))
       {
@@ -43,6 +46,7 @@ int main(int argc, char* argv[])
       }
       v_destroy(v_token);
       tree_destroy(ast);
+      free(buff);
       /*ast = parse_command(token_list);
       char* ast_print = get_data(ht, "ast_print");
       if (ast_print && !strcmp("0", ast_print))
@@ -64,13 +68,13 @@ int main(int argc, char* argv[])
   }
 }
 
-void print_PS(struct hash_table* ht)
+char* get_PS(struct hash_table* ht)
 {
   char* ps1 = get_data(ht, "PS1");
   if (ps1)
-    printf("%s", ps1);
-  char *ps2 = get_data(ht, "PS2");
+    return ps1;
+  char* ps2 = get_data(ht, "PS2");
   if (ps2)
-    printf("%s", ps2);
-  fflush(stdout);
+    return ps2;
+  return NULL;
 }

@@ -19,7 +19,7 @@ static struct rule* init_rule_input(void)
   // Rule 3
   rule->s_r[2].nb_sym = 1;
   rule->s_r[2].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[2].sym_arr + 0, 1, 0, 0, NEWLINE);
+  create_sym(rule->s_r[2].sym_arr + 0, 1, 0, 0, NL);
   
   // Rule 4
   rule->s_r[3].nb_sym = 1;
@@ -76,7 +76,7 @@ static struct rule* init_rule_com_amp(void)
   // Rule 3
   rule->s_r[2].nb_sym = 1;
   rule->s_r[2].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[2].sym_arr, 1, 0, 0, NEWLINE);
+  create_sym(rule->s_r[2].sym_arr, 1, 0, 0, NL);
 
   return rule;
 }
@@ -136,7 +136,7 @@ static struct rule *init_rule_new_line(void)
   // Rule 1
   rule->s_r[0].nb_sym = 1;
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, 0, NEWLINE);
+  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, 0, NL);
 
   return rule;
 }

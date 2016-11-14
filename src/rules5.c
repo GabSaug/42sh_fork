@@ -64,7 +64,7 @@ static struct rule *init_rule_for_aux_2(void)
   // Rule 2
   rule->s_r[1].nb_sym = 1;
   rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[1].sym_arr, 1, 0, 0, NEWLINE);
+  create_sym(rule->s_r[1].sym_arr, 1, 0, 0, NL);
 
   return rule;
 }

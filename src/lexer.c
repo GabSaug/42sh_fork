@@ -108,7 +108,7 @@ int lexer(char* s, struct vector* v_token)
     {
       append_token(v_token, curr_token, start, s + i - 1);
       if (s[i] == '\n')
-        append_token(v_token, NEWLINE, NULL, NULL);
+        append_token(v_token, NL, NULL, NULL);
       part_of_operator = 0;
       part_of_word = 0;
       curr_token = UNDIFINED;

@@ -25,3 +25,4 @@ set(SRC
 include_directories(src/)
 
 add_executable(42sh ${SRC})
+target_link_libraries(42sh readline)
