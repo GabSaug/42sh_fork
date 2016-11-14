@@ -82,40 +82,48 @@ class Test
   def print_result(extended_output)
     errors = 0
     if extended_output then
-      puts(" test : " +  @name) 
+      puts("    [\e[93mINFO\e[0m] " + @name + " started") 
     end
     if @ref_stdout != @stdout then
       errors += 1
       if extended_output then
-        puts("  Diff in stdout")
-        puts("    expected :")
+        puts("    [\e[95mWARN\e[0m] Diff in stdout")
+        puts("      expected :")
+        print("\e[7m")
         puts(@ref_stdout)
-        puts("    got      :")
+        print("\e[0m")
+        puts("      got      :")
+        print("\e[7m")
         puts(@stdout)
+        print("\e[0m")
       end
     end
     if @ref_stderr != @stderr then
       errors += 1
       if extended_output then
-        puts("  Diff in stderr")
-        puts("    expected :")
+        puts("    [\e[95mWARN\e[0m] Diff in stderr")
+        puts("      expected :")
+        print("\e[7m")
         puts(@ref_stderr)
-        puts("    got      :")
+        print("\e[0m")
+        puts("        got      :")
+        print("\e[7m")
         puts(@stderr)
+        print("\e[0m")
       end
     end
     if @ref_exit_code != @exit_code then
       errors += 1
       if extended_output then
-        puts("  Diff in exit code")
-        puts("    expected : " + @ref_exit_code.to_s)
-        puts("    got      : " + @exit_code.to_s)
+        puts("    [\e[95mWARN\e[0m] Diff in exit code")
+        puts("      expected : " + @ref_exit_code.to_s)
+        puts("      got      : " + @exit_code.to_s)
       end
     end
     if errors == 0 then
-      puts("  [\e[92mPASS\e[0m] : " + @name)
+      puts("    [\e[92mPASS\e[0m] " + @name)
     else
-      puts("  [\e[91mFAIL\e[0m] : " + @name)
+      puts("    [\e[91mFAIL\e[0m] " +  @name)
     end
     if extended_output then
       puts("")
@@ -157,17 +165,17 @@ class TestGroup
     end
     puts("")
     if fails == 0 then
-      puts("--- Sucess : All tests passed. ---")
+      puts("  Sucess : All tests passed.")
     else
       if fails == 1 then
-        puts("--- Failure : one test failed. ---")
+        puts("  Failure : one test failed.")
       else
-        puts("--- Failure : " + fails.to_s + " tests failed. ---")
+        puts("  Failure : " + fails.to_s + " tests failed.")
       end
     end
   end
   def print_name
-    puts("-- " + @group)
+    puts("  \e[4mCategory\e[0m : " + @group)
   end
 end
 
@@ -242,13 +250,13 @@ end
 
 # Running
 
-puts(" TEST SUITE for 42sh project")
+puts("TEST SUITE for 42sh project")
 if $mode == :list then
-  puts("--- Avaible testing categories : ---")
+  puts("\e[1mAvaible testing categories :\e[0m")
   puts("")
   $groups.list
 elsif $mode == :run then
-  puts("--- Running tests : ---")
+  puts("\e[1mRunning tests :\e[0m")
   puts("")
   if $out == :default then
     $groups.run(false)
