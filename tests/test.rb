@@ -4,8 +4,10 @@
 # Configuration variables :
 
 $Bin_name = "echo"
+$Timeout = 5
 
 require 'open3'
+require 'timeout'
 
 class Test
   def initialize(path)
@@ -68,13 +70,22 @@ class Test
   end
   def run_ref
     command = self.gen_command(@validation)
+    @ref_stdout = ""
     Open3.popen3(command) do |stdin, stdout, stderr, t|
       if @type == "tty" then
         input_content = File.read(@file)
         stdin.puts(input_content)
       end
+      begin
+        Timeout.timeout($Timeout) do
+          while (line = stdout.gets) do
+            @ref_stdout += line
+          end
+        end
+      rescue Timeout::Error => ex
+        Process.kill(9, t.pid)
+      end
       stdin.close
-      @ref_stdout = stdout.read
       @ref_stderr = stderr.read
       @ref_exit_code = t.value.exitstatus
     end
@@ -84,40 +95,47 @@ class Test
     if extended_output then
       puts("    [\e[93mINFO\e[0m] " + @name + " started") 
     end
-    if @ref_stdout != @stdout then
+    if @timeout then
       errors += 1
       if extended_output then
-        puts("    [\e[95mWARN\e[0m] Diff in stdout")
-        puts("      expected :")
-        print("\e[7m")
-        puts(@ref_stdout)
-        print("\e[0m")
-        puts("      got      :")
-        print("\e[7m")
-        puts(@stdout)
-        print("\e[0m")
+        puts("    [\e[95mWARN\e[0m] Timeout")
       end
-    end
-    if @ref_stderr != @stderr then
-      errors += 1
-      if extended_output then
-        puts("    [\e[95mWARN\e[0m] Diff in stderr")
-        puts("      expected :")
-        print("\e[7m")
-        puts(@ref_stderr)
-        print("\e[0m")
-        puts("        got      :")
-        print("\e[7m")
-        puts(@stderr)
-        print("\e[0m")
+    else
+      if @ref_stdout != @stdout then
+        errors += 1
+        if extended_output then
+          puts("    [\e[95mWARN\e[0m] Diff in stdout")
+          puts("      expected :")
+          print("\e[7m")
+          puts(@ref_stdout)
+          print("\e[0m")
+          puts("      got      :")
+          print("\e[7m")
+          puts(@stdout)
+          print("\e[0m")
+        end
       end
-    end
-    if @ref_exit_code != @exit_code then
-      errors += 1
-      if extended_output then
-        puts("    [\e[95mWARN\e[0m] Diff in exit code")
-        puts("      expected : " + @ref_exit_code.to_s)
-        puts("      got      : " + @exit_code.to_s)
+      if @ref_stderr != @stderr then
+        errors += 1
+        if extended_output then
+          puts("    [\e[95mWARN\e[0m] Diff in stderr")
+          puts("      expected :")
+          print("\e[7m")
+          puts(@ref_stderr)
+          print("\e[0m")
+          puts("        got      :")
+          print("\e[7m")
+          puts(@stderr)
+          print("\e[0m")
+        end
+      end
+      if @ref_exit_code != @exit_code then
+        errors += 1
+        if extended_output then
+          puts("    [\e[95mWARN\e[0m] Diff in exit code")
+          puts("      expected : " + @ref_exit_code.to_s)
+          puts("      got      : " + @exit_code.to_s)
+        end
       end
     end
     if errors == 0 then
@@ -132,15 +150,28 @@ class Test
   end
   def run_test(out)
     command = self.gen_command($Bin_name)
+    @stdout = ""
+    @timeout = false
     Open3.popen3(command) do |stdin, stdout, stderr, t|
       if @type == "tty" then
         input_content = File.read(@file)
         stdin.puts(input_content)
       end
       stdin.close
-      @stdout = stdout.read
-      @stderr = stderr.read
-      @exit_code = t.value.exitstatus
+      begin
+        Timeout.timeout($Timeout) do
+          while (line = stdout.gets) do
+            @stdout += line
+          end
+        end
+      rescue Timeout::Error => ex
+        Process.kill(9, t.pid)
+        @timeout = true
+      end
+      if !@timeout then
+        @stderr = stderr.read
+        @exit_code = t.value.exitstatus
+      end
     end
     return self.print_result(out) == 0
   end
