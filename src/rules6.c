@@ -12,13 +12,13 @@ static struct rule *init_rule_else_clause(void)
   create_sym(rule->s_r[0].sym_arr + 1, 0, MANDATORY, COMPOUND_LIST, 0);
 
   // Rule 2
-  rule->s_r[0].nb_sym = 5;
-  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 5);
-  create_sym(rule->s_r[0].sym_arr + 0, 1, MANDATORY, 0, ELIF);
-  create_sym(rule->s_r[0].sym_arr + 1, 0, MANDATORY, COMPOUND_LIST, 0);
-  create_sym(rule->s_r[0].sym_arr + 2, 1, MANDATORY, 0, THEN);
-  create_sym(rule->s_r[0].sym_arr + 3, 0, MANDATORY, COMPOUND_LIST, 0);
-  create_sym(rule->s_r[0].sym_arr + 4, 0, OPTIONAL, ELSE_CLAUSE, 0);
+  rule->s_r[1].nb_sym = 5;
+  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol) * 5);
+  create_sym(rule->s_r[1].sym_arr + 0, 1, MANDATORY, 0, ELIF);
+  create_sym(rule->s_r[1].sym_arr + 1, 0, MANDATORY, COMPOUND_LIST, 0);
+  create_sym(rule->s_r[1].sym_arr + 2, 1, MANDATORY, 0, THEN);
+  create_sym(rule->s_r[1].sym_arr + 3, 0, MANDATORY, COMPOUND_LIST, 0);
+  create_sym(rule->s_r[1].sym_arr + 4, 0, OPTIONAL, ELSE_CLAUSE, 0);
 
   return rule;
 }

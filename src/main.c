@@ -10,6 +10,7 @@
 #include "parser.h"
 #include "tree.h"
 #include "rules.h"
+#include "execute.h"
 
 char* get_PS(struct hash_table* ht);
 
@@ -43,6 +44,7 @@ int main(int argc, char* argv[])
         tree_print(ast);
         if (!strcmp(get_data(ht, "ast-print"), "1"))
           tree_print_dot(ast);
+        //printf("returned %i\n", execute(ast));
       }
       v_destroy(v_token);
       tree_destroy(ast);
@@ -72,10 +74,5 @@ int main(int argc, char* argv[])
 char* get_PS(struct hash_table* ht)
 {
   char* ps1 = get_data(ht, "PS1");
-  if (ps1)
-    return ps1;
-  char* ps2 = get_data(ht, "PS2");
-  if (ps2)
-    return ps2;
-  return NULL;
+  return ps1;
 }

@@ -5,7 +5,50 @@
 #include "vector.h"
 #include "tree.h"
 
+
 char nts2string[][20] =
+{
+  "INPUT",
+  "LIST",
+  "COM_AMP",
+  "AND_OR",
+  "BOOL_OP",
+  "NEW_LINE_RULE",
+  "PIPELINE",
+  "BANG_RULE",
+  "COMMAND",
+  "SIMPLE_COMMAND",
+  "SHELL_COMMAND",
+  "FUNCDEC",
+  "REDIRECTION",
+  "IO_NUMBER_RULE",
+  "PREFIX",
+  "ELEMENT",
+  "COMPOUND_LIST",
+  "RULE_FOR",
+  "WORD_RULE",
+  "RULE_WHILE",
+  "RULE_UNTIL",
+  "RULE_CASE",
+  "RULE_IF",
+  "ELSE_CLAUSE",
+  "DO_GROUP",
+  "CASE_CLAUSE",
+  "DSEMI_RULE",
+  "CASE_ITEM",
+  "L_PAR_RULE",
+  "LIST_AUX",
+  "AND_OR_AUX",
+  "PIPELINE_AUX",
+  "COMPOUND_LIST_AUX",
+  "COMPOUND_LIST_AUX_2",
+  "FOR_RULE_AUX",
+  "FOR_RULE_AUX_2",
+  "CASE_CLAUSE_AUX",
+  "CASE_ITEM_AUX"
+};
+
+/*char nts2string[][20] =
 {
   "INPUT",
   "LIST",
@@ -46,7 +89,7 @@ char nts2string[][20] =
   "L_PAR_RULE",
   "CASE_ITEM_AUX",
   "NB_RULE"
-};
+};*/
 /*char nts2string[][20] =
 {
   "INPUT",
@@ -171,7 +214,11 @@ void tree_add_terminal_child(struct tree* tree, struct token* token)
 
 void tree_add_non_terminal_child(struct tree* tree, struct tree* child)
 {
-  v_append(tree->child, child);
+  if (child->nts >= LIST_AUX)
+    for (size_t j = 0; j < child->child->size; ++j)
+      tree_add_non_terminal_child(tree, v_get(child->child, j));
+  else
+    v_append(tree->child, child);
 }
 
 void tree_delete_all_child(struct tree* tree)
