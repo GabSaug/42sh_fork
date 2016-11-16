@@ -22,6 +22,7 @@ struct option
 {
   int norc;
   enum input_mode input_mode;
+  char* file_name;
 };
 
 struct option opt(int argc, char *argv[], struct hash_table *ht,
