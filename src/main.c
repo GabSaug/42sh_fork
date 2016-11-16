@@ -14,34 +14,41 @@
 #include "tree.h"
 #include "rules.h"
 #include "execute.h"
+#include "main.h"
 
 static char* get_PS(struct hash_table* ht);
 static int process_input(char* buff, struct rule** rules, struct hash_table* ht);
 
-static struct hash_table* ht;
-static struct rule** rules;
+static struct hash_table* ht = NULL;
+static struct rule** rules = NULL;
+static struct vector* v_token = NULL;
+static struct tree* ast = NULL;
+static char* buff = NULL;
 
+static int processing = 0;
 
 int main(int argc, char* argv[])
 {
+  atexit(exit_42sh);
   ht = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv, ht);
-  rules = init_all_rules();
+  //rules = init_all_rules();
   if (option.input_mode == INTERACTIVE)
   {
     while (1)
     {
       char* prompt = get_PS(ht);
-      char* buff;
       buff = readline(prompt);
       if (!buff)
       {
         printf("exit\n");
         return 0;
       }
-      add_history(buff);
+      //add_history(buff);
+      processing = 1;
       process_input(buff, rules, ht);
+      processing = 0;
       free(buff);
     }
   }
@@ -52,10 +59,6 @@ int main(int argc, char* argv[])
     struct vector* v_token = v_create();
     lexer(buff, v_token);
     v_destroy(v_token);
-    /*ast = parse_file();
-    if (print_AST)
-      print_AST(ast);
-    execute_command(ast);*/
     destroy_hash(ht);
   }
   else
@@ -71,21 +74,21 @@ int main(int argc, char* argv[])
     char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
     int ret = process_input(file, rules, ht);
     munmap(file, size_file);
-    fclose(fd);
+    close(fd);
     return ret;
   }
 }
 
 static int process_input(char* buff, struct rule** rules, struct hash_table* ht)
 {
-  struct vector* v_token = v_create();
+  v_token = v_create();
   if (!lexer(buff, v_token))
   {
     v_destroy(v_token);
     return 0;
   }
   v_print(v_token);
-  struct tree* ast = parse(rules, v_token);
+  ast = parse(rules, v_token);
   if (ast == NULL)
     printf("Grammar error\n");
   else
@@ -108,5 +111,11 @@ static char* get_PS(struct hash_table* ht)
 
 void exit_42sh(void)
 {
-  // free v_token, tree, hash_table
+  destroy_hash(ht);
+  if (processing)
+  {
+    v_destroy(v_token);
+    tree_destroy(ast);
+    free(buff);
+  }
 }

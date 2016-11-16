@@ -100,6 +100,8 @@ void v_erase(struct vector *v)
 
 void v_destroy(struct vector* v)
 {
+  if (!v)
+    return;
   if (v->data != NULL)
     free(v->data);
   free(v);

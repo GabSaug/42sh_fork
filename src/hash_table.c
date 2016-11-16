@@ -32,6 +32,8 @@ struct hash_table *create_hash(size_t capacity)
 
 void destroy_hash(struct hash_table *ht)
 {
+  if (!ht)
+    return;
   for (size_t i = 0; i < ht->capacity && ht->nb_elt > 0; i++)
   {
     if (ht->table[i])
@@ -51,6 +53,8 @@ void destroy_hash(struct hash_table *ht)
       ht->nb_elt -= 1;
     }
   }
+  free(ht->table);
+  free(ht);
 }
 
 static struct hash_table *rehash(struct hash_table *ht)
