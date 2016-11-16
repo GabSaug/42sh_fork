@@ -1,4 +1,4 @@
-static int launch_command(struct tree *ast)
+static int launch_command(struct tree *ast, struct hash_table *ht)
 {
   size_t i = 1;
   struct tree *child = v_get(ast->child, i);
@@ -9,10 +9,11 @@ static int launch_command(struct tree *ast)
   }
 
   // TODO maybe changes here ?
-  return command(child);
+  return execute_command(child, ht);
 }
 
-static int staircase(struct tree *ast, int inout[], size_t index, size_t size)
+static int staircase(struct tree *ast, int inout[], size_t index, size_t size,
+                     struct hash_table *ht)
 {
   dup2(inout[0], 0);
   int res = 0;
@@ -30,23 +31,23 @@ static int staircase(struct tree *ast, int inout[], size_t index, size_t size)
       dup2(inout2[1], 1);
       close(inout2[0]);
 
-      res = launch_command(v_get(ast->child, index));
+      res = launch_command(v_get(ast->child, index), ht);
     }
     close(inout2[1]);
     close(inout[0]);
 
-    res = staircase(ast, inout2, index + 1, size);
+    res = staircase(ast, inout2, index + 1, size, ht);
   }
   else
   {
-    res = launch_command(v_get(ast->child, index));
+    res = launch_command(v_get(ast->child, index), ht);
     close(inout[0]);
   }
 
   return res;
 }
 
-int pipeline(struct tree *ast)
+int execute_pipeline(struct tree *ast, struct hash_table *ht)
 {
   if (!tree)
     return 1;
@@ -68,16 +69,14 @@ int pipeline(struct tree *ast)
       // child
       dup2(inout[1], 1);
       close(inout[0]);
-      // TODO execute tree->child[index]
+      exit(execute_command(v_get(ast->child, index), ht));
     }
     close(inout[1]);
 
-    res = staircase(ast, inout, index + 1, size);
+    res = staircase(ast, inout, index + 1, size, ht);
   }
   else
-  {
-    // TODO execute tree->child[index]
-  }
+    res = execute_command(v_get(ast->child, 0), ht);
 
   if (index)
     return !res;
@@ -91,7 +90,7 @@ static char *get_child_elt(struct tree *ast, size_t elt)
   return (v_get(v_get(ast->child, 0)->child, 0))->token->s;
 }
 
-static int execute_command(struct tree *ast, struct hash_table *ht)
+static int execute_command(struct tree *ast)
 {
   size_t size = v_size(ast->child);
 
@@ -143,8 +142,9 @@ static int execute_command(struct tree *ast, struct hash_table *ht)
   }
 }
 
-int simple_command(struct tree *ast, struct hash_table *ht)
+int execute_simple_command(struct tree *ast, struct hash_table *ht)
 {
+  ht = ht;
   // TODO need to verify if there is an assignment word, to create or update a
   // variable
   char *builtin[] =
@@ -175,6 +175,6 @@ int simple_command(struct tree *ast, struct hash_table *ht)
     }
   }
   else
-    return execute_command(ast, ht);
+    return execute_command(ast);
   // TODO need to implement here the redirections
 }
