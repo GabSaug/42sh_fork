@@ -181,16 +181,11 @@ static size_t tokenize_exp_other(char *s, char b, char d)
 
     if (s[i] == '\\')
       i++;
-    else if (s[i] == '\'')
+    else if (s[i] == '\'' || s[i] == '\"')
     {
+      char c = s[i];
       i++;
-      while (s[i] && s[i] != '\'')
-        i++;
-    }
-    else if (s[i] == '\"')
-    {
-      i++;
-      while (s[i] && s[i] != '\"')
+      while (s[i] && s[i] != c)
         i++;
     }
 
@@ -198,12 +193,8 @@ static size_t tokenize_exp_other(char *s, char b, char d)
   }
 
   if (!s[i])
-  {
     warn("Unexpected EOF, expected '%c;", d);
-    return 0;
-  }
-  else
-    return i;
+  return s[i] ? i : 0;
 }
 
 // Return the number of character in the expansion
