@@ -38,20 +38,21 @@ int lexer(char* s, struct vector* v_token)
   char quoted[3] = {0};
   enum terminal_symbol curr_token = UNDIFINED;
   // Contain { is_backslah_quoted, is_single_quoted, is double_quoted }
-  for (size_t i = 0; s[i]; ++i)
+  size_t i;
+  for (i = 0; s[i]; ++i)
   {
     v_print(v_token);
     if (quoted[BACKSLASH] > 0)
       quoted[BACKSLASH]--;
     // Rule 1
-    if (s[i] == EOF)
+    /*if (s[i] == EOF)
     {
-      if (start == s) // There is not any token
+      if (v_size(v_token) == 0) // There is not any token
         append_token(v_token, EOF_SYM, NULL, NULL);
       else
-        append_token(v_token, WORD, start, s + i - 1);
+        append_token(v_token, curr_token, start, s + i - 1);
       return 1;
-    }
+    }*/
     // Rule 2
     if (part_of_operator && !is_quoted(quoted)
              && begin_as(start, s + i, operator_list) != -1)
@@ -135,6 +136,10 @@ int lexer(char* s, struct vector* v_token)
       curr_token = WORD;
     }
   }
+  if (v_size(v_token) == 0) // There is not any token
+    append_token(v_token, EOF_SYM, NULL, NULL);
+  else
+    append_token(v_token, curr_token, start, s + i - 1);
   return 1;
 }
 
