@@ -86,7 +86,6 @@ int lexer(char* s, struct vector* v_token)
     }
     // Rule 6
     if (!is_quoted(quoted) && begin_as(s + i, s + i, operator_list) != -1)
-        //&& curr_token == UNDIFINED)
     {
       append_token(v_token, curr_token, start, s + i - 1);
       start = s + i;
@@ -106,11 +105,6 @@ int lexer(char* s, struct vector* v_token)
       start = s + i + 1;
       continue;
     }
-    /*if (begin_as(s + i, 1, blank_list) != -1 && !is_quoted[])
-    {
-      append_token(v_token, curr_token, start, s + i - 1);
-      start = s + i + 1;
-    }*/
     // Rule 8
     if (part_of_word)
     {

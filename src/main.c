@@ -18,12 +18,16 @@
 static char* get_PS(struct hash_table* ht);
 static int process_input(char* buff, struct rule** rules, struct hash_table* ht);
 
+static struct hash_table* ht;
+static struct rule** rules;
+
+
 int main(int argc, char* argv[])
 {
-  struct hash_table* ht = create_hash(256);
+  ht = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv, ht);
-  struct rule** rules = init_all_rules();
+  rules = init_all_rules();
   if (option.input_mode == INTERACTIVE)
   {
     while (1)
@@ -34,15 +38,11 @@ int main(int argc, char* argv[])
       if (!buff)
       {
         printf("exit\n");
-        break;
+        return 0;
       }
       add_history(buff);
       process_input(buff, rules, ht);
-            /*ast = parse_command(token_list);
-      char* ast_print = get_data(ht, "ast_print");
-      if (ast_print && !strcmp("0", ast_print))
-        print_AST(ast);
-      execute_command(option, ast);*/
+      free(buff);
     }
   }
   else if (option.input_mode == COMMAND_LINE)
@@ -69,7 +69,10 @@ int main(int argc, char* argv[])
       err(1, "Impossible to read stat from %s", option.file_name);
     size_t size_file = stat_buf.st_size;
     char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-    return process_input(file, rules, ht);
+    int ret = process_input(file, rules, ht);
+    munmap(file, size_file);
+    fclose(fd);
+    return ret;
   }
 }
 
@@ -94,7 +97,6 @@ static int process_input(char* buff, struct rule** rules, struct hash_table* ht)
   }
   v_destroy(v_token);
   tree_destroy(ast);
-  free(buff);
 }
 
 
@@ -102,4 +104,9 @@ static char* get_PS(struct hash_table* ht)
 {
   char* ps1 = get_data(ht, "PS1");
   return ps1;
+}
+
+void exit_42sh(void)
+{
+  // free v_token, tree, hash_table
 }
