@@ -22,7 +22,7 @@ struct tree* parse(struct rule** rules, struct vector* v_token)
 }
 
 static int parse_mandatory(struct tree* tree, struct rule** rules,
-                           struct vector* v_token, size_t nb_token_read,
+                           struct vector* v_token, size_t* nb_token_read,
                            struct symbol* sym)
 {
   struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
@@ -32,7 +32,7 @@ static int parse_mandatory(struct tree* tree, struct rule** rules,
 }
 
 static int parse_star(struct tree* tree, struct rule** rules,
-                      struct vector* v_token, size_t nb_token_read,
+                      struct vector* v_token, size_t* nb_token_read,
                       struct symbol* sym)
 {
   while (1)
@@ -46,7 +46,7 @@ static int parse_star(struct tree* tree, struct rule** rules,
 }
 
 static int parse_optional(struct tree* tree, struct rule** rules,
-                          struct vector* v_token, size_t nb_token_read,
+                          struct vector* v_token, size_t* nb_token_read,
                           struct symbol* sym)
 {
   struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
@@ -56,8 +56,8 @@ static int parse_optional(struct tree* tree, struct rule** rules,
 }
 
 static int parse_plus(struct tree* tree, struct rule** rules,
-                          struct vector* v_token, size_t nb_token_read,
-                          struct symbol* sym)
+                      struct vector* v_token, size_t* nb_token_read,
+                      struct symbol* sym)
 {
   struct tree* child = parse_rec(rules, v_token, sym->rule, nb_token_read);
   if (child == NULL)
@@ -74,7 +74,7 @@ static int parse_plus(struct tree* tree, struct rule** rules,
 }
 
 static int parse_nonterminal(struct tree* tree, struct rule** rules,
-                             struct vector* v_token, size_t nb_token_read,
+                             struct vector* v_token, size_t* nb_token_read,
                              struct symbol* sym)
 {
   if (sym->repeat == MANDATORY)
@@ -88,7 +88,7 @@ static int parse_nonterminal(struct tree* tree, struct rule** rules,
 }
 
 static int parse_terminal(struct tree* tree, struct rule** rules,
-                          struct vector* v_token, size_t nb_token_read,
+                          struct vector* v_token, size_t* nb_token_read,
                           struct symbol* sym)
 {
   struct token* token = v_get(v_token, *nb_token_read);
@@ -121,7 +121,7 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
         if (!parse_nonterminal(tree, rules, v_token, nb_token_read, sym))
           break;
         else
-          continue
+          continue;
       else // nonterminal
         if (!parse_nonterminal(tree, rules, v_token, nb_token_read, sym))
           break;
