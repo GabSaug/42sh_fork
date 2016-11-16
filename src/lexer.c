@@ -44,15 +44,7 @@ int lexer(char* s, struct vector* v_token)
     v_print(v_token);
     if (quoted[BACKSLASH] > 0)
       quoted[BACKSLASH]--;
-    // Rule 1
-    /*if (s[i] == EOF)
-    {
-      if (v_size(v_token) == 0) // There is not any token
-        append_token(v_token, EOF_SYM, NULL, NULL);
-      else
-        append_token(v_token, curr_token, start, s + i - 1);
-      return 1;
-    }*/
+    // Rule 1 is handle after the for loop
     // Rule 2
     if (part_of_operator && !is_quoted(quoted)
              && begin_as(start, s + i, operator_list) != -1)
@@ -71,9 +63,7 @@ int lexer(char* s, struct vector* v_token)
         part_of_operator = 0;
       }
       else
-      {
         part_of_operator = 0;
-      } 
     }
     // Rule 4
     if (begin_as(s + i, s + i, quote_symbol) >= 0) // inverse boolean
@@ -136,10 +126,9 @@ int lexer(char* s, struct vector* v_token)
       curr_token = WORD;
     }
   }
-  if (v_size(v_token) == 0) // There is not any token
-    append_token(v_token, EOF_SYM, NULL, NULL);
-  else
+  if (i != 0) // There is not any token
     append_token(v_token, curr_token, start, s + i - 1);
+  append_token(v_token, EOF_SYM, NULL, NULL);
   return 1;
 }
 
