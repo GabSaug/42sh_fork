@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "hash_table.h"
 
 static size_t hash_func(char *key, size_t capacity)
@@ -30,29 +32,23 @@ struct hash_table *create_hash(size_t capacity)
   return new;
 }
 
+static void free_elt_hash(struct hash_table *ht, struct elt_hash* e)
+{
+  if (!e)
+    return;
+  free_elt_hash(ht, e->next);
+  free(e->key);
+  free(e->data);
+  free(e);
+  ht->nb_elt -= 1;
+}
+
 void destroy_hash(struct hash_table *ht)
 {
   if (!ht)
     return;
   for (size_t i = 0; i < ht->capacity && ht->nb_elt > 0; i++)
-  {
-    if (ht->table[i])
-    {
-      while (ht->table[i]->next)
-      {
-        struct elt_hash *temp = ht->table[i]->next;
-        ht->table[i] = ht->table[i]->next;
-        free(temp->key);
-        free(temp->data);
-        free(temp);
-        temp = NULL;
-        ht->nb_elt -= 1;
-      }
-      free(ht->table[i]);
-      ht->table[i] = NULL;
-      ht->nb_elt -= 1;
-    }
-  }
+    free_elt_hash(ht, ht->table[i]);
   free(ht->table);
   free(ht);
 }
@@ -96,6 +92,8 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
   {
     free(found->data);
     found->data = data;
+    printf("free(key) %s\n", key);
+    free(key);
   }
   else
   {
@@ -109,7 +107,6 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
     ht->table[pos] = new;
     ht->nb_elt += 1;
   }
-
 
   return ht;
 }
