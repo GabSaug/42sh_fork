@@ -102,6 +102,30 @@ static char *get_child_elt(struct tree *ast, size_t elt)
   return son->token->s;
 }
 
+static int bin_execution(char *path, char *args[])
+{
+  int pid = fork();
+  if (pid == -1)
+  {
+    warn("%s: Can't fork to execute the command", path);
+    return 1;
+  }
+  else if (pid == 0)
+  {
+    // Child
+    execv(path, args);
+    warn("%s: Invalid instruction", path);
+    exit(1);
+  }
+  else
+  {
+    // Parent
+    int exit_status = 0;
+    waitpid(pid, &exit_status, 0);
+    return WEXITSTATUS(exit_status);
+  }
+}
+
 static int execute_prog(struct tree *ast, struct hash_table *ht)
 {
   size_t size = v_size(ast->child);
@@ -121,7 +145,10 @@ static int execute_prog(struct tree *ast, struct hash_table *ht)
 
   char *path = NULL;
   if (strlen(command_name) > 2 && strncmp(command_name, "./", 2) == 0)
+  {
     path = get_data(ht, "PWD");
+    command_name++;
+  }
   else
     path = get_data(ht, "PATH"); // TODO modified PATH, with splitting ':'
 
@@ -138,26 +165,7 @@ static int execute_prog(struct tree *ast, struct hash_table *ht)
   }
   args[size] = NULL;
 
-  int pid = fork();
-  if (pid == -1)
-  {
-    warn("%s: Can't fork to execute the command", call);
-    return 1;
-  }
-  else if (pid == 0)
-  {
-    // Child
-    execv(call, args);
-    warn("%s: Invalid instruction", call);
-    exit(1);
-  }
-  else
-  {
-    // Parent
-    int exit_status = 0;
-    waitpid(pid, &exit_status, 0);
-    return WEXITSTATUS(exit_status);
-  }
+  return bin_execution(call, args);
 }
 
 int execute_simple_command(struct tree *ast, struct hash_table *ht)
