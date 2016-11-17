@@ -84,7 +84,7 @@ class Test
         Process.kill(9, t.pid)
       end
       stdin.close
-      @ref_stderr = stderr.read
+      @ref_stderr = stderr.read.gsub(@validation, $bin_name.lines("/")[-1])
       @ref_exit_code = t.value.exitstatus
     end
   end
