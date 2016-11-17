@@ -103,7 +103,7 @@ static int binary_from_path(struct tree *ast, struct hash_table *ht,
     k2++;
   path[k2] = '\0';
   int res = concat_path(ast, path + k1, command_name, size);
-  while (res != 0 && k2 < size_path)
+  while (res == 127 && k2 < size_path)
   {
     path[k2] = ':';
     k2++;
@@ -115,8 +115,9 @@ static int binary_from_path(struct tree *ast, struct hash_table *ht,
   }
   if (k2 < size_path)
     path[k2] = ':';
-  if (res != 0)
-    warnx("%s: Invalid binary", command_name);
+
+  if (res == 127)
+    warnx("%s: command not found", command_name);
   return res;
 }
 
