@@ -24,3 +24,5 @@ vector. This vector is send to the parser which created an AST based on the
 shell grammar. If there isn't any syntax error, the AST is executed, and the
 returned value stored in $?.
 All variable are stored in a hash table for a quick access.
+
+42sh use the readline library. Thus you can use the up and down to use history.

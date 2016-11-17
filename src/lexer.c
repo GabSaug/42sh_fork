@@ -41,7 +41,7 @@ int lexer(char* s, struct vector* v_token)
   size_t i;
   for (i = 0; s[i]; ++i)
   {
-    v_print(v_token);
+    //v_print(v_token);
     if (quoted[BACKSLASH] > 0)
       quoted[BACKSLASH]--;
     // Rule 1 is handle after the for loop
