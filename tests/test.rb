@@ -3,7 +3,7 @@
 # Test Suite in Ruby for 42sh project
 # Configuration variables :
 
-$Bin_name = "echo"
+$bin_name = "sh"
 $Timeout = 5
 
 require 'open3'
@@ -149,7 +149,7 @@ class Test
     return errors
   end
   def run_test(out)
-    command = self.gen_command($Bin_name)
+    command = self.gen_command($bin_name)
     @stdout = ""
     @timeout = false
     Open3.popen3(command) do |stdin, stdout, stderr, t|
@@ -252,6 +252,7 @@ $cat_list = []
 $out = :default
 
 parsing_cat = false
+parsing_bin = false
 ARGV.each do |arg|
   if parsing_cat then
     if arg[0] == "-" then
@@ -259,13 +260,20 @@ ARGV.each do |arg|
     else
        $cat_list << arg
     end
-  end
-  if !parsing_cat then
+  elsif parsing_bin then
+    if arg[0] == "-" then
+       raise "Expected binary name after -b"
+    else
+       $bin_name = arg
+       parsing_bin = false
+    end
+  else
     if arg == "-l" || arg == "--list" then
       $mode = :list
     elsif arg == "-c" || arg == "--category" then
       $cat = :select
-      parsing_cat = true
+    elsif arg == "-b" || arg == "--binary" then
+      parsing_bin = true
     elsif arg == "-e" || arg == "--extended_output" then
       $out = :extended
     else
