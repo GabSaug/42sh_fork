@@ -1,0 +1,10 @@
+
+set (SRC
+     ${SRC}
+     ${CMAKE_CURRENT_SOURCE_DIR}/rules.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/rules2.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/rules3.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/rules4.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/rules5.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/rules6.c
+     PARENT_SCOPE)
