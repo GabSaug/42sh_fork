@@ -46,7 +46,7 @@ int main(int argc, char* argv[])
         printf("exit\n");
         return 0;
       }
-      //add_history(buff);
+      add_history(buff);
       processing = 1;
       process_input(buff, rules, ht);
       processing = 0;
