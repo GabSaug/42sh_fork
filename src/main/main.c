@@ -88,7 +88,8 @@ static void process_input(char* buff, struct rule** rules, struct hash_table* ht
     //tree_print(ast);
     if (!strcmp(get_data(ht, "ast-print"), "1"))
       tree_print_dot(ast);
-    printf("returned %i\n", execute(ast, ht));
+    execute(ast, ht);
+    //printf("returned %i\n", execute(ast, ht));
   }
   v_destroy(v_token);
   tree_destroy(ast);

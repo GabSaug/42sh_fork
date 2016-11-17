@@ -114,8 +114,7 @@ static int bin_execution(char *path, char *args[])
   {
     // Child
     execv(path, args);
-    warn("%s: Invalid instruction", path);
-    exit(1);
+    exit(127);
   }
   else
   {
@@ -126,6 +125,37 @@ static int bin_execution(char *path, char *args[])
   }
 }
 
+static int concat_path(struct tree *ast, char *path, char *command_name,
+                       size_t size)
+{
+  size_t size_cmd = strlen(command_name);
+  char *call = NULL;
+  if (command_name[size_cmd - 1] == '/')
+  {
+    call = malloc(sizeof (char) * (1 + strlen(path) + size_cmd));
+    call = strcpy(call, path);
+    call = strcat(call, command_name);
+  }
+  else
+  {
+    call = malloc(sizeof (char) * (2 + strlen(path) + size_cmd));
+    call = strcpy(call, path);
+    call = strcat(call, "/");
+    call = strcat(call, command_name);
+  }
+
+  char **args = malloc(sizeof (char *) * (1 + size));
+  args[0] = call;
+
+  for (size_t j = 1; j < size; j++)
+  {
+    args[j] = get_child_elt(ast, j);
+  }
+  args[size] = NULL;
+
+  return bin_execution(call, args);
+}
+
 static int execute_prog(struct tree *ast, struct hash_table *ht)
 {
   size_t size = v_size(ast->child);
@@ -133,11 +163,14 @@ static int execute_prog(struct tree *ast, struct hash_table *ht)
   size_t i = 0;
   struct tree *son = v_get(ast->child, i);
   son = v_get(son->child, 0);
-  while (i < size - 1 && son->nts != REDIRECTION)
+  while (i < size && son->nts != REDIRECTION)
   {
     i++;
-    son = v_get(ast->child, i);
-    son = v_get(son->child, 0);
+    if (i < size)
+    {
+      son = v_get(ast->child, i);
+      son = v_get(son->child, 0);
+    }
   }
   size = i;
 
@@ -148,24 +181,34 @@ static int execute_prog(struct tree *ast, struct hash_table *ht)
   {
     path = get_data(ht, "PWD");
     command_name++;
+    return concat_path(ast, path, command_name, size);
   }
   else
-    path = get_data(ht, "PATH"); // TODO modified PATH, with splitting ':'
-
-  char *call = malloc(sizeof (char) * (1 + strlen(path)
-                      + strlen(command_name)));
-  call = strcat(path, command_name);
-
-  char **args = malloc(sizeof (char *) * (1 + size));
-  args[0] = call;
-
-  for (size_t j = 1; j < size; j++)
   {
-    args[i] = get_child_elt(ast, j);
+    path = get_data(ht, "PATH");
+    size_t size_path = strlen(path);
+    size_t k1 = 0;
+    size_t k2 = 0;
+    while (path[k2] && path[k2] != ':')
+      k2++;
+    path[k2] = '\0';
+    int res = concat_path(ast, path + k1, command_name, size);
+    while (res != 0 && k2 < size_path)
+    {
+      path[k2] = ':';
+      k2++;
+      k1 = k2;
+      while (path[k2] && path[k2] != ':')
+        k2++;
+      path[k2] = '\0';
+      res = concat_path(ast, path + k1, command_name, size);
+    }
+    if (k2 < size_path)
+      path[k2] = ':';
+    if (res != 0)
+      warn("%s: Invalid binary", command_name);
+    return res;
   }
-  args[size] = NULL;
-
-  return bin_execution(call, args);
 }
 
 int execute_simple_command(struct tree *ast, struct hash_table *ht)
