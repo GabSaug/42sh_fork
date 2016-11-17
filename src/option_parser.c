@@ -75,7 +75,7 @@ struct option opt(int argc, char *argv[], struct hash_table *ht,
       return opt2(argc, argv, ht, options);
   }
 
-  ht = add_hash(ht, "expand_aliases", strdup("1"));
+  ht = add_hash(ht, "expand_aliases", "1");
   options.input_mode = INTERACTIVE;
   return options;
 }
@@ -90,24 +90,16 @@ static void set_env(struct hash_table *ht)
 
   for (size_t i = 0; i < sizeof (var) / sizeof (char *); i++)
   {
-    char *temp = strdup(var[i]);
     char *data = getenv(var[i]);
     if (data)
-      ht = add_hash(ht, temp, strdup(data));
+      ht = add_hash(ht, var[i], data);
+    //else
+      //printf("var %s not found\n", var[i]);
   }
 
-  char *temp2 = strdup("PS1");
-  char *data2 = strdup("42sh$ ");
-  ht = add_hash(ht, temp2, data2);
-
-  temp2 = strdup("PS2");
-  data2 = strdup("> ");
-  ht = add_hash(ht, temp2, data2);
-
-  temp2 = strdup("PS4");
-  data2 = strdup("+ ");
-  ht = add_hash(ht, temp2, data2);
-
+  ht = add_hash(ht, "PS1", "42sh$ ");
+  ht = add_hash(ht, "PS2", "> ");
+  ht = add_hash(ht, "PS4", "+ ");
 }
 
 static void init_opt(struct hash_table *ht)
@@ -119,17 +111,9 @@ static void init_opt(struct hash_table *ht)
   };
 
   for (int i = 0; i < 7; i++)
-  {
-    char *temp = strdup(opts[i]);
-    char *data = strdup("0");
-    if (data && temp)
-      ht = add_hash(ht, temp, data);
-  }
+    ht = add_hash(ht, opts[i], "0");
 
-  char *temp2 = strdup("sourcepath");
-  char *data2 = strdup("1");
-  if (data2 && temp2)
-    ht = add_hash(ht, temp2, data2);
+  ht = add_hash(ht, "sourcepath", "1");
 }
 
 struct option parse_options(int argc, char *argv[], struct hash_table *ht)
