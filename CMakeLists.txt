@@ -21,7 +21,8 @@ set(SRC
     src/rules4.c
     src/rules5.c
     src/rules6.c
-    src/execute.c)
+    src/execute.c
+    src/execute2.c)
 
 include_directories(src/)
 

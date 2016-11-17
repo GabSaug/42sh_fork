@@ -1,14 +1,24 @@
+# include "execute.h"
+
+int execute_command(struct tree* ast, struct hash_table* ht)
+{
+  struct tree* child = v_get(ast->child, 0);
+  if (child->nts == SIMPLE_COMMAND)
+    return execute_simple_command(child, ht);
+  else
+    return 1;
+}
+
 static int launch_command(struct tree *ast, struct hash_table *ht)
 {
   size_t i = 1;
   struct tree *child = v_get(ast->child, i);
-  while (child->nst != COMMAND)
+  while (child->nts != COMMAND)
   {
     i++;
     child = v_get(ast->child, i);
   }
 
-  // TODO maybe changes here ?
   return execute_command(child, ht);
 }
 
@@ -49,12 +59,12 @@ static int staircase(struct tree *ast, int inout[], size_t index, size_t size,
 
 int execute_pipeline(struct tree *ast, struct hash_table *ht)
 {
-  if (!tree)
+  if (!ast)
     return 1;
 
   size_t size = v_size(ast->child);
   int res = 0;
-  int index = tree->nts == COMMAND ? 0 : 1;
+  int index = ast->nts == COMMAND ? 0 : 1;
 
   if (size > 1)
   {
@@ -87,16 +97,24 @@ int execute_pipeline(struct tree *ast, struct hash_table *ht)
 
 static char *get_child_elt(struct tree *ast, size_t elt)
 {
-  return (v_get(v_get(ast->child, 0)->child, 0))->token->s;
+  struct tree *son = v_get(ast->child, elt);
+  son = v_get(son->child, 0);
+  return son->token->s;
 }
 
-static int execute_command(struct tree *ast)
+static int execute_prog(struct tree *ast, struct hash_table *ht)
 {
   size_t size = v_size(ast->child);
 
   size_t i = 0;
-  while (i < size && (v_get(v_get(ast->child, i), 0))->nts != REDIRECTION)
+  struct tree *son = v_get(ast->child, i);
+  son = v_get(son->child, 0);
+  while (i < size && son->nts != REDIRECTION)
+  {
     i++;
+    son = v_get(ast->child, i);
+    son = v_get(son->child, 0);
+  }
   size = i;
 
   char *command_name = get_child_elt(ast, 0);
@@ -105,7 +123,7 @@ static int execute_command(struct tree *ast)
   if (strlen(command_name) > 2 && strncmp(command_name, "./", 2) == 0)
     path = get_data(ht, "PWD");
   else
-    path = get_data(ht, "PATH");
+    path = get_data(ht, "PATH"); // TODO modified PATH, with splitting ':'
 
   char *call = malloc(sizeof (char) * (1 + strlen(path)
                       + strlen(command_name)));
@@ -175,6 +193,6 @@ int execute_simple_command(struct tree *ast, struct hash_table *ht)
     }
   }
   else
-    return execute_command(ast);
+    return execute_prog(ast, ht);
   // TODO need to implement here the redirections
 }
