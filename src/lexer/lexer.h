@@ -1,6 +1,10 @@
 #ifndef LEXER_H
 # define LEXER_H
 
+/**
+ * \file lexer.h
+*/
+
 #include <err.h>
 #include "vector.h"
 
@@ -62,6 +66,12 @@ enum quote_type
   DOUBLE_QUOTE
 };
 
+/**
+ * \brief Fill a vector of token based on the input string
+ * \param s The string to break into token
+ * \param v_token A empty vector of token
+ * \return 0 if an error occured, or 1 if the string was lexed successfully
+*/
 int lexer(char* s, struct vector* v_token);
 
 #endif /* !LEXER_H */

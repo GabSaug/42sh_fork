@@ -7,6 +7,10 @@
 
 #include "my_string.h"
 
+/**
+ * \file hash_table.h
+*/
+
 struct elt_hash
 {
   char *key;
@@ -25,7 +29,7 @@ struct hash_table
  * \brief Create a hash_table
  * \param capacity The number of element that trigger the increase in the hash
  * table capacity
-*/ 
+*/
 struct hash_table *create_hash(size_t capacity);
 void destroy_hash(struct hash_table *ht);
 struct hash_table *add_hash(struct hash_table *ht, char *key, void *data);

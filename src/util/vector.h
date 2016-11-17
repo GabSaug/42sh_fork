@@ -5,6 +5,10 @@
 
 #include <stddef.h>
 
+/**
+ * \file vector.h
+*/
+
 struct vector
 {
   size_t size;

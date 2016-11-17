@@ -4,6 +4,10 @@
 # include "lexer.h"
 # include "parser.h"
 
+/**
+ * \file tree.h
+*/
+
 struct tree
 {
   struct token* token;
@@ -11,6 +15,9 @@ struct tree
   struct vector* child;
 };
 
+/**
+ * \brief Create a dot file that represent the AST
+*/
 void tree_print_dot(struct tree* tree);
 void tree_print(struct tree* tree);
 

@@ -7,8 +7,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 #include "hash_table.h"
+
+/**
+ * \file option_parser.h
+*/
 
 enum input_mode
 {
@@ -24,6 +27,10 @@ struct option
   char* input;
 };
 
+/**
+ * \brief Parse the options given as arguments
+ * \return A structure option
+*/
 struct option parse_options(int argc, char *argv[], struct hash_table *ht);
 
 #endif /* !OPTION_PARSER_H */

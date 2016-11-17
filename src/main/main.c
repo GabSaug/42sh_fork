@@ -17,7 +17,7 @@
 #include "main.h"
 
 static char* get_PS(struct hash_table* ht);
-static void process_input(char* buff, struct rule** rules,
+static int process_input(char* buff, struct rule** rules,
                           struct hash_table* ht);
 
 static struct hash_table* ht = NULL;
@@ -30,6 +30,7 @@ static int processing = 0;
 
 int main(int argc, char* argv[])
 {
+  int ret = 0;
   atexit(exit_42sh);
   ht = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
@@ -47,12 +48,12 @@ int main(int argc, char* argv[])
         return 0;
       }
       add_history(buff);
-      process_input(buff, rules, ht);
+      ret = process_input(buff, rules, ht);
       free(buff);
     }
   }
   else if (option.input_mode == COMMAND_LINE)
-    process_input(option.input, rules, ht);
+    ret = process_input(option.input, rules, ht);
   else
   {
     int fd = open(option.input, O_RDONLY | O_CLOEXEC);
@@ -63,22 +64,24 @@ int main(int argc, char* argv[])
       err(1, "Impossible to read stat from %s", option.input);
     size_t size_file = stat_buf.st_size;
     char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-    process_input(file, rules, ht);
+    ret = process_input(file, rules, ht);
     munmap(file, size_file);
     close(fd);
     return 0;
   }
+  return ret;
 }
 
-static void process_input(char* buff, struct rule** rules,
+static int process_input(char* buff, struct rule** rules,
                           struct hash_table* ht)
 {
+  int ret = 0;
   processing = 1;
   v_token = v_create();
   if (!lexer(buff, v_token))
   {
     v_destroy(v_token);
-    return;
+    return 1;
   }
   //v_print(v_token);
   ast = parse(rules, v_token);
@@ -89,12 +92,13 @@ static void process_input(char* buff, struct rule** rules,
     //tree_print(ast);
     if (!strcmp(get_data(ht, "ast-print"), "1"))
       tree_print_dot(ast);
-    execute(ast, ht);
+    ret = execute(ast, ht);
     //printf("returned %i\n", execute(ast, ht));
   }
   v_destroy(v_token);
   tree_destroy(ast);
   processing = 0;
+  return ret;
 }
 
 
