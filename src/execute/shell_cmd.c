@@ -22,5 +22,5 @@ int execute_if(struct tree *ast, struct hash_table *ht)
     return execute_and_or(then, ht);
   }
   else
-    return 1;
+    return 0;
 }
