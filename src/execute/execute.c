@@ -45,7 +45,8 @@ static int execute_and_or(struct tree* ast, struct hash_table *ht)
     struct tree* operator = v_get(ast->child, i);
     if (!operator)
       break;
-    if (operator->token->id == AND_IF && ret == EXIT_FAILURE)
+    if ((operator->token->id == AND_IF && ret != EXIT_SUCCESS)
+        || (operator->token->id == OR_IF && ret == EXIT_SUCCESS))
       i += 2;
     i++;
     pipeline = v_get(ast->child, i);
