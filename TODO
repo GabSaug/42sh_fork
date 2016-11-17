@@ -1,0 +1,11 @@
+V 0.5
+  Manual :
+  Option Parser : OK
+  Prompt : OK
+  Shell parser : OK
+  AST printer : OK
+  CMake : OK
+  Test suite : OK
+  Execution :
+  History : OK
+

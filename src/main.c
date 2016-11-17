@@ -89,6 +89,7 @@ static void process_input(char* buff, struct rule** rules, struct hash_table* ht
     return;
   }
   //v_print(v_token);
+  printf("a");
   ast = parse(rules, v_token);
   if (ast == NULL)
     printf("Grammar error\n");

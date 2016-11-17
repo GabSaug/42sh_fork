@@ -107,9 +107,7 @@ int lexer(char* s, struct vector* v_token)
     }
     // Rule 8
     if (part_of_word)
-    {
       continue;
-    }
     // Rule 9
     if (s[i] == '#')
       i += tokenize_comment(s, i);
