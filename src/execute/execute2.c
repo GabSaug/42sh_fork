@@ -132,6 +132,10 @@ static int execute_prog(struct tree *ast, struct hash_table *ht)
     command_name++;
     return concat_path(ast, path, command_name, size);
   }
+  else if (strlen(command_name) > 1 && strncmp(command_name, "/", 1) == 0)
+  {
+    return concat_path(ast, "", command_name + 1, size);
+  }
   else
     return binary_from_path(ast, ht, command_name, size);
 }
