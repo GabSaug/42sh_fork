@@ -109,7 +109,7 @@ static int execute_prog(struct tree *ast, struct hash_table *ht)
   size_t i = 0;
   struct tree *son = v_get(ast->child, i);
   son = v_get(son->child, 0);
-  while (i < size && son->nts != REDIRECTION)
+  while (i < size - 1 && son->nts != REDIRECTION)
   {
     i++;
     son = v_get(ast->child, i);

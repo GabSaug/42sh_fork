@@ -92,7 +92,7 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
   {
     free(found->data);
     found->data = my_strdup(data);
-    printf("free(key) %s\n", key);
+    //printf("free(key) %s\n", key);
   }
   else
   {

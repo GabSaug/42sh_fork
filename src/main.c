@@ -88,16 +88,16 @@ static void process_input(char* buff, struct rule** rules, struct hash_table* ht
     v_destroy(v_token);
     return;
   }
-  v_print(v_token);
+  //v_print(v_token);
   ast = parse(rules, v_token);
   if (ast == NULL)
     printf("Grammar error\n");
   else
   {
-    tree_print(ast);
+    //tree_print(ast);
     if (!strcmp(get_data(ht, "ast-print"), "1"))
       tree_print_dot(ast);
-    //printf("returned %i\n", execute(ast));
+    printf("returned %i\n", execute(ast, ht));
   }
   v_destroy(v_token);
   tree_destroy(ast);
