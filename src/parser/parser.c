@@ -119,13 +119,13 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
     for (j = 0; j < s_r->nb_sym; ++j)
     {
       struct symbol* sym = &(s_r->sym_arr[j]);
-      if (sym->terminal)
+      if (sym->terminal) // terminal
         if (!parse_terminal(tree, rules, v_token, nb_token_read, sym))
           break;
         else
           continue;
-      else // nonterminal
-        if (!parse_nonterminal(tree, rules, v_token, nb_token_read, sym))
+      // non terminal
+      else if (!parse_nonterminal(tree, rules, v_token, nb_token_read, sym))
           break;
     }
     if (j == s_r->nb_sym) // Rule match
