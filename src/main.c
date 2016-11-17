@@ -33,7 +33,7 @@ int main(int argc, char* argv[])
   ht = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv, ht);
-  //rules = init_all_rules();
+  rules = init_all_rules();
   if (option.input_mode == INTERACTIVE)
   {
     while (1)
@@ -112,6 +112,7 @@ static char* get_PS(struct hash_table* ht)
 void exit_42sh(void)
 {
   destroy_hash(ht);
+  rules_destroy(rules);
   if (processing)
   {
     v_destroy(v_token);
