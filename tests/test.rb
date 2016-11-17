@@ -53,8 +53,6 @@ class Test
         @ref_stderr = File.read(path.lines("/")[0] + $1)
         test_content =~ /<exit_code>(.*)<\/exit_code>/
         @ref_exit_code = $1.to_i
-      else
-        self.run_ref
       end
     else
       raise "No <validation> balise in " + path +
@@ -123,7 +121,7 @@ class Test
           print("\e[7m")
           puts(@ref_stderr)
           print("\e[0m")
-          puts("        got      :")
+          puts("      got      :")
           print("\e[7m")
           puts(@stderr)
           print("\e[0m")
@@ -149,6 +147,9 @@ class Test
     return errors
   end
   def run_test(out)
+    if @validation != "manual" then
+      self.run_ref
+    end
     command = self.gen_command($bin_name)
     @stdout = ""
     @timeout = false
