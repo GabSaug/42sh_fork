@@ -91,7 +91,7 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
   if (found)
   {
     free(found->data);
-    found->data = strdup(data);
+    found->data = my_strdup(data);
     printf("free(key) %s\n", key);
   }
   else
@@ -99,8 +99,8 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
     struct elt_hash *new = malloc(sizeof (struct elt_hash));
     if (!new)
       return NULL;
-    new->key = strdup(key);
-    new->data = strdup(data);
+    new->key = my_strdup(key);
+    new->data = my_strdup(data);
 
     new->next = ht->table[pos];
     ht->table[pos] = new;

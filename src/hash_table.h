@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "my_string.h"
+
 struct elt_hash
 {
   char *key;

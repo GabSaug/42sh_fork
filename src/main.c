@@ -17,7 +17,8 @@
 #include "main.h"
 
 static char* get_PS(struct hash_table* ht);
-static int process_input(char* buff, struct rule** rules, struct hash_table* ht);
+static void process_input(char* buff, struct rule** rules,
+                          struct hash_table* ht);
 
 static struct hash_table* ht = NULL;
 static struct rule** rules = NULL;
@@ -72,20 +73,20 @@ int main(int argc, char* argv[])
       err(1, "Impossible to read stat from %s", option.file_name);
     size_t size_file = stat_buf.st_size;
     char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-    int ret = process_input(file, rules, ht);
+    process_input(file, rules, ht);
     munmap(file, size_file);
     close(fd);
-    return ret;
+    return 0;
   }
 }
 
-static int process_input(char* buff, struct rule** rules, struct hash_table* ht)
+static void process_input(char* buff, struct rule** rules, struct hash_table* ht)
 {
   v_token = v_create();
   if (!lexer(buff, v_token))
   {
     v_destroy(v_token);
-    return 0;
+    return;
   }
   v_print(v_token);
   ast = parse(rules, v_token);
