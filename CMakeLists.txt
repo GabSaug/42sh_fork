@@ -24,7 +24,13 @@ set(SRC
     src/execute.c
     src/execute2.c)
 
-include_directories(src/)
+add_subdirectory(src/execute)
+add_subdirectory(src/lexer)
+add_subdirectory(src/main)
+add_subdirectory(src/option_parser)
+add_subdirectory(src/parser)
+add_subdirectory(src/rules)
+add_subdirectory(src/util)
 
 add_executable(42sh ${SRC})
 target_link_libraries(42sh readline)
