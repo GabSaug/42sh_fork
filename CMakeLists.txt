@@ -27,8 +27,10 @@ target_link_libraries(${BIN_NAME} readline)
 
 add_custom_target(check
                   COMMAND ./test.rb -b ${CMAKE_BINARY_DIR}/${BIN_NAME}
-                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
+                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
+                  DEPENDS ${BIN_NAME})
 
 add_custom_target(echeck
                   COMMAND ./test.rb -e -b ${CMAKE_BINARY_DIR}/${BIN_NAME}
-                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests)
+                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
+                  DEPENDS ${BIN_NAME})

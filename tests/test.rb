@@ -26,7 +26,7 @@ class Test
       @type = $1
       if  @type == "file" || @type == "tty" then
         if (test_content =~ /<file>(.*)<\/file>/) != nil then
-          @file = $1
+          @file = path.lines("/")[0] + $1
         else
           raise "No <file> balise in " + path +
           " test file (mandatory balise when input_type is file or tty)"
