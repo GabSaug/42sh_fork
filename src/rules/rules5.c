@@ -27,13 +27,13 @@ static struct rule *init_rule_for_aux(void)
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 1);
   create_sym(rule->s_r[0].sym_arr + 0, 1, MANDATORY, 0, SEMI);
 
-  // Rule 1
-  rule->s_r[0].nb_sym = 4;
-  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 4);
-  create_sym(rule->s_r[0].sym_arr + 0, 0, STAR, NEW_LINE_RULE, 0);
-  create_sym(rule->s_r[0].sym_arr + 1, 1, MANDATORY, 0, IN);
-  create_sym(rule->s_r[0].sym_arr + 2, 0, STAR, WORD_RULE, 0);
-  create_sym(rule->s_r[0].sym_arr + 3, 0, MANDATORY, FOR_RULE_AUX_2, 0);
+  // Rule 2
+  rule->s_r[1].nb_sym = 4;
+  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol) * 4);
+  create_sym(rule->s_r[1].sym_arr + 0, 0, STAR, NEW_LINE_RULE, 0);
+  create_sym(rule->s_r[1].sym_arr + 1, 1, MANDATORY, 0, IN);
+  create_sym(rule->s_r[1].sym_arr + 2, 0, STAR, WORD_RULE, 0);
+  create_sym(rule->s_r[1].sym_arr + 3, 0, MANDATORY, FOR_RULE_AUX_2, 0);
 
   return rule;
 }
