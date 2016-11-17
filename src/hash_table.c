@@ -91,17 +91,16 @@ struct hash_table *add_hash(struct hash_table *ht, char *key, void *data)
   if (found)
   {
     free(found->data);
-    found->data = data;
+    found->data = strdup(data);
     printf("free(key) %s\n", key);
-    free(key);
   }
   else
   {
     struct elt_hash *new = malloc(sizeof (struct elt_hash));
     if (!new)
       return NULL;
-    new->key = key;
-    new->data = data;
+    new->key = strdup(key);
+    new->data = strdup(data);
 
     new->next = ht->table[pos];
     ht->table[pos] = new;

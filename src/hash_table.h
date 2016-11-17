@@ -1,8 +1,9 @@
 #ifndef HASH_TABLE_H
 # define HASH_TABLE_H
 
-#include <stdlib.h>
+#define _DEFAULT_SOURCE
 #include <string.h>
+#include <stdlib.h>
 
 struct elt_hash
 {
