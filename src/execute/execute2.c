@@ -175,8 +175,8 @@ int execute_simple_command(struct tree *ast, struct hash_table *ht)
   // variable
   char *builtin[] =
   {
-    "exit", "cd", "shopt", "export", "alias", "unalias", "echo", "continue",
-    "break", "source", "history"
+    "exit", "true", "false", "cd", "shopt", "export", "alias", "unalias",
+    "echo", "continue", "break", "source", "history"
   };
 
   int bi = -1;
@@ -194,6 +194,10 @@ int execute_simple_command(struct tree *ast, struct hash_table *ht)
     {
     case 0:
       exit(EXIT_SUCCESS);
+    case 1:
+      return 0;
+    case 2:
+      return 1;
     default:
       warn("%s: Invalid builtin", get_child_elt(ast, 0));
       return 1;
