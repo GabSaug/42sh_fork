@@ -27,5 +27,8 @@ int is_in(char* start, char* end, char s_list[][10]);
  * \return The address of the newly malloc'd string
 */
 char* my_strdup(char* s);
+int my_is_in(char* str, char s_list[][10]);
+int my_strcmp(char* str1, char* str2);
+int my_strnum(char* s);
 
 #endif /* !MY_STRING_H */

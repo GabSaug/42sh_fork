@@ -19,7 +19,22 @@ int is_in(char* start, char* end, char s_list[][10])
     if (!strncmp(start, s_list[i], len) && strlen(s_list[i]) == len)
       return i;
   return -1;
+}
 
+int my_is_in(char* str, char s_list[][10])
+{
+  return is_in(str, str + strlen(str), s_list);
+}
+
+int my_strcmp(char* str1, char* str2)
+{
+  size_t i;
+  for (i = 0; str1[i] && str2[i]; i++)
+  {
+    if (str1[i] != str2[i])
+      return 0;
+  }
+  return str1[i] == str2[i];
 }
 
 char* my_strdup(char* s)
@@ -29,4 +44,14 @@ char* my_strdup(char* s)
   for (size_t i = 0; i < len; ++i)
     new_s[i] = s[i];
   return new_s;
+}
+
+int my_strnum(char* s)
+{
+  for (size_t i = 0; s[i]; i++)
+  {
+    if (s[i] < '0' || s[i] > '9')
+      return 1;
+  }
+  return 1;
 }

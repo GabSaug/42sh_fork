@@ -3,6 +3,7 @@
 #include "lexer.h"
 #include "my_malloc.h"
 #include "my_string.h"
+#include "vectors.h"
 
 char operator_list[][10] =
 {
@@ -41,13 +42,12 @@ int lexer(char* s, struct vector* v_token)
   size_t i;
   for (i = 0; s[i]; ++i)
   {
-    //v_print(v_token);
     if (quoted[BACKSLASH] > 0)
       quoted[BACKSLASH]--;
     // Rule 1 is handle after the for loop
     // Rule 2
     if (part_of_operator && !is_quoted(quoted)
-             && begin_as(start, s + i, operator_list) != -1)
+        && begin_as(start, s + i, operator_list) != -1)
     {
       curr_token = begin_as(start, s + i, operator_list);
       continue;
