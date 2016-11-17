@@ -70,7 +70,8 @@ int main(int argc, char* argv[])
   }
 }
 
-static void process_input(char* buff, struct rule** rules, struct hash_table* ht)
+static void process_input(char* buff, struct rule** rules,
+                          struct hash_table* ht)
 {
   processing = 1;
   v_token = v_create();

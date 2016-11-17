@@ -66,10 +66,9 @@ static struct option opt(int argc, char *argv[], struct hash_table *ht,
       options.input_mode = COMMAND_LINE;
       return options;
     }
-    else if (!strcmp(argv[1], "--version"))
+    else if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "--ver"))
     {
       printf("Version 0.5\n");
-      destroy_hash(ht);
       exit(0);
     }
     else
