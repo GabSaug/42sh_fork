@@ -24,7 +24,7 @@ struct rule** init_all_rules(void)
   return rules;
 }
 
-void rule_destroy(struct rule** rules)
+void rules_destroy(struct rule** rules)
 {
   for (size_t i = 0; i < NB_RULE; ++i)
   {

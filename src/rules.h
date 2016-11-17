@@ -80,6 +80,7 @@ struct rule
 void create_sym(struct symbol* sym, int terminal, enum repeat repeat,
                 enum non_terminal_symbol rule,
                 enum terminal_symbol terminal_symbol);
+void rule_destroy(struct rule** rules);
 struct rule** init_all_rules(void);
 struct rule** init_all_rules2(struct rule **rules);
 struct rule** init_all_rules3(struct rule **rules);
