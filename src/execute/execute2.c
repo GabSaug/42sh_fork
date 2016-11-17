@@ -5,6 +5,8 @@ int execute_command(struct tree* ast, struct hash_table* ht)
   struct tree* child = v_get(ast->child, 0);
   if (child->nts == SIMPLE_COMMAND)
     return execute_simple_command(child, ht);
+  else if (child->nts == SHELL_COMMAND)
+    return execute_shell_command(child, ht);
   else
     return 1;
 }

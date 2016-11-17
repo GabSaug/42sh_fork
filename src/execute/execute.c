@@ -5,7 +5,6 @@
 
 static int execute_input(struct tree* ast, struct hash_table *ht);
 static int execute_list(struct tree* ast, struct hash_table *ht);
-static int execute_and_or(struct tree* ast, struct hash_table *ht);
 
 int execute(struct tree* ast, struct hash_table *ht)
 {
@@ -34,7 +33,7 @@ static int execute_list(struct tree* ast, struct hash_table *ht)
   return res;
 }
 
-static int execute_and_or(struct tree* ast, struct hash_table *ht)
+int execute_and_or(struct tree* ast, struct hash_table *ht)
 {
   struct tree* pipeline = v_get(ast->child, 0);
   size_t i = 0;
