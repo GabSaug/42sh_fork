@@ -230,6 +230,8 @@ void tree_destroy(struct tree* tree)
 {
   if (!tree)
     return;
+  for (size_t i = 0; i < v_size(tree->child); ++i)
+    tree_destroy(v_get(tree->child, i));
   v_destroy(tree->child);
   free(tree);
 }
