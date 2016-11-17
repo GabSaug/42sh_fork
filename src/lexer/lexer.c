@@ -136,27 +136,19 @@ size_t tokenize_comment(char* s, size_t i)
 // Return the number of character in the expansion
 static size_t tokenize_exp_normal(char *s)
 {
-  size_t i = 2;
-  while (s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n' && s[i] != '$')
+  size_t i;
+  for (i = 2; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n' && s[i] != '$'
+       ; ++i)
   {
     if (s[i] == '\\')
       i++;
     else if (s[i] == '\'')
-    {
-      i++;
-      while (s[i] && s[i] != '\'' && s[i - 1] != '\\')
-        i++;
-    }
+      for (i++; s[i] && s[i] != '\'' && s[i - 1] != '\\'; ++i)
+        continue;
     else if (s[i] == '\"')
-    {
-      i++;
-      while (s[i] && s[i] != '\"' && s[i - 1] != '\\')
-        i++;
-    }
-
-    i++;
+      for (i++; s[i] && s[i] != '\"' && s[i - 1] != '\\'; ++i)
+        continue;
   }
-
   return i;
 }
 
@@ -176,9 +168,8 @@ static size_t tokenize_exp_other(char *s, char b, char d)
     else if (s[i] == '\'' || s[i] == '\"')
     {
       char c = s[i];
-      i++;
-      while (s[i] && s[i] != c)
-        i++;
+      for (i++; s[i] && s[i] != c; ++i)
+        continue;
     }
 
     i++;
@@ -242,6 +233,7 @@ void append_token(struct vector* v_token, enum terminal_symbol token_id,
       new_token->s = s;
     }
   }
+  //new_token->id = UNDIFINED;
   v_append(v_token, new_token);
 }
 

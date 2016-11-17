@@ -44,7 +44,7 @@ static struct option opt2(int argc, char *argv[], struct hash_table *ht,
     errx(2, "%s: invalid option", argv[1]);
   else
   {
-    options.file_name = argv[1];
+    options.input = argv[1];
     options.input_mode = INPUT_FILE;
     return options;
   }
@@ -59,11 +59,9 @@ struct option opt(int argc, char *argv[], struct hash_table *ht,
     {
       if (argc < 3)
         errx(2, "-c: option requires an argument");
-      else
-      {
-        options.input_mode = COMMAND_LINE;
-        return options;
-      }
+      options.input = argv[2];
+      options.input_mode = COMMAND_LINE;
+      return options;
     }
     else if (!strcmp(argv[1], "--version"))
     {
@@ -122,6 +120,6 @@ struct option parse_options(int argc, char *argv[], struct hash_table *ht)
   init_opt(ht);
   struct option options;
   options.norc = 0;
-  options.file_name = NULL;
+  options.input = NULL;
   return opt(argc, argv, ht, options);
 }

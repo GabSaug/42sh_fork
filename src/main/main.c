@@ -47,30 +47,20 @@ int main(int argc, char* argv[])
         return 0;
       }
       add_history(buff);
-      processing = 1;
       process_input(buff, rules, ht);
-      processing = 0;
       free(buff);
     }
   }
   else if (option.input_mode == COMMAND_LINE)
-  {
-    char buff[100]; // A MODIFER
-    buff[read(STDOUT_FILENO, buff, 90)] = '\0';
-    struct vector* v_token = v_create();
-    lexer(buff, v_token);
-    v_destroy(v_token);
-    destroy_hash(ht);
-  }
+    process_input(option.input, rules, ht);
   else
   {
-    printf("file = %s\n", option.file_name);
-    int fd = open(option.file_name, O_RDONLY);
+    int fd = open(option.input, O_RDONLY);
     if (fd == -1)
       err(1, NULL);
     struct stat stat_buf;
-    if (stat(option.file_name, &stat_buf) == -1)
-      err(1, "Impossible to read stat from %s", option.file_name);
+    if (stat(option.input, &stat_buf) == -1)
+      err(1, "Impossible to read stat from %s", option.input);
     size_t size_file = stat_buf.st_size;
     char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
     process_input(file, rules, ht);
@@ -82,6 +72,7 @@ int main(int argc, char* argv[])
 
 static void process_input(char* buff, struct rule** rules, struct hash_table* ht)
 {
+  processing = 1;
   v_token = v_create();
   if (!lexer(buff, v_token))
   {
@@ -101,6 +92,7 @@ static void process_input(char* buff, struct rule** rules, struct hash_table* ht
   }
   v_destroy(v_token);
   tree_destroy(ast);
+  processing = 0;
 }
 
 
