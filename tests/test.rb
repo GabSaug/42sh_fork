@@ -92,6 +92,7 @@ class Test
     errors = 0
     if extended_output then
       puts("    [\e[93mINFO\e[0m] " + @name + " started") 
+      puts("    [\e[93mINFO\e[0m] Command : " + self.gen_command($bin_name)) 
     end
     if @timeout then
       errors += 1
