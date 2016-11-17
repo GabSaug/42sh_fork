@@ -1,6 +1,10 @@
 #ifndef MAIN_H
 # define MAIN_H
 
+# ifndef O_CLOEXEC
+#  define O_CLOEXEC 0
+# endif
+
 /**
  * \file main.h
 */

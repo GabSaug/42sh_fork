@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
-//#include "main.h"
+
 #include "option_parser.h"
 #include "vector.h"
 #include "hash_table.h"
@@ -55,7 +55,7 @@ int main(int argc, char* argv[])
     process_input(option.input, rules, ht);
   else
   {
-    int fd = open(option.input, O_RDONLY);
+    int fd = open(option.input, O_RDONLY | O_CLOEXEC);
     if (fd == -1)
       err(1, NULL);
     struct stat stat_buf;
