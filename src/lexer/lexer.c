@@ -4,6 +4,7 @@
 #include "my_malloc.h"
 #include "my_string.h"
 #include "vector.h"
+#include "tokenize.h"
 
 char operator_list[][10] =
 {
@@ -26,17 +27,17 @@ char blank_list[][10] =
   "\n", " ", "\t"
 };
 
-static void append_token(struct vector* v_token, enum terminal_symbol id, char* start, char* end);
+static void append_token(struct vector* v_token, enum terminal_symbol id,
+                         char* start, char* end);
 static int is_quoted(char quoted[3]);
-static size_t tokenize_expansion(char* s);
-static size_t tokenize_comment(char* s, size_t i);
 
 static int apply_rule(struct vector* v_token, char quoted[],
                       enum terminal_symbol* curr_token, char* part_of_operator,
                       char* part_of_word, char* s, size_t* i, char** start);
 static int apply_rule_2(struct vector* v_token, char quoted[],
-                        enum terminal_symbol* curr_token, char* part_of_operator,
-                        char* part_of_word, char* s, size_t* i, char** start);
+                        enum terminal_symbol* curr_token,
+                        char* part_of_operator, char* part_of_word, char* s,
+                        size_t* i, char** start);
 static void rule_3(struct vector* v_token, char** start, char* s, size_t i,
               enum terminal_symbol* curr_token, char* part_of_operator);
 static void rule_4(char c, char quoted[]);
@@ -87,7 +88,8 @@ static int apply_rule(struct vector* v_token, char quoted[],
   if (begin_as(s + *i, s + *i, quote_symbol) >= 0)
     rule_4(s[*i], quoted);
   // Rule 5
-  if ((s[*i] == '$' || s[*i] == '`') && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
+  if ((s[*i] == '$' || s[*i] == '`') && !quoted[BACKSLASH]
+      && !quoted[SINGLE_QUOTE])
   {
     int ret = tokenize_expansion(s + *i);
     if (ret == 0)
@@ -101,8 +103,9 @@ static int apply_rule(struct vector* v_token, char quoted[],
 }
 
 static int apply_rule_2(struct vector* v_token, char quoted[],
-                        enum terminal_symbol* curr_token, char* part_of_operator,
-                        char* part_of_word, char* s, size_t* i, char** start)
+                        enum terminal_symbol* curr_token,
+                        char* part_of_operator, char* part_of_word, char* s,
+                        size_t* i, char** start)
 {
   // Rule 6
   if (!is_quoted(quoted) && begin_as(s + *i, s + *i, operator_list) != -1)
@@ -172,92 +175,9 @@ static void rule_4(char c, char quoted[])
     quoted[DOUBLE_QUOTE] = 1;
 }
 
-// Return the number of character in the comment
-static size_t tokenize_comment(char* s, size_t i)
-{
-  size_t j;
-  for (j = 0; s[i + j] != '\0' && s[i + j] != '\n'; ++j)
-    continue;
-  return j - 1;
-}
-
-// Return the number of character in the expansion
-static size_t tokenize_exp_normal(char *s)
-{
-  size_t i;
-  for (i = 2; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n' && s[i] != '$'
-       ; ++i)
-  {
-    if (s[i] == '\\')
-      i++;
-    else if (s[i] == '\'')
-      for (i++; s[i] && s[i] != '\'' && s[i - 1] != '\\'; ++i)
-        continue;
-    else if (s[i] == '\"')
-      for (i++; s[i] && s[i] != '\"' && s[i - 1] != '\\'; ++i)
-        continue;
-  }
-  return i;
-}
-
-static size_t tokenize_exp_other(char *s, char b, char d)
-{
-  int count = 0;
-  size_t i = 2;
-  while (s[i] && (s[i] != d || count > 0))
-  {
-    if (s[i] == b)
-      count++;
-    else if (s[i] == d)
-      count--;
-
-    if (s[i] == '\\')
-      i++;
-    else if (s[i] == '\'' || s[i] == '\"')
-    {
-      char c = s[i];
-      for (i++; s[i] && s[i] != c; ++i)
-        continue;
-    }
-
-    i++;
-  }
-
-  if (!s[i])
-    warn("Unexpected EOF, expected '%c;", d);
-  return s[i] ? i : 0;
-}
-
-// Return the number of character in the expansion
-static size_t tokenize_expansion(char* s)
-{
-  char b = '{';
-  char d = '{';
-  if (s[0] == '`')
-  {
-    d = '`';
-    b = '`';
-  }
-  else
-  {
-    b = s[1];
-    switch (s[1])
-    {
-    case '{':
-      d = '}';
-      break;
-    case '(':
-      d = ')';
-      break;
-    default:
-      return tokenize_exp_normal(s);
-    }
-  }
-  return tokenize_exp_other(s, b, d);
-}
 
 static void append_token(struct vector* v_token, enum terminal_symbol token_id,
-                  char* start, char* end)
+                         char* start, char* end)
 {
   if (token_id == UNDIFINED)
     return;

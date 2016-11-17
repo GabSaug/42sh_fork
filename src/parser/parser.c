@@ -114,7 +114,7 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
   {
     struct simple_rule* s_r = &(rules[symbol]->s_r[i]);
     tree_delete_all_child(tree);
-    *nb_token_read = nb_init_token_read; 
+    *nb_token_read = nb_init_token_read;
     size_t j;
     for (j = 0; j < s_r->nb_sym; ++j)
     {

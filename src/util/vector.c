@@ -61,22 +61,6 @@ void v_set(struct vector* v, size_t i, void* elmt)
     v->data[i] = elmt;
 }
 
-void v_swap(struct vector* v, size_t i, size_t j)
-{
-  if (i >= v->size || j >= v->size)
-    return;
-  void* tmp = v->data[i];
-  v->data[i] = v->data[j];
-  v->data[j] = tmp;
-}
-
-void* v_top(struct vector* v)
-{
-  if (v->size == 0)
-    return NULL;
-  return v->data[0];
-}
-
 void* v_remove_last(struct vector* v)
 {
   if (v->size == 0)

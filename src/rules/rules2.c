@@ -20,12 +20,12 @@ static struct rule* init_rule_input(void)
   rule->s_r[2].nb_sym = 1;
   rule->s_r[2].sym_arr = my_malloc(sizeof (struct symbol));
   create_sym(rule->s_r[2].sym_arr + 0, 1, 0, 0, NL);
-  
+
   // Rule 4
   rule->s_r[3].nb_sym = 1;
   rule->s_r[3].sym_arr = my_malloc(sizeof (struct symbol) * 2);
   create_sym(rule->s_r[3].sym_arr + 0, 1, 0, 0, EOF_SYM);
-  
+
   return rule;
 }
 
