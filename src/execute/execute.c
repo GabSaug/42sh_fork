@@ -15,21 +15,23 @@ int execute(struct tree* ast, struct hash_table *ht)
 static int execute_input(struct tree* ast, struct hash_table *ht)
 {
   struct tree* child = v_get(ast->child, 0);
+  int res = 0;
   if (child->nts == LIST)
-    execute_list(child, ht);
-  return 0;
+    res = execute_list(child, ht);
+  return res;
 }
 
 static int execute_list(struct tree* ast, struct hash_table *ht)
 {
+  int res = 0;
   struct tree* child = v_get(ast->child, 0);
   size_t i = 0;
   do {
-    execute_and_or(child, ht);
+    res = execute_and_or(child, ht);
     i ++;
     child = v_get(ast->child, 2 * i);
   } while (child);
-  return 0;
+  return res;
 }
 
 static int execute_and_or(struct tree* ast, struct hash_table *ht)
@@ -48,5 +50,5 @@ static int execute_and_or(struct tree* ast, struct hash_table *ht)
     i++;
     pipeline = v_get(ast->child, i);
   } while (pipeline);
-  return 0;
+  return ret;
 }
