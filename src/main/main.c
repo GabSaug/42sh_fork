@@ -19,6 +19,9 @@
 static char* get_PS(struct hash_table* ht);
 static int process_input(char* buff, struct rule** rules,
                           struct hash_table* ht);
+static int process_file(struct option option, struct rule** rules,
+                        struct hash_table* ht);
+static int process_interactive(void);
 
 static struct hash_table* ht = NULL;
 static struct rule** rules = NULL;
@@ -37,38 +40,48 @@ int main(int argc, char* argv[])
   struct option option = parse_options(argc, argv, ht);
   rules = init_all_rules();
   if (option.input_mode == INTERACTIVE)
-  {
-    while (1)
-    {
-      char* prompt = get_PS(ht);
-      buff = readline(prompt);
-      if (!buff)
-      {
-        printf("exit\n");
-        return 0;
-      }
-      add_history(buff);
-      ret = process_input(buff, rules, ht);
-      free(buff);
-    }
-  }
+    process_interactive();
   else if (option.input_mode == COMMAND_LINE)
     ret = process_input(option.input, rules, ht);
   else
+    process_file(option, rules, ht);
+  return ret;
+}
+
+static int process_interactive(void)
+{
+  int ret = 0;
+  while (1)
   {
-    int fd = open(option.input, O_RDONLY | O_CLOEXEC);
-    if (fd == -1)
-      err(1, NULL);
-    struct stat stat_buf;
-    if (stat(option.input, &stat_buf) == -1)
-      err(1, "Impossible to read stat from %s", option.input);
-    size_t size_file = stat_buf.st_size;
-    char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-    ret = process_input(file, rules, ht);
-    munmap(file, size_file);
-    close(fd);
-    return 0;
+    char* prompt = get_PS(ht);
+    buff = readline(prompt);
+    if (!buff)
+    {
+      printf("exit\n");
+      return 0;
+    }
+    add_history(buff);
+    ret = process_input(buff, rules, ht);
+    free(buff);
   }
+  return ret;
+}
+
+static int process_file(struct option option, struct rule** rules,
+                        struct hash_table* ht)
+{
+  int ret = 0;
+  int fd = open(option.input, O_RDONLY | O_CLOEXEC);
+  if (fd == -1)
+    err(1, NULL);
+  struct stat stat_buf;
+  if (stat(option.input, &stat_buf) == -1)
+    err(1, "Impossible to read stat from %s", option.input);
+  size_t size_file = stat_buf.st_size;
+  char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
+  ret = process_input(file, rules, ht);
+  munmap(file, size_file);
+  close(fd);
   return ret;
 }
 
