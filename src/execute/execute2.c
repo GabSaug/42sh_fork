@@ -35,6 +35,8 @@ static int bin_execution(char *path, char *args[])
     // Parent
     int exit_status = 0;
     waitpid(pid, &exit_status, 0);
+    free(path);
+    free(args);
     return WEXITSTATUS(exit_status);
   }
 }
