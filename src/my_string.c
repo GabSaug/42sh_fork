@@ -1,5 +1,6 @@
 #include <string.h>
 
+#include "my_malloc.h"
 #include "my_string.h"
 
 /* If the string from start to end match with the begining of a string in
@@ -26,4 +27,13 @@ int is_in(char* start, char* end, char s_list[][10])
       return i;
   return -1;
 
+}
+
+char* my_strdup(char* s)
+{
+  size_t len = strlen(s) + 1;
+  char* new_s = my_malloc(sizeof (char) * len);
+  for (size_t i = 0; i < len; ++i)
+    new_s[i] = s[i];
+  return new_s;
 }
