@@ -29,6 +29,7 @@ static int parse_mandatory(struct tree* tree, struct rule** rules,
   if (child == NULL)
     return 0;
   tree_add_non_terminal_child(tree, child);
+  return 1;
 }
 
 static int parse_star(struct tree* tree, struct rule** rules,
@@ -91,6 +92,7 @@ static int parse_terminal(struct tree* tree, struct rule** rules,
                           struct vector* v_token, size_t* nb_token_read,
                           struct symbol* sym)
 {
+  rules = rules;
   struct token* token = v_get(v_token, *nb_token_read);
   if (token && sym->terminal_symbol == token->id)
   {
@@ -118,7 +120,7 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
     {
       struct symbol* sym = &(s_r->sym_arr[j]);
       if (sym->terminal)
-        if (!parse_nonterminal(tree, rules, v_token, nb_token_read, sym))
+        if (!parse_terminal(tree, rules, v_token, nb_token_read, sym))
           break;
         else
           continue;
