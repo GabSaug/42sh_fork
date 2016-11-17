@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "rules.h"
 
 void create_sym(struct symbol* sym, int terminal, enum repeat repeat,
@@ -20,4 +22,18 @@ struct rule** init_all_rules(void)
   rules = init_all_rules6(rules);
 
   return rules;
+}
+
+void rule_destroy(struct rule** rules)
+{
+  for (size_t i = 0; i < NB_RULE; ++i)
+  {
+    for (size_t j = 0; j < rules[i]->nb_s_r; ++j)
+    {
+      free(rules[i]->s_r[j].sym_arr);
+    }
+    free(rules[i]->s_r);
+    free(rules[i]);
+  }
+  free(rules);
 }
