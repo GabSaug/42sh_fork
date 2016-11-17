@@ -1,5 +1,8 @@
 #include "option_parser.h"
 
+static struct option opt(int argc, char *argv[], struct hash_table *ht,
+                  struct option options);
+
 static void set_o(int o, char *str, struct hash_table *ht)
 {
   char *names[] =
@@ -50,7 +53,7 @@ static struct option opt2(int argc, char *argv[], struct hash_table *ht,
   }
 }
 
-struct option opt(int argc, char *argv[], struct hash_table *ht,
+static struct option opt(int argc, char *argv[], struct hash_table *ht,
                   struct option options)
 {
   if (argc > 1)

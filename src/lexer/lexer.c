@@ -25,10 +25,10 @@ char blank_list[][10] =
   "\n", " ", "\t"
 };
 
-void append_token(struct vector* v_token, enum terminal_symbol id, char* start, char* end);
-int is_quoted(char quoted[3]);
-size_t tokenize_expansion(char* s);
-size_t tokenize_comment(char* s, size_t i);
+static void append_token(struct vector* v_token, enum terminal_symbol id, char* start, char* end);
+static int is_quoted(char quoted[3]);
+static size_t tokenize_expansion(char* s);
+static size_t tokenize_comment(char* s, size_t i);
 
 int lexer(char* s, struct vector* v_token)
 {
@@ -125,7 +125,7 @@ int lexer(char* s, struct vector* v_token)
 }
 
 // Return the number of character in the comment
-size_t tokenize_comment(char* s, size_t i)
+static size_t tokenize_comment(char* s, size_t i)
 {
   size_t j;
   for (j = 0; s[i + j] != '\0' && s[i + j] != '\n'; ++j)
@@ -181,7 +181,7 @@ static size_t tokenize_exp_other(char *s, char b, char d)
 }
 
 // Return the number of character in the expansion
-size_t tokenize_expansion(char* s)
+static size_t tokenize_expansion(char* s)
 {
   char b = '{';
   char d = '{';
@@ -208,7 +208,7 @@ size_t tokenize_expansion(char* s)
   return tokenize_exp_other(s, b, d);
 }
 
-void append_token(struct vector* v_token, enum terminal_symbol token_id,
+static void append_token(struct vector* v_token, enum terminal_symbol token_id,
                   char* start, char* end)
 {
   if (token_id == UNDIFINED)
@@ -237,7 +237,7 @@ void append_token(struct vector* v_token, enum terminal_symbol token_id,
   v_append(v_token, new_token);
 }
 
-int is_quoted(char quoted[3])
+static int is_quoted(char quoted[3])
 {
   for (int i = 0; i < 3; i++)
     if (quoted[i])

@@ -24,8 +24,6 @@ struct option
   char* input;
 };
 
-struct option opt(int argc, char *argv[], struct hash_table *ht,
-                  struct option options);
 struct option parse_options(int argc, char *argv[], struct hash_table *ht);
 
 #endif /* !OPTION_PARSER_H */
