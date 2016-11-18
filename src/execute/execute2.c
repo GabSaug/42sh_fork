@@ -23,7 +23,7 @@ static int execute_bin(char** argv)
   int pid = fork();
   if (pid == -1)
   {
-    warn("%s: Can't fork to execute the command", path);
+    warn("%s: Can't fork to execute the command", argv[0]);
     return 1;
   }
   else if (pid == 0)
@@ -43,7 +43,7 @@ static int execute_bin(char** argv)
 
 static int generate_command(struct tree *ast)
 {
-  size_t size = v_size(ast->childs);
+  size_t size = v_size(ast->child);
   char **args = malloc(sizeof (char*) * (size + 1));
 
   for (size_t j = 0; j < size; j++)
