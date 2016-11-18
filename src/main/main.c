@@ -93,7 +93,7 @@ static int process_input(char* buff, struct rule** rules,
   v_token = v_create();
   if (!lexer(buff, v_token))
   {
-    v_destroy(v_token);
+    v_destroy(v_token, token_destroy);
     return 1;
   }
   //v_print(v_token);
@@ -107,9 +107,9 @@ static int process_input(char* buff, struct rule** rules,
       tree_print_dot(ast);
     ret = execute(ast, ht);
     //printf("returned %i\n", execute(ast, ht));
+    tree_destroy(ast);
   }
-  v_destroy(v_token);
-  tree_destroy(ast);
+  v_destroy(v_token, token_destroy);
   processing = 0;
   return ret;
 }
@@ -127,7 +127,7 @@ void exit_42sh(void)
   rules_destroy(rules);
   if (processing)
   {
-    v_destroy(v_token);
+    v_destroy(v_token, token_destroy);
     tree_destroy(ast);
     free(buff);
   }

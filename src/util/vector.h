@@ -27,6 +27,6 @@ void* v_get(struct vector* v, size_t i);
 void v_set(struct vector* v, size_t i, void* elmt);
 void* v_remove_last(struct vector* v);
 void v_erase(struct vector *v);
-void v_destroy(struct vector* v);
+void v_destroy(struct vector* v, void (*free_elt) (void*));
 
 #endif /* !VECTOR_H */

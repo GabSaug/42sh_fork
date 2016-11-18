@@ -82,11 +82,15 @@ void v_erase(struct vector *v)
   v->capacity = MIN_CAPACITY;
 }
 
-void v_destroy(struct vector* v)
+void v_destroy(struct vector* v, void (*free_elt) (void*))
 {
   if (!v)
     return;
-  if (v->data != NULL)
-    free(v->data);
+  if (free_elt)
+  {
+    for (size_t i = 0; i < v_size(v); ++i)
+      free_elt(v_get(v, i));
+  }
+  free(v->data);
   free(v);
 }

@@ -140,8 +140,12 @@ void tree_add_terminal_child(struct tree* tree, struct token* token)
 void tree_add_non_terminal_child(struct tree* tree, struct tree* child)
 {
   if (child->nts >= LIST_AUX)
+  {
     for (size_t j = 0; j < child->child->size; ++j)
       tree_add_non_terminal_child(tree, v_get(child->child, j));
+    v_destroy(child->child, NULL);
+    free(child);
+  }
   else
     v_append(tree->child, child);
 }
@@ -157,6 +161,6 @@ void tree_destroy(struct tree* tree)
     return;
   for (size_t i = 0; i < v_size(tree->child); ++i)
     tree_destroy(v_get(tree->child, i));
-  v_destroy(tree->child);
+  v_destroy(tree->child, NULL);
   free(tree);
 }

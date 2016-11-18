@@ -144,7 +144,6 @@ static int execute_prog(struct tree *ast, struct hash_table *ht)
 
 int execute_simple_command(struct tree *ast, struct hash_table *ht)
 {
-  ht = ht;
   // TODO need to verify if there is an assignment word, to create or update a
   // variable
   char *builtin[] =

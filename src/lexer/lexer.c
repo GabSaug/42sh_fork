@@ -213,3 +213,10 @@ static int is_quoted(char quoted[3])
   return 0;
 }
 
+void token_destroy(void* p)
+{
+  struct token* token = p;
+  free(token->s);
+  free(token);
+}
+
