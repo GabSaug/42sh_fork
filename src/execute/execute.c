@@ -44,6 +44,7 @@ int execute_and_or(struct tree* ast, struct hash_table *ht)
     struct tree* operator = v_get(ast->child, i);
     if (!operator)
       break;
+    operator = v_get(operator->child, 0);
     if ((operator->token->id == AND_IF && ret != EXIT_SUCCESS)
         || (operator->token->id == OR_IF && ret == EXIT_SUCCESS))
       i += 2;
