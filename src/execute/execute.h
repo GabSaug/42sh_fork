@@ -20,5 +20,6 @@ int execute_shell_command(struct tree *ast, struct hash_table *ht);
 int builtin_execution(struct tree *ast, struct hash_table *ht, int bi);
 char *get_child_elt(struct tree *ast, size_t elt);
 int execute_if(struct tree *ast, struct hash_table *ht);
+int execute_while(struct tree *ast, struct hash_table *ht);
 
 #endif /* !EXECUTE_H */
