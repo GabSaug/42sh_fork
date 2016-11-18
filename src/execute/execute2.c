@@ -1,5 +1,5 @@
 # include "execute.h"
-
+  
 int execute_command(struct tree* ast, struct hash_table* ht)
 {
   struct tree* child = v_get(ast->child, 0);
@@ -18,7 +18,7 @@ char *get_child_elt(struct tree *ast, size_t elt)
   return son->token->s;
 }
 
-static int bin_execution(char *path, char *args[])
+static int execute_bin(char** argv)
 {
   int pid = fork();
   if (pid == -1)
@@ -29,7 +29,7 @@ static int bin_execution(char *path, char *args[])
   else if (pid == 0)
   {
     // Child
-    execv(path, args);
+    execvp(argv[0], argv);
     exit(127);
   }
   else
@@ -37,43 +37,23 @@ static int bin_execution(char *path, char *args[])
     // Parent
     int exit_status = 0;
     waitpid(pid, &exit_status, 0);
-    free(path);
-    free(args);
     return WEXITSTATUS(exit_status);
   }
 }
 
-static int concat_path(struct tree *ast, char *path, char *command_name,
-                       size_t size)
+static int generate_command(struct tree *ast)
 {
-  size_t size_cmd = strlen(command_name);
-  char *call = NULL;
-  if (command_name[size_cmd - 1] == '/')
-  {
-    call = malloc(sizeof (char) * (1 + strlen(path) + size_cmd));
-    call = strcpy(call, path);
-    call = strcat(call, command_name);
-  }
-  else
-  {
-    call = malloc(sizeof (char) * (2 + strlen(path) + size_cmd));
-    call = strcpy(call, path);
-    call = strcat(call, "/");
-    call = strcat(call, command_name);
-  }
+  size_t size = v_size(ast->childs);
+  char **args = malloc(sizeof (char*) * (size + 1));
 
-  char **args = malloc(sizeof (char *) * (1 + size));
-  args[0] = call;
-
-  for (size_t j = 1; j < size; j++)
-  {
+  for (size_t j = 0; j < size; j++)
     args[j] = get_child_elt(ast, j);
-  }
   args[size] = NULL;
 
-  return bin_execution(call, args);
+  return args;
 }
 
+/*
 static size_t get_size(struct tree *ast)
 {
   size_t size = v_size(ast->child);
@@ -93,77 +73,22 @@ static size_t get_size(struct tree *ast)
   size = i;
   return size;
 }
+*/
 
-static int binary_from_path(struct tree *ast, struct hash_table *ht,
-                            char *command_name, size_t size)
+static int execute_prog(char** argv, struct hash_table *ht)
 {
-  char *path = get_data(ht, "PATH");
-  size_t size_path = strlen(path);
-  size_t k1 = 0;
-  size_t k2 = 0;
-  while (path[k2] && path[k2] != ':')
-    k2++;
-  path[k2] = '\0';
-  int res = concat_path(ast, path + k1, command_name, size);
-  while (res == 127 && k2 < size_path)
-  {
-    path[k2] = ':';
-    k2++;
-    k1 = k2;
-    while (path[k2] && path[k2] != ':')
-      k2++;
-    path[k2] = '\0';
-    res = concat_path(ast, path + k1, command_name, size);
-  }
-  if (k2 < size_path)
-    path[k2] = ':';
-
-  if (res == 127)
-    warnx("%s: command not found", command_name);
-  return res;
-}
-
-static int execute_prog(struct tree *ast, struct hash_table *ht)
-{
-  size_t size = get_size(ast);
-  char *command_name = get_child_elt(ast, 0);
-
-  if (strlen(command_name) > 2 && strncmp(command_name, "./", 2) == 0)
-  {
-    char *path = get_data(ht, "PWD");
-    command_name++;
-    return concat_path(ast, path, command_name, size);
-  }
-  else if (strlen(command_name) > 1 && strncmp(command_name, "/", 1) == 0)
-  {
-    return concat_path(ast, "", command_name + 1, size);
-  }
+  // Ca va changer lol
+  int (*fun) (char** argv, struct hash_table* ht) = builtin_fun_match(argv[0]);
+  if (fun)
+    return fun(argv, ht);
   else
-    return binary_from_path(ast, ht, command_name, size);
+    return execute_bin(argv);
 }
 
 int execute_simple_command(struct tree *ast, struct hash_table *ht)
 {
-  // TODO need to verify if there is an assignment word, to create or update a
-  // variable
-  char *builtin[] =
-  {
-    "exit", "true", "false", "cd", "shopt", "export", "alias", "unalias",
-    "echo", "continue", "break", "source", "history"
-  };
-
-  int bi = -1;
-  for (size_t i = 0; i < sizeof (builtin) / sizeof (char *); i++)
-  {
-    if (strcmp(builtin[i], get_child_elt(ast, 0)) == 0)
-    {
-      bi = i;
-      break;
-    }
-  }
-  if (bi >= 0)
-    return builtin_execution(ast, ht, bi);
-  else
-    return execute_prog(ast, ht);
-  // TODO need to implement here the redirections
+  char** argv = generate_command(ast);
+  int res = execute_prog(argv, ht);
+  free(argv);
+  return res;
 }
