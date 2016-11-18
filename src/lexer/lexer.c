@@ -6,23 +6,23 @@
 #include "vector.h"
 #include "tokenize.h"
 
-char operator_list[][10] =
+static char operator_list[][10] =
 {
   ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
   "<>", "<<-", ">|", ""
 };
-char reserved_word[][10] =
+static char reserved_word[][10] =
 {
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
   "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
 };
 
-char quote_symbol[][10] =
+static char quote_symbol[][10] =
 {
   "\\", "'", "\"", "\0"
 };
 
-char blank_list[][10] =
+static char blank_list[][10] =
 {
   "\n", " ", "\t"
 };

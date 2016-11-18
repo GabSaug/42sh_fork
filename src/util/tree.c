@@ -6,7 +6,7 @@
 #include "tree.h"
 
 
-char nts2string[][20] =
+static char nts2string[][20] =
 {
   "INPUT",
   "LIST",
