@@ -282,11 +282,13 @@ ARGV.each do |arg|
        $bin_name = arg
        parsing_bin = false
     end
-  else
+  end
+  if !parsing_cat && !parsing_bin then
     if arg == "-l" || arg == "--list" then
       $mode = :list
     elsif arg == "-c" || arg == "--category" then
       $cat = :select
+      parsing_cat = true
     elsif arg == "-b" || arg == "--binary" then
       parsing_bin = true
     elsif arg == "-e" || arg == "--extended_output" then
