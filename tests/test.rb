@@ -5,6 +5,7 @@
 
 $bin_name = "sh"
 $Timeout = 5
+$Err_eq_def = true
 
 require 'open3'
 require 'timeout'
@@ -43,6 +44,18 @@ class Test
       @additional_args = $1
     else
       @additional_args = ""
+    end
+    if (test_content =~ /<err_eq>(.*)<\/err_eq>/) != nil then
+      bool = $1
+      if bool == "true" then
+        @err_eq = true
+      elsif bool == "false" then
+        @err_eq = false
+      else
+        raise "Expected true or false in <err_eq> balise"
+      end
+    else
+      @err_eq = $Err_eq_def
     end
     if (test_content =~ /<validation>(.*)<\/validation>/) != nil then
       @validation = $1
@@ -114,7 +127,7 @@ class Test
           print("\e[0m")
         end
       end
-      if @ref_stderr != @stderr then
+      if @err_eq && @ref_stderr != @stderr then
         errors += 1
         if extended_output then
           puts("    [\e[95mWARN\e[0m] Diff in stderr")
