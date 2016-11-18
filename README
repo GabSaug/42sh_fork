@@ -1,3 +1,11 @@
+* How to compile
+Type the folowing command :
+  mkdir build
+  cd build
+  cmake ..
+  make
+
+* How to use 42sh
 42sh is a duplicate of the shell.
 You can launch it in 3 modes : Interactive, Command, and File
 
