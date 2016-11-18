@@ -2,9 +2,55 @@
 
 #include "execute.h"
 
-static int builtin_echo(char* argv[]);
+static int builtin_exit(char* argv[], struct hash_table* ht);
+static int builtin_echo(char** argv);
 
-int builtin_execution(struct tree *ast, struct hash_table *ht, int bi)
+static struct builtin_fun builtin_fun_array[] =
+{
+  { "exit", builtin_exit }
+};
+/*,
+  { "true", builtin_true },
+  { "false", builtin_false },
+  { "cd", builtin_cd },
+  { "shopt", builtin_shopt },
+  { "export", builtin_export },
+  { "alias", builtin_alias },
+  { "unalias", builtin_unalias },
+  { "echo", builtin_echo },
+  { "continue", builtin_echo },
+  { "break", builtin_break },
+  { "source", builtin_source },
+  { "history", builtin_history }
+};*/
+
+int (*builtin_fun_match (char* s)) (char** argv, struct hash_table* ht)
+{
+  size_t len_array = sizeof (builtin_fun_array) / sizeof (*builtin_fun_array);
+
+  for (size_t i = 0; i < len_array; ++i)
+  {
+    if (!strcmp(builtin_fun_array[i].name, s))
+      return builtin_fun_array[i].fun;
+  }
+  return NULL;
+}
+
+static int builtin_exit(char* argv[], struct hash_table* ht)
+{
+  char* ret_string = NULL;
+  if (argv[1])
+    ret_string = argv[1];
+  if (ret_string == NULL)
+    ret_string = get_data(ht, "$?");
+  int ret = 0; 
+  if (ret_string)
+    ret = atoi(ret_string);
+  exit(ret);
+}
+
+// To delete
+/*int builtin_execution(struct tree *ast, struct hash_table *ht, int bi)
 {
   ht = ht;
 
@@ -111,3 +157,38 @@ static int builtin_echo(char* argv[])
     builtin_echo_print(argv[i], opt_n, opt_e);
  return 0; 
 }
+
+static void builtin_alias_print_all(struct hash_table* ht_alias)
+{
+  hash_dump(ht_alias);
+}
+
+static int builtin_alias(char* argv[])
+{
+  if (argv[1] == NULL)
+  {
+    builtin_alias_print_all(ht_alias);
+    return 0;
+  }
+  size_t i = 1;
+  for (i = 1; argv[i]; ++i)
+  {
+    char* ptr_equal = strchr(argv[1], '=');
+    if (ptr_equal) // Assignment
+    {
+      argv[1][ptr_equal] = '\0';
+      add_hash(ht, argv[1], arg[1] + ptr_equal + 1);
+    }
+    else // print
+    {
+      char* alias_value = get_data(ht_alias, agrv[1]);
+      if (alias_value == NULL)
+      {
+        warn("not found");
+        return 0;
+      }
+      printf("alias %sbuiltin_alias_print(argv[i]);
+    }
+  }
+  return 0;
+}*/
