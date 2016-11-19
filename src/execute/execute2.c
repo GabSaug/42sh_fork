@@ -1,12 +1,14 @@
 # include "execute.h"
-  
-int execute_command(struct tree* ast, struct hash_table* ht)
+
+extern struct hash_table* ht[2];
+
+int execute_command(struct tree* ast)
 {
   struct tree* child = v_get(ast->child, 0);
   if (child->nts == SIMPLE_COMMAND)
-    return execute_simple_command(child, ht);
+    return execute_simple_command(child);
   else if (child->nts == SHELL_COMMAND)
-    return execute_shell_command(child, ht);
+    return execute_shell_command(child);
   else
     return 1;
 }
@@ -37,11 +39,13 @@ static int execute_bin(char** argv)
     // Parent
     int exit_status = 0;
     waitpid(pid, &exit_status, 0);
+    if (exit_status != 0)
+      warnx("%s: comand not found", argv[0]);
     return WEXITSTATUS(exit_status);
   }
 }
 
-static int generate_command(struct tree *ast)
+static char** generate_command(struct tree *ast)
 {
   size_t size = v_size(ast->child);
   char **args = malloc(sizeof (char*) * (size + 1));
@@ -75,20 +79,19 @@ static size_t get_size(struct tree *ast)
 }
 */
 
-static int execute_prog(char** argv, struct hash_table *ht)
+static int execute_prog(char** argv)
 {
-  // Ca va changer lol
-  int (*fun) (char** argv, struct hash_table* ht) = builtin_fun_match(argv[0]);
+  int (*fun) (char** argv) = builtin_fun_match(argv[0]);
   if (fun)
-    return fun(argv, ht);
+    return fun(argv);
   else
     return execute_bin(argv);
 }
 
-int execute_simple_command(struct tree *ast, struct hash_table *ht)
+int execute_simple_command(struct tree *ast)
 {
   char** argv = generate_command(ast);
-  int res = execute_prog(argv, ht);
+  int res = execute_prog(argv);
   free(argv);
   return res;
 }

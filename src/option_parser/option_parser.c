@@ -1,9 +1,10 @@
 #include "option_parser.h"
 
-static struct option opt(int argc, char *argv[], struct hash_table *ht,
-                  struct option options);
+extern struct hash_table* ht[2];
 
-static void set_o(int o, char *str, struct hash_table *ht)
+static struct option opt(int argc, char *argv[], struct option options);
+
+static void set_o(int o, char *str)
 {
   char *names[] =
   {
@@ -22,26 +23,25 @@ static void set_o(int o, char *str, struct hash_table *ht)
   val[1] = '\0';
   val[0] = o ? '1' : '0';
 
-  ht = add_hash(ht, str, val);
+  add_hash(ht[VAR], str, val);
 }
 
-static struct option opt2(int argc, char *argv[], struct hash_table *ht,
-                          struct option options)
+static struct option opt2(int argc, char *argv[], struct option options)
 {
   if (!strcmp(argv[1], "--norc"))
   {
     options.norc = 1;
-    return opt(argc - 1, argv + 1, ht, options);
+    return opt(argc - 1, argv + 1, options);
   }
   else if(!strcmp(argv[1], "--ast-print"))
   {
-    ht = add_hash(ht, "ast-print", "1");
-    return opt(argc - 1, argv + 1, ht, options);
+    add_hash(ht[VAR], "ast-print", "1");
+    return opt(argc - 1, argv + 1, options);
   }
   else if (!strcmp(argv[1], "-O") || !strcmp(argv[1], "+O"))
   {
-    set_o(argv[1][0] == '+', argv[2], ht);
-    return opt(argc - 2, argv + 2, ht, options);
+    set_o(argv[1][0] == '+', argv[2]);
+    return opt(argc - 2, argv + 2, options);
   }
   else if (argv[1][0] && argv[1][0] == '-')
     errx(2, "%s: invalid option", argv[1]);
@@ -53,8 +53,7 @@ static struct option opt2(int argc, char *argv[], struct hash_table *ht,
   }
 }
 
-static struct option opt(int argc, char *argv[], struct hash_table *ht,
-                  struct option options)
+static struct option opt(int argc, char *argv[], struct option options)
 {
   if (argc > 1)
   {
@@ -72,15 +71,15 @@ static struct option opt(int argc, char *argv[], struct hash_table *ht,
       exit(0);
     }
     else
-      return opt2(argc, argv, ht, options);
+      return opt2(argc, argv, options);
   }
 
-  ht = add_hash(ht, "expand_aliases", "1");
+  add_hash(ht[VAR], "expand_aliases", "1");
   options.input_mode = INTERACTIVE;
   return options;
 }
 
-static void set_env(struct hash_table *ht)
+static void set_env(void)
 {
   char *var[] =
   {
@@ -92,17 +91,17 @@ static void set_env(struct hash_table *ht)
   {
     char *data = getenv(var[i]);
     if (data)
-      ht = add_hash(ht, var[i], data);
+      add_hash(ht[VAR], var[i], data);
     //else
       //printf("var %s not found\n", var[i]);
   }
 
-  ht = add_hash(ht, "PS1", "42sh$ ");
-  ht = add_hash(ht, "PS2", "> ");
-  ht = add_hash(ht, "PS4", "+ ");
+  add_hash(ht[VAR], "PS1", "42sh$ ");
+  add_hash(ht[VAR], "PS2", "> ");
+  add_hash(ht[VAR], "PS4", "+ ");
 }
 
-static void init_opt(struct hash_table *ht)
+static void init_opt(void)
 {
   char *opts[] =
   {
@@ -111,17 +110,17 @@ static void init_opt(struct hash_table *ht)
   };
 
   for (int i = 0; i < 7; i++)
-    ht = add_hash(ht, opts[i], "0");
+    add_hash(ht[VAR], opts[i], "0");
 
-  ht = add_hash(ht, "sourcepath", "1");
+  add_hash(ht[VAR], "sourcepath", "1");
 }
 
-struct option parse_options(int argc, char *argv[], struct hash_table *ht)
+struct option parse_options(int argc, char *argv[])
 {
-  set_env(ht);
-  init_opt(ht);
+  set_env();
+  init_opt();
   struct option options;
   options.norc = 0;
   options.input = NULL;
-  return opt(argc, argv, ht, options);
+  return opt(argc, argv, options);
 }

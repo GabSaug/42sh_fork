@@ -123,6 +123,11 @@ void *get_data(struct hash_table *ht, char *key)
     return NULL;
 }
 
+void hash_dump(struct hash_table ht)
+{
+  ht = ht; 
+}
+
 int del_hash(struct hash_table *ht, char *key)
 {
   size_t pos = hash_func(key, ht->capacity);

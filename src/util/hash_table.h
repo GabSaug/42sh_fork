@@ -11,6 +11,12 @@
  * \file hash_table.h
 */
 
+enum hash_table_id
+{
+  VAR,
+  ALIAS
+};
+
 struct elt_hash
 {
   char *key;

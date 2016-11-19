@@ -2,29 +2,33 @@
 
 #include "execute.h"
 
-static int builtin_exit(char* argv[], struct hash_table* ht);
-static int builtin_echo(char** argv);
+extern struct hash_table* ht[2];
+
+static int builtin_exit(char* argv[]);
+static int builtin_true(char* argv[]);
+static int builtin_false(char* argv[]);
+static int builtin_cd(char* argv[]);
+static int builtin_echo(char* argv[]);
 
 static struct builtin_fun builtin_fun_array[] =
 {
-  { "exit", builtin_exit }
-};
-/*,
+  { "exit", builtin_exit },
   { "true", builtin_true },
   { "false", builtin_false },
   { "cd", builtin_cd },
-  { "shopt", builtin_shopt },
+  { "echo", builtin_echo }
+};
+/*  { "shopt", builtin_shopt },
   { "export", builtin_export },
   { "alias", builtin_alias },
   { "unalias", builtin_unalias },
-  { "echo", builtin_echo },
   { "continue", builtin_echo },
   { "break", builtin_break },
   { "source", builtin_source },
   { "history", builtin_history }
 };*/
 
-int (*builtin_fun_match (char* s)) (char** argv, struct hash_table* ht)
+int (*builtin_fun_match (char* s)) (char* argv[])
 {
   size_t len_array = sizeof (builtin_fun_array) / sizeof (*builtin_fun_array);
 
@@ -36,24 +40,74 @@ int (*builtin_fun_match (char* s)) (char** argv, struct hash_table* ht)
   return NULL;
 }
 
-static int builtin_exit(char* argv[], struct hash_table* ht)
+static int builtin_exit(char* argv[])
 {
   char* ret_string = NULL;
   if (argv[1])
     ret_string = argv[1];
   if (ret_string == NULL)
-    ret_string = get_data(ht, "$?");
+    ret_string = get_data(ht[VAR], "$?");
   int ret = 0; 
   if (ret_string)
     ret = atoi(ret_string);
   exit(ret);
 }
 
-// To delete
-/*int builtin_execution(struct tree *ast, struct hash_table *ht, int bi)
+static int builtin_true(char* argv[])
 {
-  ht = ht;
+  argv = argv;
+  return 0;
+}
 
+static int builtin_false(char* argv[])
+{
+  argv = argv;
+  return 1;
+}
+
+static int builtin_cd(char* argv[])
+{
+  if (chdir(argv[1]) == 0)
+  {
+    add_hash(ht[VAR], "PWD", getenv("PWD"));
+    return 0;
+  }
+  return 1;
+}
+
+  /*char* directory = argv[1];
+  //Rule 1 and 2
+  if (argv[1] == NULL)
+  {
+    char* home = getdata(ht, "HOME");
+    if (home == NULL || home[0] == '\0')
+    {
+      printf("No HOME defined\n");
+      return 0;
+    }
+    directory = home;
+  }
+  if (directory[0] = '/') // Rule 3
+    curpath = /;
+  if (strncmp(directory, ".", 1)) // Rule 4
+  {
+    if (PWD != NULL)
+    {
+      if (concat(PWD, '/', directory) is a directory) //  Rule 5
+        curpath = 
+    }
+    else
+      concat(".", "/", "");
+  }
+  curpath = directory; // Rule 6
+  if 
+    
+}*/
+
+/*
+// To delete
+int builtin_execution(struct tree *ast, int bi)
+{
   switch (bi)
   {
   case 0:
@@ -67,7 +121,7 @@ static int builtin_exit(char* argv[], struct hash_table* ht)
     return 1;
   // TODO Execute buitins
   }
-}
+}*/
 
 static char* builtin_echo_help = "\n\
 echo: echo [-neE] [arg ...]\n\
@@ -158,7 +212,7 @@ static int builtin_echo(char* argv[])
  return 0; 
 }
 
-static void builtin_alias_print_all(struct hash_table* ht_alias)
+/*static void builtin_alias_print_all(struct hash_table* ht_alias)
 {
   hash_dump(ht_alias);
 }
@@ -187,7 +241,7 @@ static int builtin_alias(char* argv[])
         warn("not found");
         return 0;
       }
-      printf("alias %sbuiltin_alias_print(argv[i]);
+      printf("alias %s=\'%s\'\n", argv[i], alias_value);
     }
   }
   return 0;

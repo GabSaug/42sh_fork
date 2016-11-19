@@ -31,6 +31,6 @@ struct option
  * \brief Parse the options given as arguments
  * \return A structure option
 */
-struct option parse_options(int argc, char *argv[], struct hash_table *ht);
+struct option parse_options(int argc, char *argv[]);
 
 #endif /* !OPTION_PARSER_H */
