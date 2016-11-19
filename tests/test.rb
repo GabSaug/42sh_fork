@@ -3,9 +3,10 @@
 # Test Suite in Ruby for 42sh project
 # Configuration variables :
 
-$bin_name = "sh"
-$Timeout = 5
+$Bin_default_name = "sh"
+$Timeout_default = 5
 $Err_eq_def = true
+$Sanity_bin = "valgrind --track-fds=yes --xml=yes --xml-file=outxml --log-file=outend --child-silent-after-fork=yes"
 
 require 'open3'
 require 'timeout'
@@ -72,47 +73,98 @@ class Test
       " test file (mandatory balise)."
     end
   end
-  def gen_command(bin)
-    command = bin + " " + @additional_args
+  def gen_command(test)
+    command = ""
+    if $sanity then
+      command += $Sanity_bin + " "
+    end
+    if test then
+      command += $bin_name + " "
+    else
+      command += @validation + " "
+    end
+    command += @additional_args
     if @type == "file" then
       command += " " + @file
     end
     return command
   end
   def run_ref
-    command = self.gen_command(@validation)
+    command = self.gen_command(false)
     @ref_stdout = ""
+    @ref_timeout = false
     Open3.popen3(command) do |stdin, stdout, stderr, t|
       if @type == "tty" then
         input_content = File.read(@file)
         stdin.puts(input_content)
       end
+      stdin.close
       begin
-        Timeout.timeout($Timeout) do
+        Timeout.timeout($timeout) do
           while (line = stdout.gets) do
             @ref_stdout += line
           end
         end
       rescue Timeout::Error => ex
         Process.kill(9, t.pid)
+        @ref_timeout = true
+      end
+      if !@ref_timeout then
+        @ref_stderr = stderr.read.gsub(@validation, $bin_name.lines("/")[-1])
+        @ref_exit_code = t.value.exitstatus
+      end
+    end
+  end
+  def run_test(out)
+    if @validation != "manual" then
+      self.run_ref
+    end
+    command = self.gen_command(true)
+    @stdout = ""
+    @timeout = false
+    Open3.popen3(command) do |stdin, stdout, stderr, t|
+      if @type == "tty" then
+        input_content = File.read(@file)
+        stdin.puts(input_content)
       end
       stdin.close
-      @ref_stderr = stderr.read.gsub(@validation, $bin_name.lines("/")[-1])
-      @ref_exit_code = t.value.exitstatus
+      begin
+        Timeout.timeout($timeout) do
+          while (line = stdout.gets) do
+            @stdout += line
+          end
+        end
+      rescue Timeout::Error => ex
+        Process.kill(9, t.pid)
+        @timeout = true
+      end
+      if !@timeout then
+        @stderr = stderr.read
+        @exit_code = t.value.exitstatus
+      end
     end
+    return self.print_result(out) == 0
   end
   def print_result(extended_output)
     errors = 0
     if extended_output then
       puts("    [\e[93mINFO\e[0m] " + @name + " started") 
       puts("    [\e[93mINFO\e[0m] Command : " + self.gen_command($bin_name)) 
+      if @ref_timeout then
+        puts("    [\e[93mINFO\e[0m] Reference test has timeout") 
+      end
     end
-    if @timeout then
+    if !@ref_timeout && @timeout then
       errors += 1
       if extended_output then
         puts("    [\e[95mWARN\e[0m] Timeout")
       end
-    else
+    elsif @ref_timeout && !@timeout then
+      errors += 1
+      if extended_output then
+        puts("    [\e[95mWARN\e[0m] Did not timeout, but reference test did")
+      end
+    elsif !@ref_timeout && !@timeout then
       if @ref_stdout != @stdout then
         errors += 1
         if extended_output then
@@ -150,45 +202,44 @@ class Test
         end
       end
     end
+    if $sanity && errors == 0 then
+      sanity_out_xml = File.read("outxml")
+      sanity_out_end = File.read("outend")
+      while (sanity_out_xml =~ /<error>(.*?)<\/error>(.*)/m) != nil do
+        error_content = $1
+        sanity_out_xml = $2
+        errors += 1
+        if extended_output then
+          if (error_content =~ /<kind>(.*)<\/kind>/m) != nil then
+            error_kind = $1
+            puts("    [\e[95mWARN\e[0m] Memory error : " + error_kind)
+          else
+            puts("    [\e[95mWARN\e[0m] Memory unknown error")
+          end
+        end
+      end
+      if (sanity_out_end =~ /FILE DESCRIPTORS: ([[:digit:]]*) open an exit/m) != nil then
+        puts($1);
+      end
+      #fd_leaks = sanity_out_end.gsub("");
+    end
     if errors == 0 then
       puts("    [\e[92mPASS\e[0m] " + @name)
     else
-      puts("    [\e[91mFAIL\e[0m] " +  @name)
+      if extended_output then
+        if errors == 1 then
+          puts("    [\e[91mFAIL\e[0m] " +  @name + " : one error")
+        else
+          puts("    [\e[91mFAIL\e[0m] " +  @name + " : " + errors.to_s + " errors")
+        end
+      else
+        puts("    [\e[91mFAIL\e[0m] " +  @name)
+      end
     end
     if extended_output then
       puts("")
     end
     return errors
-  end
-  def run_test(out)
-    if @validation != "manual" then
-      self.run_ref
-    end
-    command = self.gen_command($bin_name)
-    @stdout = ""
-    @timeout = false
-    Open3.popen3(command) do |stdin, stdout, stderr, t|
-      if @type == "tty" then
-        input_content = File.read(@file)
-        stdin.puts(input_content)
-      end
-      stdin.close
-      begin
-        Timeout.timeout($Timeout) do
-          while (line = stdout.gets) do
-            @stdout += line
-          end
-        end
-      rescue Timeout::Error => ex
-        Process.kill(9, t.pid)
-        @timeout = true
-      end
-      if !@timeout then
-        @stderr = stderr.read
-        @exit_code = t.value.exitstatus
-      end
-    end
-    return self.print_result(out) == 0
   end
 end
 
@@ -265,25 +316,34 @@ $mode = :run
 $cat = :all
 $cat_list = []
 $out = :default
+$sanity = false
+$bin_name = $Bin_default_name
+$timeout = $Timeout_default
 
 parsing_cat = false
 parsing_bin = false
+parsing_time = false
 ARGV.each do |arg|
   if parsing_cat then
     if arg[0] == "-" then
-       parsing_cat = false
+      parsing_cat = false
     else
-       $cat_list << arg
+      $cat_list << arg.gsub("/", "");
     end
   elsif parsing_bin then
     if arg[0] == "-" then
        raise "Expected binary name after -b"
     else
-       $bin_name = arg
-       parsing_bin = false
+      $bin_name = arg
+    end
+  elsif parsing_time then
+    if arg[0] == "-" then
+       raise "Expected timeout duration after -t"
+    else
+      $timeout = arg.to_i
     end
   end
-  if !parsing_cat && !parsing_bin then
+  if !parsing_cat && !parsing_bin && !parsing_time then
     if arg == "-l" || arg == "--list" then
       $mode = :list
     elsif arg == "-c" || arg == "--category" then
@@ -291,11 +351,18 @@ ARGV.each do |arg|
       parsing_cat = true
     elsif arg == "-b" || arg == "--binary" then
       parsing_bin = true
+    elsif arg == "-t" || arg == "--timeout" then
+      parsing_time = true
     elsif arg == "-e" || arg == "--extended_output" then
       $out = :extended
+    elsif arg == "-s" || arg == "--sanity" then
+      $sanity = true
     else
       raise "Unknown argument : " + arg
     end
+  else
+    parsing_bin = false
+    parsing_time = false
   end
 end
 

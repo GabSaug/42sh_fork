@@ -58,7 +58,7 @@ static int process_interactive(void)
     if (!buff)
     {
       printf("exit\n");
-      return 0;
+      return ret;
     }
     add_history(buff);
     ret = process_input(buff, rules, ht);
