@@ -67,21 +67,27 @@ static int builtin_false(char* argv[])
 
 static int builtin_cd(char* argv[])
 {
-  if (chdir(argv[1]) == 0)
+  if (argv[1] && !strcmp(argv[1], "-"))
   {
-    add_hash(ht[VAR], "PWD", getenv("PWD"));
-    printf("new pwd = %s\n", getenv("PWD"));
+    char* old_pwd = get_data(ht[VAR], "OLDPWD");
+    if (old_pwd)
+      chdir(old_pwd);
+    else
+    {
+      warnx("OLDPWD not set");
+      return 1;
+    }
+
+    add_hash(ht[VAR], "OLDPWD", get_data(ht[VAR], "PWD"));
+    add_hash(ht[VAR], "PWD", getcwd(NULL, 0));
     return 0;
   }
-  warn("cd: %s", argv[1]);
-  return 1;
-}
-
-  /*char* directory = argv[1];
+  
+  char* directory = argv[1];
   //Rule 1 and 2
   if (argv[1] == NULL)
   {
-    char* home = getdata(ht, "HOME");
+    char* home = get_data(ht[VAR], "HOME");
     if (home == NULL || home[0] == '\0')
     {
       printf("No HOME defined\n");
@@ -89,22 +95,16 @@ static int builtin_cd(char* argv[])
     }
     directory = home;
   }
-  if (directory[0] = '/') // Rule 3
-    curpath = /;
-  if (strncmp(directory, ".", 1)) // Rule 4
+  if (chdir(directory) == 0)
   {
-    if (PWD != NULL)
-    {
-      if (concat(PWD, '/', directory) is a directory) //  Rule 5
-        curpath = 
-    }
-    else
-      concat(".", "/", "");
+    add_hash(ht[VAR], "OLDPWD", get_data(ht[VAR], "PWD"));
+    add_hash(ht[VAR], "PWD", getcwd(NULL, 0));
+
+    return 0;
   }
-  curpath = directory; // Rule 6
-  if 
-    
-}*/
+  warn("cd: %s", argv[1]);
+  return 1;
+}
 
 /*
 // To delete

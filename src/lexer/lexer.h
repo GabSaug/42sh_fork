@@ -73,6 +73,11 @@ enum quote_type
  * \return 0 if an error occured, or 1 if the string was lexed successfully
 */
 int lexer(char* s, struct vector* v_token);
+
+/**
+ * \brief Free the token given as argument
+ * \param p The address of the token to free
+*/
 void token_destroy(void* p);
 
 #endif /* !LEXER_H */

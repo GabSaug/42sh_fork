@@ -45,6 +45,22 @@ static int execute_bin(char** argv)
   }
 }
 
+/*static struct vector* generate_command(struct tree *ast)
+{
+  size_t size = v_size(ast->child);
+  struct vector* args = v_create();
+
+  for (size_t j = 0; j < size; j++)
+  {
+    struct vector* arg_tmp = expand(get_child_elt(ast, j));
+    v_concat(args, arg_tmp);
+    v_destroy(arg_tmp, NULL);
+  }
+
+  return args;
+}*/
+
+/*
 static size_t get_size(struct tree *ast)
 {
   size_t size = v_size(ast->child);
@@ -66,7 +82,7 @@ static size_t get_size(struct tree *ast)
     }
   }
   return count;
-}
+}*/
 
 static char** generate_command(struct tree *ast, size_t *size)
 {
@@ -136,5 +152,8 @@ int execute_simple_command(struct tree *ast)
   dup2(std_err, 2);
   close(std_err);
 
+  /*struct vector* args = generate_command(ast);
+  int res = execute_prog(args);
+  v_destroy(args, free);*/
   return res;
 }

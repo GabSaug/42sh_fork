@@ -15,6 +15,7 @@
 #include "rules.h"
 #include "execute.h"
 #include "main.h"
+#include "typer.h"
 
 static char* get_PS(void);
 static int process_input(char* buff, struct rule** rules);
@@ -93,7 +94,9 @@ static int process_input(char* buff, struct rule** rules)
     v_destroy(v_token, token_destroy);
     return 1;
   }
-  //v_print(v_token);
+  typer(v_token);
+  v_print(v_token);
+  printf("lexer success\n");
   ast = parse(rules, v_token);
   if (ast == NULL)
     printf("Grammar error\n");

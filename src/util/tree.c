@@ -97,30 +97,6 @@ void tree_print_dot(struct tree* tree)
   fclose(file);
 }
 
-static void tree_print_rec(struct tree* tree, int indent)
-{
-  if (tree == NULL)
-    return;
-  if (tree->token)
-  {
-    printf("leaf = %d\n", tree->token->id);
-  }
-  else
-  {
-    printf("node has %zu child, name = %d\n", tree->child->size, tree->nts);
-    for (size_t i = 0; i < tree->child->size; ++i)
-    {
-      printf("%*sch %zu : ", 8*indent, "", i);
-      tree_print_rec(v_get(tree->child, i), indent + 1);
-    }
-  }
-}
-
-void tree_print(struct tree* tree)
-{
-  tree_print_rec(tree, 0);
-}
-
 struct tree* tree_create(enum non_terminal_symbol nts)
 {
   struct tree* tree = my_malloc(sizeof (struct tree));
