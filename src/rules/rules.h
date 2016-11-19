@@ -85,15 +85,46 @@ void create_sym(struct symbol* sym, int terminal, enum repeat repeat,
                 enum non_terminal_symbol rule,
                 enum terminal_symbol terminal_symbol);
 void rules_destroy(struct rule** rules);
+
 /**
  * \brief Create the array of rules
  * \return The array of rules
 */
 struct rule** init_all_rules(void);
+
+/**
+ * \brief Fill the second part of the array of rules
+ * \param rules The array of rules to fill
+ * \return The array of rules filled
+*/
 struct rule** init_all_rules2(struct rule **rules);
+
+/**
+ * \brief Fill the third part of the array of rules
+ * \param rules The array of rules to fill
+ * \return The array of rules filled
+*/
 struct rule** init_all_rules3(struct rule **rules);
+
+/**
+ * \brief Fill the fourth part of the array of rules
+ * \param rules The array of rules to fill
+ * \return The array of rules filled
+*/
 struct rule** init_all_rules4(struct rule **rules);
+
+/**
+ * \brief Fill the fifth part of the array of rules
+ * \param rules The array of rules to fill
+ * \return The array of rules filled
+*/
 struct rule** init_all_rules5(struct rule **rules);
+
+/**
+ * \brief Fill the sixth and last part of the array of rules
+ * \param rules The array of rules to fill
+ * \return The array of rules filled
+*/
 struct rule** init_all_rules6(struct rule **rules);
 
 #endif /* !RULES_H */

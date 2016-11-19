@@ -29,6 +29,8 @@ struct option
 
 /**
  * \brief Parse the options given as arguments
+ * \param argc The number of parameters given
+ * \param argv The arguments given
  * \return A structure option
 */
 struct option parse_options(int argc, char *argv[]);

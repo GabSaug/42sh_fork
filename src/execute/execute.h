@@ -11,23 +11,79 @@
 # include "tree.h"
 # include "vector.h"
 
+/**
+ * \file execute.h
+*/
+
 struct builtin_fun
 {
   char name[20];
   int (*fun) (char* argv[]);
 };
 
-
+/**
+ * \brief Execute the AST to run commands
+ * \param ast The AST given by the parser
+ * \return The success or failure of the execution
+*/
 int execute(struct tree* ast);
+
+/**
+ * \brief Execute the rule and_or of a AST
+ * \param ast The AST with in the root the rule and_or
+ * \return The success or failure of execution
+*/
 int execute_and_or(struct tree* ast);
+
+/**
+ * \brief Execute the rule command of a AST
+ * \param ast The AST with in the root the rule command
+ * \return The success or failure of execution
+*/
 int execute_command(struct tree* ast);
+
+/**
+ * \brief Execute the rule pipeline of a AST
+ * \param ast The AST with in the root the rule pipeline
+ * \return The success or failure of execution
+*/
 int execute_pipeline(struct tree *ast);
+
+/**
+ * \brief Execute the rule simple_command of a AST
+ * \param ast The AST with in the root the rule simple_command
+ * \return The success or failure of execution
+*/
 int execute_simple_command(struct tree *ast);
+
+/**
+ * \brief Execute the rule shell_command of a AST
+ * \param ast The AST with in the root the rule shell_command
+ * \return The success or failure of execution
+*/
 int execute_shell_command(struct tree *ast);
-//int builtin_execution(struct tree *ast, int bi);
 int (*builtin_fun_match (char* s)) (char* argv[]);
+
+/**
+ \brief get the element of the first child of the child of the AST
+ \param ast The ast to get the element
+ \param elt The child of ast to get the element of the first child
+ \return the element found
+*/
 char *get_child_elt(struct tree *ast, size_t elt);
+
+/**
+ * \brief Execute the rule if of a AST
+ * \param ast The AST with in the root the rule if
+ * \return The success or failure of execution
+*/
 int execute_if(struct tree *ast);
+
+/**
+ * \brief Execute the rule while of a AST
+ * \param ast The AST with in the root the rule while
+ * \return The success or failure of execution
+*/
 int execute_while(struct tree *ast);
 
 #endif /* !EXECUTE_H */
