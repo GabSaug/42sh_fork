@@ -70,8 +70,10 @@ static int builtin_cd(char* argv[])
   if (chdir(argv[1]) == 0)
   {
     add_hash(ht[VAR], "PWD", getenv("PWD"));
+    printf("new pwd = %s\n", getenv("PWD"));
     return 0;
   }
+  warn("cd: %s", argv[1]);
   return 1;
 }
 
