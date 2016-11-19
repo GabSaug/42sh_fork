@@ -1,11 +1,55 @@
-V 0.5
-  Manual :
-  Option Parser : OK
-  Prompt : OK
-  Shell parser : OK
-  AST printer : OK
-  CMake : OK
-  Test suite : OK
-  Execution :
-  History : OK
+-- 42sh TODO file
 
+[ ] Version 0.5
+     [x] Manual
+     [X] Option Parser
+     [X] Prompt
+     [x] Shell parser
+     [X] AST printer
+     [X] CMake
+     [X] Test suite
+     [ ] Execution
+          [X] Operators
+          [X] Pipes
+          [X] Simple commands
+          [ ] Redirections
+          [x] If commands
+          [x] While and until commands
+          [ ] For commands
+          [ ] Functions
+          [ ] Case commands
+     [ ] History
+
+[ ] Version 0.8
+     [ ] Expansion
+          [ ] Tilde
+          [ ] Variables
+          [ ] Quoting removal
+          [ ] Path
+          [ ] Arithmetic
+          [ ] Aliases
+          [ ] Path, level chalenge
+     [ ] Builtin commands
+          [X] Exit
+          [X] True and false
+          [X] Cd
+          [ ] Shopt
+          [ ] Export
+          [ ] Alias
+          [ ] Unalias
+          [X] Echo
+          [ ] Continue
+          [ ] Break
+          [ ] Source
+          [ ] History
+     [ ] Advanced prompt
+     [X] Readline 
+
+[ ] Version 0.9
+     [x] Completion 
+     [ ] Command substitution
+     [ ] Multi-arch support
+     [ ] Job control
+
+[ ] Version 1.0
+     [ ] Sanity
