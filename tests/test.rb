@@ -202,7 +202,7 @@ class Test
         end
       end
     end
-    if $sanity && errors == 0 then
+    if $sanity then
       sanity_out_xml = File.read("outxml")
       sanity_out_end = File.read("outend")
       while (sanity_out_xml =~ /<error>(.*?)<\/error>(.*)/m) != nil do
@@ -218,10 +218,18 @@ class Test
           end
         end
       end
-      if (sanity_out_end =~ /FILE DESCRIPTORS: ([[:digit:]]*) open an exit/m) != nil then
-        puts($1);
+      if (sanity_out_end =~ /FILE DESCRIPTORS: ([[:digit:]]*) open at exit./m) != nil then
+        fd_all = $1.to_i
+        fd_parent = sanity_out_end.gsub("<inherited from parent>").count
+        fd_leaks = fd_all - fd_parent
+        while fd_leaks > 0 do
+          errors += 1
+          if extended_output then
+            puts("    [\e[95mWARN\e[0m] File descriptor not closed")
+          end
+          fd_leaks -= 1
+        end
       end
-      #fd_leaks = sanity_out_end.gsub("");
     end
     if errors == 0 then
       puts("    [\e[92mPASS\e[0m] " + @name)
