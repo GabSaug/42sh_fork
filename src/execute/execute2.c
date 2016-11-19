@@ -40,7 +40,7 @@ static int execute_bin(char** argv)
     int exit_status = 0;
     waitpid(pid, &exit_status, 0);
     if (exit_status != 0)
-      warnx("%s: comand not found", argv[0]);
+      warnx("%s: command not found", argv[0]);
     return WEXITSTATUS(exit_status);
   }
 }
