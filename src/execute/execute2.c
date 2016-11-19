@@ -45,39 +45,49 @@ static int execute_bin(char** argv)
   }
 }
 
-static char** generate_command(struct tree *ast)
-{
-  size_t size = v_size(ast->child);
-  char **args = malloc(sizeof (char*) * (size + 1));
-
-  for (size_t j = 0; j < size; j++)
-    args[j] = get_child_elt(ast, j);
-  args[size] = NULL;
-
-  return args;
-}
-
-/*
 static size_t get_size(struct tree *ast)
 {
   size_t size = v_size(ast->child);
 
   size_t i = 0;
+  size_t count = 0;
   struct tree *son = v_get(ast->child, i);
   son = v_get(son->child, 0);
-  while (i < size && son->nts != REDIRECTION)
+  while (i < size)
   {
     i++;
+    if (son->nts != REDIRECTION)
+      count++;
+
     if (i < size)
     {
       son = v_get(ast->child, i);
       son = v_get(son->child, 0);
     }
   }
-  size = i;
-  return size;
+  return count;
 }
-*/
+
+static char** generate_command(struct tree *ast)
+{
+  size_t size = get_size(ast);;
+  char **args = malloc(sizeof (char*) * (size + 1));
+  size_t k = 0;
+
+  for (size_t j = 0; j < v_size(ast->child); j++)
+  {
+    struct tree *son = v_get(ast->child, j);
+    son = v_get(son->child, 0);
+    if (son->nts != REDIRECTION)
+    {
+      args[k] = son->token->s;
+      k++;
+    }
+  }
+  args[size] = NULL;
+
+  return args;
+}
 
 static int execute_prog(char** argv)
 {
@@ -91,6 +101,9 @@ static int execute_prog(char** argv)
 int execute_simple_command(struct tree *ast)
 {
   char** argv = generate_command(ast);
+  // TODO managed redirections
+
+
   int res = execute_prog(argv);
   free(argv);
   return res;
