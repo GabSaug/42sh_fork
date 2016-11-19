@@ -25,6 +25,12 @@ add_subdirectory(src/util)
 add_executable(${BIN_NAME} ${SRC})
 target_link_libraries(${BIN_NAME} readline)
 
+
+add_custom_target(doc
+                  COMMAND doxygen doxy &> /dev/null && chromium html/index.html
+                  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/doc)
+
+
 add_custom_target(check
                   COMMAND ./test.rb -b ${CMAKE_BINARY_DIR}/${BIN_NAME}
                   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tests
