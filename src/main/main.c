@@ -133,4 +133,8 @@ void exit_42sh(void)
     tree_destroy(ast);
     free(buff);
   }
+
+  close(0);
+  close(1);
+  close(2);
 }
