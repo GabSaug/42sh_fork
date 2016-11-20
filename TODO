@@ -12,7 +12,7 @@
           [X] Operators
           [X] Pipes
           [X] Simple commands
-          [ ] Redirections
+          [x] Redirections
           [x] If commands
           [x] While and until commands
           [ ] For commands
