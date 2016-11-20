@@ -198,7 +198,7 @@ static int builtin_echo_print(char* s, char opt_e)
       else if (c2 == 'n')
         printf("\n");
       else if (c2 == 'e')
-        printf("\e");
+        printf("%c", 0x1b);
       else if (c2 == 't')
         printf("\t");
       else if (c2 == 'a')
