@@ -68,10 +68,10 @@ static size_t get_size(struct tree *ast)
   return count;
 }
 
-static char** generate_command(struct tree *ast)
+static char** generate_command(struct tree *ast, size_t *size)
 {
-  size_t size = get_size(ast);;
-  char **args = malloc(sizeof (char*) * (size + 1));
+  *size = get_size(ast);;
+  char **args = malloc(sizeof (char*) * (*size + 1));
   size_t k = 0;
 
   for (size_t j = 0; j < v_size(ast->child); j++)
@@ -84,7 +84,7 @@ static char** generate_command(struct tree *ast)
       k++;
     }
   }
-  args[size] = NULL;
+  args[*size] = NULL;
 
   return args;
 }
@@ -100,11 +100,31 @@ static int execute_prog(char** argv)
 
 int execute_simple_command(struct tree *ast)
 {
-  char** argv = generate_command(ast);
-  // TODO managed redirections
+  size_t size;
+  char** argv = generate_command(ast, &size);
 
+  struct vector *to_close = NULL;
+  if (size < v_size(ast->child))
+  {
+    to_close = managed_redirections(ast);
+    if (!to_close)
+    {
+      free(argv);
+      return 1;
+    }
+  }
 
   int res = execute_prog(argv);
   free(argv);
+  if (to_close)
+  {
+    for (size_t i = 0; i < v_size(to_close); i++)
+    {
+      int *fd = v_get(to_close, i);
+      close(*fd);
+    }
+    v_destroy(to_close, free);
+  }
+
   return res;
 }

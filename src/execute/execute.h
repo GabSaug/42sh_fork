@@ -3,6 +3,7 @@
 
 # include <string.h>
 # include <err.h>
+# include <fcntl.h>
 # include <stdlib.h>
 # include <sys/wait.h>
 # include <unistd.h>
@@ -85,5 +86,13 @@ int execute_if(struct tree *ast);
  * \return The success or failure of execution
 */
 int execute_while(struct tree *ast);
+
+/**
+ * \brief Managed the redirection of a command
+ * \param ast The command where there is redirection
+ * \return A vector of file descriptors to close after the execution of the
+ * command
+*/
+struct vector *managed_redirections(struct tree *ast);
 
 #endif /* !EXECUTE_H */

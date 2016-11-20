@@ -6,5 +6,6 @@ set (SRC
      ${CMAKE_CURRENT_SOURCE_DIR}/pipeline.c
      ${CMAKE_CURRENT_SOURCE_DIR}/builtins.c
      ${CMAKE_CURRENT_SOURCE_DIR}/shell_cmd.c
+     ${CMAKE_CURRENT_SOURCE_DIR}/redirection.c
      PARENT_SCOPE)
 
