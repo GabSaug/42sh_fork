@@ -62,30 +62,30 @@ static int redir_rdwr(int fd_ionum, const char *file_name)
   return - 1;
 }
 
-static int redir_type(int fd_ionum, const char *sign, const char *file_name)
+static int redir_type(int fd_ionum, enum terminal_symbol sign, const char *file_name)
 {
-  if (strcmp(sign, ">") == 0 || strcmp(sign, ">|") == 0)
+  if (sign == GREAT || sign == CLOBBER)
     return open_and_redir(fd_ionum == -1 ? 1 : fd_ionum, file_name,
                           O_WRONLY | O_CREAT | O_TRUNC, 0);
-  else if (strcmp(sign, "<") == 0)
+  else if (sign == LESS)
     return open_and_redir(fd_ionum == -1 ? 0 : fd_ionum, file_name, O_RDONLY,
                           1);
-  else if (strcmp(sign, ">>") == 0)
+  else if (sign == DGREAT)
     return open_and_redir(fd_ionum == -1 ? 1 : fd_ionum, file_name,
                           O_WRONLY | O_APPEND, 0);
-  else if (strcmp(sign, "<<") == 0)
+  else if (sign == DLESS)
     return - 1;// TODO
-  else if (strcmp(sign, "<<-") == 0)
+  else if (sign == DLESSDASH)
     return - 1;// TODO
-  else if (strcmp(sign, ">&") == 0)
+  else if (sign == GREATAND)
     return copy_or_close(fd_ionum == -1 ? 1 : fd_ionum, file_name, 0);
-  else if (strcmp(sign, "<&") == 0)
+  else if (sign  == LESSAND)
     return copy_or_close(fd_ionum == -1 ? 0 : fd_ionum, file_name, 1);
-  else if (strcmp(sign, "<>") == 0)
+  else if (sign == LESSGREAT)
     return redir_rdwr(fd_ionum == -1 ? 0 : fd_ionum, file_name);
   else
   {
-    warn("%s: Invalid redirection", sign);
+    warn("Invalid redirection");
     return - 2;
   }
 }
@@ -104,7 +104,7 @@ static int read_redirection(struct tree *ast)
   struct tree *sign = v_get(ast->child, i);
   struct tree *word = v_get(ast->child, i + 1);
 
-  return redir_type(fd_ionum, sign->token->s, word->token->s);
+  return redir_type(fd_ionum, sign->token->id, word->token->s);
 }
 
 struct vector *managed_redirections(struct tree *ast)
