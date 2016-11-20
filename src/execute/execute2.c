@@ -104,6 +104,9 @@ int execute_simple_command(struct tree *ast)
   char** argv = generate_command(ast, &size);
 
   struct vector *to_close = NULL;
+  int std_in = dup(0);
+  int std_out = dup(1);
+  int std_err = dup(2);
   if (size < v_size(ast->child))
   {
     to_close = managed_redirections(ast);
@@ -125,6 +128,13 @@ int execute_simple_command(struct tree *ast)
     }
     v_destroy(to_close, free);
   }
+
+  dup2(std_in, 0);
+  close(std_in);
+  dup2(std_out, 1);
+  close(std_out);
+  dup2(std_err, 2);
+  close(std_err);
 
   return res;
 }
