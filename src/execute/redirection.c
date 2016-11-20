@@ -17,8 +17,7 @@ static int my_atoi(const char str[])
   return res;
 }
 
-static int open_and_redir(int fd_ionum, const char *file_name, int flags,
-                          int order)
+static int open_and_redir(int fd_ionum, const char *file_name, int flags)
 {
   int fd = open(file_name, flags, 00644);
   if (fd == - 1)
@@ -27,14 +26,12 @@ static int open_and_redir(int fd_ionum, const char *file_name, int flags,
     return - 2;
   }
 
-  if (order)
-    dup2(fd_ionum, fd);
-  else
-    dup2(fd, fd_ionum);
+  dup2(fd, fd_ionum);
+
   return fd;
 }
 
-static int copy_or_close(int fd_ionum, const char *file_name, int order)
+static int copy_or_close(int fd_ionum, const char *file_name)
 {
   if (strcmp(file_name, "-") == 0)
   {
@@ -47,10 +44,14 @@ static int copy_or_close(int fd_ionum, const char *file_name, int order)
   }
   else
   {
-    if (order)
-      dup2(fd_ionum, my_atoi(file_name));
+    int fd = my_atoi(file_name);
+    if (fd == - 1)
+    {
+      warnx("%s: Invalidfile descriptor", file_name);
+      return - 2;
+    }
     else
-      dup2(my_atoi(file_name), fd_ionum);
+      dup2(fd, fd_ionum);
   }
   return - 1;
 }
@@ -62,30 +63,30 @@ static int redir_rdwr(int fd_ionum, const char *file_name)
   return - 1;
 }
 
-static int redir_type(int fd_ionum, enum terminal_symbol sign, const char *file_name)
+static int redir_type(int fd_ionum, enum terminal_symbol sign,
+                      const char *file_name)
 {
   if (sign == GREAT || sign == CLOBBER)
     return open_and_redir(fd_ionum == -1 ? 1 : fd_ionum, file_name,
-                          O_WRONLY | O_CREAT | O_TRUNC, 0);
+                          O_WRONLY | O_CREAT | O_TRUNC);
   else if (sign == LESS)
-    return open_and_redir(fd_ionum == -1 ? 0 : fd_ionum, file_name, O_RDONLY,
-                          1);
+    return open_and_redir(fd_ionum == -1 ? 0 : fd_ionum, file_name, O_RDONLY);
   else if (sign == DGREAT)
     return open_and_redir(fd_ionum == -1 ? 1 : fd_ionum, file_name,
-                          O_WRONLY | O_APPEND, 0);
+                          O_WRONLY | O_APPEND);
   else if (sign == DLESS)
     return - 1;// TODO
   else if (sign == DLESSDASH)
     return - 1;// TODO
   else if (sign == GREATAND)
-    return copy_or_close(fd_ionum == -1 ? 1 : fd_ionum, file_name, 0);
+    return copy_or_close(fd_ionum == -1 ? 1 : fd_ionum, file_name);
   else if (sign  == LESSAND)
-    return copy_or_close(fd_ionum == -1 ? 0 : fd_ionum, file_name, 1);
+    return copy_or_close(fd_ionum == -1 ? 0 : fd_ionum, file_name);
   else if (sign == LESSGREAT)
     return redir_rdwr(fd_ionum == -1 ? 0 : fd_ionum, file_name);
   else
   {
-    warn("Invalid redirection");
+    warnx("Invalid redirection");
     return - 2;
   }
 }
