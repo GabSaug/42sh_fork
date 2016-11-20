@@ -30,5 +30,6 @@ char* my_strdup(char* s);
 int my_is_in(char* str, char s_list[][10]);
 int my_strcmp(char* str1, char* str2);
 int my_strnum(char* s);
+int is_prefix_arr(char* str, char s_list[][10]);
 
 #endif /* !MY_STRING_H */
