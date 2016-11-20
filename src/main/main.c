@@ -32,7 +32,6 @@ static int processing = 0;
 
 int main(int argc, char* argv[])
 {
-  int ret = 0;
   atexit(exit_42sh);
   ht[VAR] = create_hash(256);
   ht[ALIAS] = create_hash(256);
@@ -40,12 +39,11 @@ int main(int argc, char* argv[])
   struct option option = parse_options(argc, argv);
   rules = init_all_rules();
   if (option.input_mode == INTERACTIVE)
-    process_interactive();
+    return process_interactive();
   else if (option.input_mode == COMMAND_LINE)
-    ret = process_input(option.input, rules);
+    return process_input(option.input, rules);
   else
-    process_file(option, rules);
-  return ret;
+    return process_file(option, rules);
 }
 
 static int process_interactive(void)
@@ -95,8 +93,8 @@ static int process_input(char* buff, struct rule** rules)
     return 1;
   }
   typer(v_token);
-  v_print(v_token);
-  printf("lexer success\n");
+  //v_print(v_token);
+  //printf("lexer success\n");
   ast = parse(rules, v_token);
   if (ast == NULL)
   {

@@ -92,7 +92,6 @@ static int apply_rule(struct vector* v_token, char quoted[],
     if (ret == 0)
       return -1;
     *i += ret - 1;
-    printf("$ = %c\n", s[*i]);
     return 0;
   }
   apply_rule_2(v_token, quoted, part_of_operator,

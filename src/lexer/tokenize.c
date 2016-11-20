@@ -21,9 +21,8 @@ static size_t tokenize_exp_normal(char *s)
   size_t i;
   // for (i = 2 -> wtf ?
   for (i = 1; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n'
-       && s[i] != '$' && is_prefix_arr(operator_list, s + i) == -1; ++i) // To modify
+       && s[i] != '$' && is_prefix_arr(s + i, operator_list) == -1; ++i) // To modify
   {
-    printf("i = %zu  s[i] = %c\n", i, s[i]);
     if (s[i] == '\\' && s[i + 1])
       i++;
     else if (s[i] == '\'')

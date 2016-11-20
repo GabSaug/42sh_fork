@@ -40,7 +40,7 @@ void typer(struct vector* v_token)
       token->id = EOF_SYM;
       continue;
     }
-    printf("lexer = %s\n", token->s);
+    //printf("lexer = %s\n", token->s);
     int index_operator_list = my_is_in(token->s, operator_list);
     if (index_operator_list != -1) // Rule 1
     {

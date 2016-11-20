@@ -60,8 +60,8 @@ int is_prefix_arr(char* str, char s_list[][10])
 {
   for (int i = 0; s_list[i][0]; ++i)
   {
-    size_t len = strlen(list[i];
-    if (!strncmp(start, s_list[i], len) && strlen(s_list[i]) == len)
+    size_t len = strlen(s_list[i]);
+    if (!strncmp(str, s_list[i], len) && strlen(s_list[i]) == len)
       return i;
   }
   return -1;
