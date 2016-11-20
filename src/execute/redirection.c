@@ -20,7 +20,7 @@ static int my_atoi(const char str[])
 static int open_and_redir(int fd_ionum, const char *file_name, int flags,
                           int order)
 {
-  int fd = open(file_name, flags);
+  int fd = open(file_name, flags, 00644);
   if (fd == - 1)
   {
     warn("%s: ", file_name);
@@ -57,7 +57,7 @@ static int copy_or_close(int fd_ionum, const char *file_name, int order)
 
 static int redir_rdwr(int fd_ionum, const char *file_name)
 {
-  int fd = open(file_name, O_RDWR);
+  int fd = open(file_name, O_RDWR | O_CREAT | O_TRUNC, 00644);
   dup2(fd, fd_ionum);
   return - 1;
 }
