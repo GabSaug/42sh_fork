@@ -110,7 +110,7 @@ class Test
         @ref_timeout = true
       end
       if !@ref_timeout then
-        @ref_stderr = stderr.read.gsub(@validation, $bin_name.lines("/")[-1])
+        @ref_stderr = stderr.read.gsub(@validation + ":", $bin_name.lines("/")[-1] + ":")
         @ref_exit_code = t.value.exitstatus
       end
     end
