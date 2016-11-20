@@ -181,12 +181,10 @@ static int option_parser(char* argv[], int* i, char* opt_n, char* opt_e)
   return 0;
 }
 
-static void builtin_echo_print(char* s, char opt_n, char opt_e)
+static void builtin_echo_print(char* s, char opt_e)
 {
   opt_e = opt_e;
   printf("%s", s);
-  if (!opt_n)
-    printf("\n");
 }
 
 static int builtin_echo(char* argv[])
@@ -208,9 +206,14 @@ static int builtin_echo(char* argv[])
   if (option_parser(argv, &i, &opt_n, &opt_e) == -1)
     return 0;
   if (argv[i])
-    builtin_echo_print(argv[i], opt_n, opt_e);
+    builtin_echo_print(argv[i], opt_e);
   for (++i; argv[i]; ++i)
-    builtin_echo_print(argv[i], opt_n, opt_e);
+  {
+    printf(" ");
+    builtin_echo_print(argv[i], opt_e);
+  }
+  if (!opt_n)
+    printf("\n");
  return 0; 
 }
 

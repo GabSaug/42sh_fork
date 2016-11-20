@@ -1,4 +1,5 @@
 #include "tokenize.h"
+#include "my_string.h"
 
 // Return the number of character in the comment
 size_t tokenize_comment(char* s, size_t i)
@@ -9,14 +10,21 @@ size_t tokenize_comment(char* s, size_t i)
   return j - 1;
 }
 
+static char operator_list[][10] =
+{
+  ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
+  "<>", "<<-", ">|", ""
+};
 // Return the number of character in the expansion
 static size_t tokenize_exp_normal(char *s)
 {
   size_t i;
-  for (i = 2; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n' && s[i] != '$'
-       ; ++i)
+  // for (i = 2 -> wtf ?
+  for (i = 1; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n'
+       && s[i] != '$' && is_prefix_arr(operator_list, s + i) == -1; ++i) // To modify
   {
-    if (s[i] == '\\')
+    printf("i = %zu  s[i] = %c\n", i, s[i]);
+    if (s[i] == '\\' && s[i + 1])
       i++;
     else if (s[i] == '\'')
       for (i++; s[i] && s[i] != '\'' && s[i - 1] != '\\'; ++i)

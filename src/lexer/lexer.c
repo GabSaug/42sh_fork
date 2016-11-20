@@ -8,14 +8,14 @@
 
 static char operator_list[][10] =
 {
-  ";", "&", "|", "&&", "||", ";;", "zzzzz", "zzzzzz", "<<", ">>", "<&", ">&",
+  ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
   "<>", "<<-", ">|", ""
 };
-static char reserved_word[][10] =
+/*static char reserved_word[][10] =
 {
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
   "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
-};
+};*/
 
 static char quote_symbol[][10] =
 {
@@ -92,6 +92,7 @@ static int apply_rule(struct vector* v_token, char quoted[],
     if (ret == 0)
       return -1;
     *i += ret - 1;
+    printf("$ = %c\n", s[*i]);
     return 0;
   }
   apply_rule_2(v_token, quoted, part_of_operator,
@@ -106,7 +107,8 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
   // Rule 6
   if (!is_quoted(quoted) && begin_as(s + *i, s + *i, operator_list) != -1)
   {
-    append_token(v_token, *start, s + *i - 1);
+    if (*start != s + *i)
+      append_token(v_token, *start, s + *i - 1);
     *start = s + *i;
     *part_of_operator = 1;
     //*curr_token = begin_as(s + *i, s + *i, operator_list);
@@ -136,9 +138,10 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
 static void rule_7(struct vector* v_token, char** start, char* s, size_t* i,
                    char* part_of_operator, char* part_of_word)
 {
-  append_token(v_token, *start, s + *i - 1);
-  if (s[*i] == '\n')
-    append_token(v_token, NULL, NULL);
+  if (*start != s + *i)
+    append_token(v_token, *start, s + *i - 1);
+  /*if (s[*i] == '\n')
+    append_token(v_token, NULL, NULL);*/
   *part_of_operator = 0;
   *part_of_word = 0;
   *start = s + *i + 1;

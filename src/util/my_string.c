@@ -23,7 +23,7 @@ int is_in(char* start, char* end, char s_list[][10])
 
 int my_is_in(char* str, char s_list[][10])
 {
-  return is_in(str, str + strlen(str), s_list);
+  return is_in(str, str + strlen(str) - 1, s_list);
 }
 
 int my_strcmp(char* str1, char* str2)

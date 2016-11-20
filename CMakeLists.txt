@@ -8,6 +8,7 @@ set(BIN_NAME "42sh")
 
 include_directories(src/util
                     src/lexer
+                    src/typer
                     src/execute
                     src/main
                     src/parser
@@ -16,6 +17,7 @@ include_directories(src/util
 
 add_subdirectory(src/execute)
 add_subdirectory(src/lexer)
+add_subdirectory(src/typer)
 add_subdirectory(src/main)
 add_subdirectory(src/option_parser)
 add_subdirectory(src/parser)

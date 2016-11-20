@@ -60,7 +60,7 @@ static int execute_bin(char** argv)
   return args;
 }*/
 
-/*
+
 static size_t get_size(struct tree *ast)
 {
   size_t size = v_size(ast->child);
@@ -82,7 +82,7 @@ static size_t get_size(struct tree *ast)
     }
   }
   return count;
-}*/
+}
 
 static char** generate_command(struct tree *ast, size_t *size)
 {

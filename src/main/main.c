@@ -99,7 +99,10 @@ static int process_input(char* buff, struct rule** rules)
   printf("lexer success\n");
   ast = parse(rules, v_token);
   if (ast == NULL)
-    printf("Grammar error\n");
+  {
+    warnx("Grammar error\n");
+    ret = 1;
+  }
   else
   {
     //tree_print(ast);
