@@ -193,19 +193,17 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
 {
   /*if (token_id == UNDIFINED)
     return;*/
-  struct token* new_token = my_malloc(sizeof(struct token));
-  new_token->id = UNDIFINED;
-  size_t s_size = (end - start) + 1;
-  char* s = my_malloc(s_size + 1); // +1 for '\0'
-  if (start && end)
+  if (start && end && end >= start)
   {
+    struct token* new_token = my_malloc(sizeof(struct token));
+    new_token->id = UNDIFINED;
+    size_t s_size = (end - start) + 1;
+    char* s = my_malloc(s_size + 1); // +1 for '\0'
     for (size_t i = 0; i < s_size + 1; ++i)
       s[i] = start[i];
     s[s_size] = '\0';
+    //printf("tok : %s\n", s);
     new_token->s = s;
-  }
-  else
-    new_token->s = NULL;
 
   /*if (token_id == WORD)
   {
@@ -226,7 +224,10 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
     }
   }*/
   //new_token->id = UNDIFINED;
-  return v_append(v_token, new_token);
+    return v_append(v_token, new_token);
+  }
+  else
+    return 0;
 }
 
 static int is_quoted(char quoted[3])
