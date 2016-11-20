@@ -166,17 +166,20 @@ static int option_parser(char* argv[], int* i, char* opt_n, char* opt_e)
   if (!strcmp(argv[*i], "-n"))
   {
     *opt_n = 1;
-    option_parser(argv, i + 1, opt_n, opt_e);
+    *i += 1;
+    return option_parser(argv, i, opt_n, opt_e);
   }
   else if (!strcmp(argv[*i], "-e"))
   {
     *opt_e = 1;
-    option_parser(argv, i + 1, opt_n, opt_e);
+    *i += 1;
+    return option_parser(argv, i, opt_n, opt_e);
   }
   else if (!strcmp(argv[*i], "-E"))
   {
     *opt_e = 0;
-    option_parser(argv, i + 1, opt_n, opt_e);
+    *i += 1;
+    return option_parser(argv, i, opt_n, opt_e);
   }
   return 0;
 }
@@ -188,29 +191,32 @@ static void builtin_echo_print(char* s, char opt_e)
 }
 
 static int builtin_echo(char* argv[])
-{ 
-  if (!strcmp(argv[1], "--help"))
-  {
-    printf("%s", builtin_echo_help);
-    return 0;
-  }
-  if (!strcmp(argv[1], "--version"))
-  {
-    printf("%s", builtin_echo_version);
-    return 0;
-  }
-
+{
   char opt_n = 0; 
   char opt_e = 1;
-  int i = 1;
-  if (option_parser(argv, &i, &opt_n, &opt_e) == -1)
-    return 0;
-  if (argv[i])
-    builtin_echo_print(argv[i], opt_e);
-  for (++i; argv[i]; ++i)
+  if (argv[1])
   {
-    printf(" ");
-    builtin_echo_print(argv[i], opt_e);
+    if (!strcmp(argv[1], "--help"))
+    {
+      printf("%s", builtin_echo_help);
+      return 0;
+    }
+    if (!strcmp(argv[1], "--version"))
+    {
+      printf("%s", builtin_echo_version);
+      return 0;
+    }
+
+    int i = 1;
+    if (option_parser(argv, &i, &opt_n, &opt_e) == -1)
+      return 0;
+    if (argv[i])
+      builtin_echo_print(argv[i], opt_e);
+    for (++i; argv[i]; ++i)
+    {
+      printf(" ");
+      builtin_echo_print(argv[i], opt_e);
+    }
   }
   if (!opt_n)
     printf("\n");

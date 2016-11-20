@@ -93,7 +93,7 @@ static int process_input(char* buff, struct rule** rules)
     return 1;
   }
   typer(v_token);
-  v_print(v_token);
+  //v_print(v_token);
   //printf("lexer success\n");
   ast = parse(rules, v_token);
   if (ast == NULL)
