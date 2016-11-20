@@ -3,6 +3,7 @@
 #include "typer.h"
 #include "my_string.h"
 #include "lexer.h"
+#include "my_string.h"
 #include "string.h"
 
 static char operator_list[][10] =
@@ -15,6 +16,21 @@ static char reserved_word[][10] =
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
   "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
 };
+
+static enum terminal_symbol before_reserved_word[] =
+{
+  IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL, L_BRACE, R_BRACE, L_PAR, R_PAR,
+  BANG, IN, PIPE, AND_IF, OR_IF, SEMI, AND, DSEMI, NL
+};
+
+static int is_among(enum terminal_symbol sym, enum terminal_symbol arr[],
+                    size_t len)
+{
+  for (size_t i = 0; i < len; ++i)
+    if (sym == arr[i])
+      return i;
+  return -1;
+}
 
 static int is_digit(char c)
 {
@@ -59,8 +75,10 @@ void typer(struct vector* v_token)
       }
     }
     struct token* prev = v_get(v_token, i - 1);
-    if (prev == NULL || (prev->id == SEMI || prev->id == AND || prev->id == NL
-                 || prev->id == BANG))
+    //if (prev == NULL || (prev->id == SEMI || prev->id == AND || prev->id == NL
+  //             || prev->id == BANG))
+    size_t len = sizeof (before_reserved_word) / sizeof (*before_reserved_word);
+    if (prev == NULL || is_among(prev->id, before_reserved_word, len) != -1)
     {
       int index_reserved_word = my_is_in(token->s, reserved_word);
       if (index_reserved_word != -1)
