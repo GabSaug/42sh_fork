@@ -32,6 +32,7 @@ static int execute_bin(char** argv)
   {
     // Child
     execvp(argv[0], argv);
+    warnx("%s: command not found", argv[0]);
     exit(127);
   }
   else
@@ -39,8 +40,6 @@ static int execute_bin(char** argv)
     // Parent
     int exit_status = 0;
     waitpid(pid, &exit_status, 0);
-    if (exit_status != 0)
-      warnx("%s: command not found", argv[0]);
     return WEXITSTATUS(exit_status);
   }
 }
