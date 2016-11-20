@@ -66,11 +66,14 @@ static void tree_print_dot_rec(struct tree* tree, FILE* file)
   unsigned num_node = num_dot;
   if (tree->token)
   {
-    if (tree->token->id != WORD)
-      fprintf(file, "%u [label=\"%s\"]\n", num_dot, ts2string[tree->token->id]);
-    else
+    if (tree->token->id == WORD)
       fprintf(file, "%u [label=\"%s = %s\"]\n", num_dot,
               ts2string[tree->token->id], tree->token->s);
+    else if (tree->token->id == IO_NUMBER)
+      fprintf(file, "%u [label=\"%s = %s\"]\n", num_dot,
+              ts2string[tree->token->id], tree->token->s);
+    else
+      fprintf(file, "%u [label=\"%s\"]\n", num_dot, ts2string[tree->token->id]);
   }
   else
   {
