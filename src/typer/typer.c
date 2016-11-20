@@ -35,6 +35,8 @@ void typer(struct vector* v_token)
   for (size_t i = 0; i < v_size(v_token); ++i)
   {
     token = v_get(v_token, i);
+    if (token->id != UNDIFINED)
+      continue;
     if (token->s == NULL)
     {
       token->id = EOF_SYM;
