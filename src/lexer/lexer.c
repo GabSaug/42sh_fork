@@ -17,6 +17,19 @@ static char operator_list[][10] =
   "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
 };*/
 
+static int is_digit(char c)
+{
+  return ('0' <= c && c <= '9');
+}
+
+static int is_number(char* s)
+{
+  for (size_t i = 0; s[i]; ++i)
+    if (!is_digit(s[i]))
+      return 0;
+  return 1;
+}
+
 static char quote_symbol[][10] =
 {
   "\\", "'", "\"", "\0"
@@ -27,7 +40,7 @@ static char blank_list[][10] =
   "\n", " ", "\t"
 };
 
-static void append_token(struct vector* v_token, char* start, char* end);
+static size_t append_token(struct vector* v_token, char* start, char* end);
 static int is_quoted(char quoted[3]);
 
 static int apply_rule(struct vector* v_token, char quoted[],
@@ -104,10 +117,17 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
                         size_t* i, char** start)
 {
   // Rule 6
-  if (!is_quoted(quoted) && begin_as(s + *i, s + *i, operator_list) != -1)
+  int op = begin_as(s + *i, s + *i, operator_list); 
+  if (!is_quoted(quoted) && op != -1)
   {
     if (*start != s + *i)
-      append_token(v_token, *start, s + *i - 1);
+    {
+      size_t index = append_token(v_token, *start, s + *i - 1);
+      struct token* tok = v_get(v_token, index);
+      if (is_number(tok->s) && (op == LESS || op == GREAT || op == DLESS
+          || op == CLOBBER))
+        tok->id = IO_NUMBER;
+    }
     *start = s + *i;
     *part_of_operator = 1;
     //*curr_token = begin_as(s + *i, s + *i, operator_list);
@@ -127,10 +147,8 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
     *i += tokenize_comment(s, *i);
   // Rule 10
   else
-  {
     *part_of_word = 1;
     //*curr_token = WORD;
-  }
   return 0;
 }
 
@@ -171,7 +189,7 @@ static void rule_4(char c, char quoted[])
 }
 
 
-static void append_token(struct vector* v_token, char* start, char* end)
+static size_t append_token(struct vector* v_token, char* start, char* end)
 {
   /*if (token_id == UNDIFINED)
     return;*/
@@ -208,7 +226,7 @@ static void append_token(struct vector* v_token, char* start, char* end)
     }
   }*/
   //new_token->id = UNDIFINED;
-  v_append(v_token, new_token);
+  return v_append(v_token, new_token);
 }
 
 static int is_quoted(char quoted[3])
