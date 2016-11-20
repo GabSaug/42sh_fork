@@ -1,5 +1,17 @@
 #include "execute.h"
 
+static int execute_compound_list(struct tree *ast)
+{
+  int res = 0;
+  for (size_t i = 0; i < v_size(ast->child); i++)
+  {
+    struct tree *child = v_get(ast->child, i);
+    if (child->nts == AND_OR)
+      res = execute_and_or(child);
+  }
+  return res;
+}
+
 int execute_shell_command(struct tree *ast)
 {
   struct tree *child = v_get(ast->child, 0);
@@ -16,14 +28,12 @@ int execute_shell_command(struct tree *ast)
 int execute_if(struct tree *ast)
 {
   struct tree *compound_list = v_get(ast->child, 1);
-  struct tree *cond = v_get(compound_list->child, 0);
-  int condition = execute_and_or(cond);
+  int condition = execute_compound_list(compound_list);
 
   if (condition == 0)
   {
     compound_list = v_get(ast->child, 3);
-    struct tree *then = v_get(compound_list->child, 0);
-    return execute_and_or(then);
+    return execute_compound_list(compound_list);
   }
   else
     return 0;
@@ -31,29 +41,26 @@ int execute_if(struct tree *ast)
 
 int execute_while(struct tree *ast)
 {
-  struct tree *compound_list = v_get(ast->child, 1);
-  struct tree *cond = v_get(compound_list->child, 0);
+  struct tree *cond = v_get(ast->child, 1);
   int ret = 0;
-  while (execute_and_or(cond) == 0)
+  while (execute_compound_list(cond) == 0)
   {
-    compound_list = v_get(ast->child, 3);
-    struct tree *then = v_get(compound_list->child, 0);
-    ret = execute_and_or(then);
+    struct tree *do_group = v_get(ast->child, 2);
+    struct tree *compound_list = v_get(do_group->child, 1);
+    ret = execute_compound_list(compound_list);
   }
   return ret;
 }
 
 int execute_until(struct tree *ast)
 {
-  struct tree *compound_list = v_get(ast->child, 1);
-  struct tree *cond = v_get(compound_list->child, 0);
+  struct tree *cond = v_get(ast->child, 1);
   int ret = 0;
-  while (execute_and_or(cond) != 0)
+  while (execute_compound_list(cond) != 0)
   {
-    compound_list = v_get(ast->child, 3);
-    struct tree *then = v_get(compound_list->child, 0);
-    ret = execute_and_or(then);
+    struct tree *do_group = v_get(ast->child, 2);
+    struct tree *compound_list = v_get(do_group->child, 1);
+    ret = execute_compound_list(compound_list);
   }
   return ret;
-
 }
