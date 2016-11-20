@@ -35,6 +35,12 @@ int execute_if(struct tree *ast)
     compound_list = v_get(ast->child, 3);
     return execute_compound_list(compound_list);
   }
+  else if (v_size(ast->child) > 5)
+  {
+    struct tree *compound_list = v_get(ast->child, 4);
+    compound_list = v_get(compound_list->child, 1);
+    return execute_compound_list(compound_list);
+  }
   else
     return 0;
 }
