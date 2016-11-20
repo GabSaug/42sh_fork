@@ -144,11 +144,11 @@ int execute_simple_command(struct tree *ast)
     v_destroy(to_close, free);
   }
 
-  dup2(std_in, 0);
+  dup2(0, std_in);
   close(std_in);
-  dup2(std_out, 1);
+  dup2(1, std_out);
   close(std_out);
-  dup2(std_err, 2);
+  dup2(2, std_err);
   close(std_err);
 
   /*struct vector* args = generate_command(ast);
