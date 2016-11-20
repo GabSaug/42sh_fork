@@ -184,16 +184,48 @@ static int option_parser(char* argv[], int* i, char* opt_n, char* opt_e)
   return 0;
 }
 
-static void builtin_echo_print(char* s, char opt_e)
+static int builtin_echo_print(char* s, char opt_e)
 {
-  opt_e = opt_e;
-  printf("%s", s);
+  for (size_t i = 0; s[i]; i++)
+  {
+    char c = s[i];
+    if (c == '\\' && opt_e)
+    {
+      i++;
+      char c2 = s[i];
+      if (!c2 || c2 == '\\')
+        printf("\\");
+      else if (c2 == 'n')
+        printf("\n");
+      else if (c2 == 'e')
+        printf("\e");
+      else if (c2 == 't')
+        printf("\t");
+      else if (c2 == 'a')
+        printf("\a");
+      else if (c2 == 'c')
+        return 0;
+      else if (c2 == 'f')
+        printf("\f");
+      else if (c2 == 'r')
+        printf("\r");
+      else if (c2 == 't')
+        printf("\t");
+      else if (c2 == 'v')
+        printf("\v");
+      else
+        printf("\\%i", c2);
+    }
+    else
+      printf("%c", c);
+  }
+  return 1;
 }
 
 static int builtin_echo(char* argv[])
 {
   char opt_n = 0; 
-  char opt_e = 1;
+  char opt_e = 0;
   if (argv[1])
   {
     if (!strcmp(argv[1], "--help"))
@@ -210,13 +242,8 @@ static int builtin_echo(char* argv[])
     int i = 1;
     if (option_parser(argv, &i, &opt_n, &opt_e) == -1)
       return 0;
-    if (argv[i])
-      builtin_echo_print(argv[i], opt_e);
-    for (++i; argv[i]; ++i)
-    {
+    for (; argv[i] && builtin_echo_print(argv[i], opt_e) && argv[i + 1]; ++i)
       printf(" ");
-      builtin_echo_print(argv[i], opt_e);
-    }
   }
   if (!opt_n)
     printf("\n");
