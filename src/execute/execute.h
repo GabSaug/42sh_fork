@@ -95,6 +95,13 @@ int execute_while(struct tree *ast);
 int execute_until(struct tree *ast);
 
 /**
+ * \brief Execute the rule for of a AST
+ * \param ast The AST with the rule for in the root
+ * \return The success or failure of the last execution of the loop
+*/
+int execute_for(struct tree *ast);
+
+/**
  * \brief Managed the redirection of a command
  * \param ast The command where there is redirection
  * \return A vector of file descriptors to close after the execution of the

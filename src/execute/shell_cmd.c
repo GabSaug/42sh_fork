@@ -21,6 +21,8 @@ int execute_shell_command(struct tree *ast)
     return execute_while(child);
   else if (child->nts == RULE_UNTIL)
     return execute_until(child);
+  else if (child->nts == RULE_FOR)
+    return execute_for(child);
   else
     return 1;
 }
@@ -48,25 +50,48 @@ int execute_if(struct tree *ast)
 int execute_while(struct tree *ast)
 {
   struct tree *cond = v_get(ast->child, 1);
-  int ret = 0;
+  int res = 0;
   while (execute_compound_list(cond) == 0)
   {
     struct tree *do_group = v_get(ast->child, 2);
     struct tree *compound_list = v_get(do_group->child, 1);
-    ret = execute_compound_list(compound_list);
+    res = execute_compound_list(compound_list);
   }
-  return ret;
+  return res;
 }
 
 int execute_until(struct tree *ast)
 {
   struct tree *cond = v_get(ast->child, 1);
-  int ret = 0;
+  int res = 0;
   while (execute_compound_list(cond) != 0)
   {
     struct tree *do_group = v_get(ast->child, 2);
     struct tree *compound_list = v_get(do_group->child, 1);
-    ret = execute_compound_list(compound_list);
+    res = execute_compound_list(compound_list);
   }
-  return ret;
+  return res;
+}
+
+int execute_for(struct tree *ast)
+{
+  struct tree *son = v_get(ast->child, 1);
+  char *var = son->token->s;
+
+  struct tree *compound_list = v_get(ast->child, v_size(ast->child) - 1);
+  compound_list = v_get(compound_list->child, 1);
+  int res;
+
+  son = v_get(ast->child, 3);
+  for (size_t i = 3; son->nts == WORD_RULE; i++)
+  {
+    son = v_get(son->child, 0);
+    ht[VAR] = add_hash(ht[VAR], var, son->token->s);
+    res = execute_compound_list(compound_list);
+    son = v_get(ast->child, i + 1);
+  }
+
+  del_hash(ht[VAR], var);
+
+  return res;
 }

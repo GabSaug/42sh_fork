@@ -66,6 +66,8 @@ enum quote_type
   DOUBLE_QUOTE
 };
 
+extern struct hash_table* ht[2];
+
 /**
  * \brief Fill a vector of token based on the input string
  * \param s The string to break into token
