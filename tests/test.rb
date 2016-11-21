@@ -218,16 +218,18 @@ class Test
           end
         end
       end
-      if (sanity_out_end =~ /FILE DESCRIPTORS: ([[:digit:]]*) open at exit./m) != nil then
-        fd_all = $1.to_i
-        fd_parent = sanity_out_end.gsub("<inherited from parent>").count
-        fd_leaks = fd_all - fd_parent
-        while fd_leaks > 0 do
+      while (sanity_out_end =~ /Open file descriptor ([[:digit:]]*):(.*?)\n(.*)/m) != nil do
+        sanity_out_end = $3
+        fd_num = $1.to_i
+        fd_path = $2
+        if (sanity_out_end =~ /<inherited from parent>/) == nil && fd_num != 0 && fd_num != 1 && fd_num != 2 then
           errors += 1
           if extended_output then
-            puts("    [\e[95mWARN\e[0m] File descriptor not closed")
+            puts("    [\e[95mWARN\e[0m] File descriptor not closed : " + fd_num.to_s)
+            if fd_path != nil && fd_path.size > 1 then
+              puts("      path : " + fd_path)
+            end
           end
-          fd_leaks -= 1
         end
       end
     end
