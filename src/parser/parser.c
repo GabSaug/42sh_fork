@@ -6,17 +6,29 @@
 #include "rules.h"
 
 static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
-                   enum non_terminal_symbol symbol, size_t* nb_token_read);
+                              enum non_terminal_symbol symbol,
+                              size_t* nb_token_read);
 
-struct tree* parse(struct rule** rules, struct vector* v_token)
+static struct tree* parse_rec_chap(struct rule** rules, struct vector* v_token,
+                                   size_t* nb_token_read)
 {
-  size_t nb_token_read = 0;
-  struct tree* tree = parse_rec(rules, v_token, INPUT, &nb_token_read);
+  *nb_token_read = 0;
+  return parse_rec(rules, v_token, INPUT, nb_token_read);
+}
+
+
+struct tree* parse(struct rule** rules, struct vector* v_token, int* fit_level)
+{
+  size_t nb_token_read;
+  *fit_level = 0;
+  struct tree* tree = parse_rec_chap(rules, v_token, &nb_token_read);
   if (nb_token_read == v_size(v_token))
     return tree;
   else
   {
     tree_destroy(tree);
+    if (nb_token_read == v_size(v_token))
+      *fit_level = 1;
     return NULL;
   }
 }
@@ -84,8 +96,10 @@ static int parse_nonterminal(struct tree* tree, struct rule** rules,
     return parse_star(tree, rules, v_token, nb_token_read, sym);
   else if (sym->repeat == OPTIONAL)
     return parse_optional(tree, rules, v_token, nb_token_read, sym);
-  else // PLUS
+  else if (sym->repeat == PLUS)
     return parse_plus(tree, rules, v_token, nb_token_read, sym);
+  else
+    return 0;
 }
 
 static int parse_terminal(struct tree* tree, struct rule** rules,
@@ -106,7 +120,8 @@ static int parse_terminal(struct tree* tree, struct rule** rules,
 // return -1 if no rules fit
 // return the length of the string it has accepted otherwise
 static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
-                   enum non_terminal_symbol symbol, size_t* nb_token_read)
+                              enum non_terminal_symbol symbol,
+                              size_t* nb_token_read)
 {
   struct tree* tree = tree_create(symbol);
   int nb_init_token_read = *nb_token_read;
@@ -126,7 +141,7 @@ static struct tree* parse_rec(struct rule** rules, struct vector* v_token,
           continue;
       // non terminal
       else if (!parse_nonterminal(tree, rules, v_token, nb_token_read, sym))
-          break;
+        break;
     }
     if (j == s_r->nb_sym) // Rule match
       return tree;

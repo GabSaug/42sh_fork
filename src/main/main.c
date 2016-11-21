@@ -95,7 +95,8 @@ static int process_input(char* buff, struct rule** rules)
   typer(v_token);
   //v_print(v_token);
   //printf("lexer success\n");
-  ast = parse(rules, v_token);
+  int fit_level = 0;
+  ast = parse(rules, v_token, &fit_level);
   if (ast == NULL)
   {
     warnx("Grammar error\n");
@@ -134,7 +135,7 @@ void exit_42sh(void)
     free(buff);
   }
 
-  close(0);
-  close(1);
-  close(2);
+//  close(0);
+//  close(1);
+//  close(2);
 }
