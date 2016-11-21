@@ -13,6 +13,7 @@ include_directories(src/util
                     src/main
                     src/parser
                     src/rules
+                    src/signals
                     src/option_parser)
 
 add_subdirectory(src/execute)
@@ -22,6 +23,7 @@ add_subdirectory(src/main)
 add_subdirectory(src/option_parser)
 add_subdirectory(src/parser)
 add_subdirectory(src/rules)
+add_subdirectory(src/signals)
 add_subdirectory(src/util)
 
 add_executable(${BIN_NAME} ${SRC})

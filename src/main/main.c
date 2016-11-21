@@ -16,6 +16,7 @@
 #include "execute.h"
 #include "main.h"
 #include "typer.h"
+#include "signals.h"
 
 static char* get_PS(void);
 static int process_input(char* buff, struct rule** rules);
@@ -33,6 +34,7 @@ static int processing = 0;
 int main(int argc, char* argv[])
 {
   atexit(exit_42sh);
+  set_sigacts();
   ht[VAR] = create_hash(256);
   ht[ALIAS] = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
@@ -51,16 +53,28 @@ static int process_interactive(void)
   int ret = 0;
   while (1)
   {
-    char* prompt = get_PS();
-    buff = readline(prompt);
-    if (!buff)
-    {
-      printf("exit\n");
-      return ret;
-    }
-    add_history(buff);
-    ret = process_input(buff, rules);
-    free(buff);
+//    int pid = fork();
+//    if (pid == -1)
+//      err(1, "Fork fail");
+//    else if (pid == 0)
+//    {
+      char* prompt = get_PS();
+      buff = readline(prompt);
+      if (!buff)
+      {
+        printf("exit\n");
+        return ret;
+      }
+      if (strlen(buff) != 0)
+      {
+        add_history(buff);
+        ret = process_input(buff, rules);
+      }
+      free(buff);
+//      exit(ret);
+//    }
+//    else
+//      waitpid(pid, &ret, 0);
   }
   return ret;
 }
