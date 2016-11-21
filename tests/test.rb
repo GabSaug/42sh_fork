@@ -216,6 +216,31 @@ class Test
           else
             puts("    [\e[95mWARN\e[0m] Memory unknown error")
           end
+          if (error_content =~ /<stack>(.*)<\/stack>/m) != nil then
+            stack_content = $1
+            puts("      stack :")
+            print("\e[7m")
+            while (stack_content =~ /<frame>(.*?)<\/frame>(.*)/m) != nil do
+              frame_content = $1
+              stack_content = $2
+              frame_content =~ /<obj>(.*)<\/obj>/
+              obj = $1
+              frame_content =~ /<fn>(.*)<\/fn>/
+              fn = $1
+              frame_content =~ /<file>(.*)<\/file>/
+              file = $1
+              frame_content =~ /<line>(.*)<\/line>/
+              line = $1
+              if true || obj != nil && obj.index($bin_name) != nil then
+                if file != nil && line != nil
+                  puts("function : " + fn + " in " + file + ":" + line)
+                else
+                  puts("function : " + fn)
+                end
+              end
+            end
+            print("\e[0m")
+          end
         end
       end
       while (sanity_out_end =~ /Open file descriptor ([[:digit:]]*):(.*?)\n(.*)/m) != nil do
