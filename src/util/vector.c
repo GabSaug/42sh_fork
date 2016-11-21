@@ -70,6 +70,12 @@ void v_set(struct vector* v, size_t i, void* elmt)
     v->data[i] = elmt;
 }
 
+void v_concat(struct vector* v1, struct vector* v2)
+{
+  for (size_t i = 0; i < v2->size; ++i)
+    v_append(v1, v_get(v2, i));
+}
+
 void* v_remove_last(struct vector* v)
 {
   if (v->size == 0)

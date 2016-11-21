@@ -36,7 +36,7 @@ int main(int argc, char* argv[])
   atexit(exit_42sh);
   set_sigacts();
   ht[VAR] = create_hash(256);
-  ht[ALIAS] = create_hash(256);
+  ht[FUN] = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv);
   rules = init_all_rules();
@@ -112,7 +112,7 @@ static int process_input(char* buff, struct rule** rules)
   ast = parse(rules, v_token, &fit_level);
   if (ast == NULL)
   {
-    warnx("Grammar error\n");
+    warnx("Grammar error");
     ret = 1;
   }
   else
@@ -139,7 +139,7 @@ static char* get_PS(void)
 void exit_42sh(void)
 {
   destroy_hash(ht[VAR]);
-  destroy_hash(ht[ALIAS]);
+  destroy_hash(ht[FUN]);
   rules_destroy(rules);
   if (processing)
   {

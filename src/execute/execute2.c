@@ -1,4 +1,6 @@
-# include "execute.h"
+#include "execute.h"
+#include "my_string.h"
+#include "expansion.h"
 
 extern struct hash_table* ht[2];
 
@@ -44,22 +46,6 @@ static int execute_bin(char** argv)
   }
 }
 
-/*static struct vector* generate_command(struct tree *ast)
-{
-  size_t size = v_size(ast->child);
-  struct vector* args = v_create();
-
-  for (size_t j = 0; j < size; j++)
-  {
-    struct vector* arg_tmp = expand(get_child_elt(ast, j));
-    v_concat(args, arg_tmp);
-    v_destroy(arg_tmp, NULL);
-  }
-
-  return args;
-}*/
-
-
 static size_t get_size(struct tree *ast)
 {
   size_t size = v_size(ast->child);
@@ -83,11 +69,28 @@ static size_t get_size(struct tree *ast)
   return count;
 }
 
+/*static struct vector* generate_command(struct tree *ast)
+{
+  size_t size = v_size(ast->child);
+  struct vector* args = v_create();
+
+  for (size_t j = 0; j < size; j++)
+  {
+    struct vector* arg_tmp = expand(get_child_elt(ast, j));
+    v_concat(args, arg_tmp);
+    v_destroy(arg_tmp, NULL);
+  }
+
+  return args;
+}*/
+
 static char** generate_command(struct tree *ast, size_t *size)
 {
-  *size = get_size(ast);;
+  /**size = get_size(ast);;
   char **args = malloc(sizeof (char*) * (*size + 1));
-  size_t k = 0;
+  size_t k = 0;*/
+
+  struct vector* v_args = v_create();
 
   for (size_t j = 0; j < v_size(ast->child); j++)
   {
@@ -95,10 +98,17 @@ static char** generate_command(struct tree *ast, size_t *size)
     son = v_get(son->child, 0);
     if (son->nts != REDIRECTION)
     {
-      args[k] = son->token->s;
-      k++;
+      /*args[k] = son->token->s;
+      k++;*/
+      struct vector* v_arg_tmp = expand(my_strdup(son->token->s));
+      v_concat(v_args, v_arg_tmp);
+      v_destroy(v_arg_tmp, NULL);
     }
   }
+  *size = v_size(v_args);
+  char **args = malloc(sizeof (char*) * (*size + 1));
+  for (size_t i = 0; i < *size; ++i)
+    args[i] = v_get(v_args, i);
   args[*size] = NULL;
 
   return args;
@@ -133,6 +143,8 @@ int execute_simple_command(struct tree *ast)
   }
 
   int res = execute_prog(argv);
+  for (size_t i = 0; argv[i]; ++i)
+    free(argv[i]);
   free(argv);
   if (to_close)
   {

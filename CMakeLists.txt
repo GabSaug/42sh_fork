@@ -6,24 +6,26 @@ set(CMAKE_C_FLAGS_DEBUG "-g")
 set(CMAKE_C_FLAGS_RELEASE "-O2")
 set(BIN_NAME "42sh")
 
-include_directories(src/util
+include_directories(src/main
+                    src/signals
+                    src/option_parser
                     src/lexer
                     src/typer
-                    src/execute
-                    src/main
-                    src/parser
                     src/rules
-                    src/signals
-                    src/option_parser)
+                    src/parser
+                    src/expansion
+                    src/execute
+                    src/util)
 
-add_subdirectory(src/execute)
+add_subdirectory(src/main)
+add_subdirectory(src/signals)
+add_subdirectory(src/option_parser)
 add_subdirectory(src/lexer)
 add_subdirectory(src/typer)
-add_subdirectory(src/main)
-add_subdirectory(src/option_parser)
-add_subdirectory(src/parser)
 add_subdirectory(src/rules)
-add_subdirectory(src/signals)
+add_subdirectory(src/parser)
+add_subdirectory(src/expansion)
+add_subdirectory(src/execute)
 add_subdirectory(src/util)
 
 add_executable(${BIN_NAME} ${SRC})
