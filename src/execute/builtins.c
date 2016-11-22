@@ -330,6 +330,7 @@ static int builtin_echo(char* argv[])
   }
   if (!opt_n)
     printf("\n");
+  fflush(stdout);
  return 0; 
 }
 

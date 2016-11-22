@@ -55,7 +55,7 @@ static size_t tokenize_exp_other(char *s, char b, char d)
     else if (s[i] == '\'' || s[i] == '\"')
     {
       char c = s[i];
-      for (i++; s[i] && s[i] != c; ++i)
+      for (i++; s[i] && s[i] != c; ++i) // add back_slash escape
         continue;
     }
 
