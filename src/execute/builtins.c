@@ -55,20 +55,20 @@ static int builtin_shopt(char *argv[])
     if (opt[0] && opt[0] == '-')
     {
       i++;
-      for (size_t i = 0; opt[i]; i++)
+      for (size_t l = 1; opt[l]; l++)
       {
-        if (opt[i] == 's' && strcmp(set, "off") != 0)
-          set = "on\0";
-        else if (opt[i] == 'u' && strcmp(set, "on") != 0)
-          set = "off\0";
-        else if (opt[i] == 's' || opt[i] == 'u')
+        if (opt[l] == 's' && strcmp(set, "0\0") != 0)
+          set = "1\0";
+        else if (opt[l] == 'u' && strcmp(set, "1\0") != 0)
+          set = "0\0";
+        else if (opt[l] == 's' || opt[l] == 'u')
         {
           warnx("shopt: cannot set and unset shell options simultaneously");
           return 1;
         }
-        else if (opt[i] == 'q' && set[0] == ' ')
+        else if (opt[l] == 'q' && set[0] == ' ')
           set = "q\0";
-        else if (opt[i] != 'q')
+        else if (opt[l] != 'q')
         {
           warnx("shopt: invalid option");
           return 2;
