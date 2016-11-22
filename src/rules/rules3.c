@@ -72,17 +72,17 @@ static struct rule *init_rule_simple_command(void)
 {
   struct rule *rule = my_malloc(sizeof (struct rule));
   rule->nb_s_r = 2;
-  rule->s_r = my_malloc(sizeof (struct simple_rule) * 2);
+  rule->s_r = my_malloc(sizeof (struct simple_rule) * 2); // inverse rules
   // Rule 1
-  rule->s_r[0].nb_sym = 1;
-  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[0].sym_arr, 0, PLUS, PREFIX, 0);
+  rule->s_r[0].nb_sym = 2;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 2);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, STAR, PREFIX, 0);
+  create_sym(rule->s_r[0].sym_arr + 1, 0, PLUS, ELEMENT, 0);
 
   // Rule 2
-  rule->s_r[1].nb_sym = 2;
-  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol) * 2);
-  create_sym(rule->s_r[1].sym_arr + 0, 0, STAR, PREFIX, 0);
-  create_sym(rule->s_r[1].sym_arr + 1, 0, PLUS, ELEMENT, 0);
+  rule->s_r[1].nb_sym = 1;
+  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[1].sym_arr, 0, PLUS, PREFIX, 0);
 
   return rule;
 }
