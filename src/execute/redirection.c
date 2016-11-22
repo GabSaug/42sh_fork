@@ -1,21 +1,5 @@
 #include "execute.h"
-
-static int my_atoi(const char str[])
-{
-  size_t i = 0;
-  int res = 0;
-
-  while (str[i])
-  {
-    if (str[i] < '0' || str[i] > '9')
-      return - 1;
-    else
-      res = res * 10 + str[i] - '0';
-    i++;
-  }
-
-  return res;
-}
+#include "my_string.h"
 
 static int open_and_redir(int fd_ionum, const char *file_name, int flags)
 {

@@ -30,6 +30,7 @@ int my_is_in(char* str, char s_list[][10]);
 int my_strcmp(char* str1, char* str2);
 int is_digit(char c);
 int is_number(char* s);
+int my_atoi(const char str[]);
 char* my_strdup(char* s);
 char* my_strndup(char* s, size_t n);
 int is_prefix_arr(char* str, char s_list[][10]);

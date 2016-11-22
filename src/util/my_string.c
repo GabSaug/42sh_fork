@@ -42,12 +42,26 @@ int is_digit(char c)
   return ('0' <= c && c <= '9');
 }
 
-int is_number(char* s)
+int is_number(char* s) // Negative number are NOT recognize as number
 {
   for (size_t i = 0; s[i]; ++i)
     if (!is_digit(s[i]))
       return 0;
   return 1;
+}
+
+int my_atoi(const char str[])
+{
+  int res = 0;
+  for (size_t i = 0; str[i]; ++i)
+  {
+    if (!is_digit(str[i]))
+      return - 1;
+    else
+      res = res * 10 + str[i] - '0';
+  }
+
+  return res;
 }
 
 char* my_strdup(char* s)
