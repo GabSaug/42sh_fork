@@ -17,14 +17,14 @@
           [X] While and until commands
           [X] For commands
           [ ] Functions
-          [x] Case commands
+          [X] Case commands
      [ ] History
 
 [ ] Version 0.8
      [ ] Expansion
           [ ] Tilde
-          [ ] Variables
-          [ ] Quoting removal
+          [x] Variables
+          [X] Quoting removal
           [ ] Path
           [ ] Arithmetic
           [ ] Aliases
