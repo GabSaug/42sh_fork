@@ -4,7 +4,7 @@
 # Configuration variables :
 
 $Bin_default_name = "sh"
-$Timeout_default = 5
+$Timeout_default = 1
 $Err_eq_def = true
 $Sanity_bin = "valgrind --track-fds=yes --xml=yes --xml-file=outxml --log-file=outend --child-silent-after-fork=yes"
 
