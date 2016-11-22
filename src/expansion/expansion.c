@@ -11,6 +11,7 @@ extern struct hash_table* ht[2];
 
 //static char* tilde_expansion(char* s);
 static char* parameter_expansion(char* s);
+static char* remove_quote(char* s);
 
 struct vector* expand(char* s)
 {
@@ -18,6 +19,12 @@ struct vector* expand(char* s)
   char* param_s = parameter_expansion(s); // Change to tilde_s
 struct vector* v = v_create();
 v_append(v, param_s);
+
+//printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
+
+  for (size_t i = 0; i < v_size(v); ++i)
+    v_set(v, i, remove_quote(v_get(v, i)));
+
 return v;
 
   /*char* param_s = parameter_expansion(tilde_s);
@@ -30,8 +37,34 @@ return v;
   char* IFS = get_data(ht[VAR], "IFS");
   if (IFS && IFS != '\0') // IFS is not null
     field_split(v);*/
+}
 
-  
+static char* remove_quote(char* s)
+{
+  char* new = NULL;
+  size_t new_size = 1;
+  new = realloc(new, new_size);
+  size_t j = 0;
+  char quoted[3] = {0};
+  for (size_t i = 0; s[i]; ++i)
+  {
+    //printf("s[i] = %c, %.*s\n", s[i], (int)j, new);
+    if (quoted[BACKSLASH] > 0)
+      quoted[BACKSLASH]--;
+    if (!update_quote(s[i], quoted))
+    {
+      if (new_size - 1 <= j)
+      {
+        new_size *= 2;
+        new = realloc(new, new_size);
+      }
+      new[j++] = s[i];
+    }
+  }
+  free(s);
+
+  new[j] = '\0';
+  return new;
 }
 
 static char* parameter_expansion(char* s)
