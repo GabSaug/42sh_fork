@@ -89,10 +89,10 @@ static int apply_rule(struct vector* v_token, char quoted[],
   if ((s[*i] == '$' || s[*i] == '`') && !quoted[BACKSLASH]
       && !quoted[SINGLE_QUOTE])
   {
-    int ret = tokenize_expansion(s + *i);
-    if (ret == 0)
+    size_t size_exp = tokenize_expansion(s + *i).size;
+    if (size_exp == 0)
       return -1;
-    *i += ret - 1;
+    *i += size_exp - 1;
     return 0;
   }
   apply_rule_2(v_token, quoted, part_of_operator,
@@ -131,7 +131,10 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
     return 0;
   // Rule 9
   if (s[*i] == '#')
+  {
     *i += tokenize_comment(s, *i);
+    *start = s + *i + 1;
+  }
   // Rule 10
   else
     *part_of_word = 1;
@@ -183,15 +186,20 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
 
   struct token* new_token = my_malloc(sizeof(struct token));
   new_token->id = UNDIFINED;
-  if (start && end && end >= start)
+  if (start && end)
   {
-    size_t s_size = (end - start) + 1;
-    char* s = my_malloc(s_size + 1); // +1 for '\0'
-    for (size_t i = 0; i < s_size + 1; ++i)
-      s[i] = start[i];
-    s[s_size] = '\0';
-    //printf("tok : %s\n", s);
-    new_token->s = s;
+    if (end >= start)
+    {
+      size_t s_size = (end - start) + 1;
+      char* s = my_malloc(s_size + 1); // +1 for '\0'
+      for (size_t i = 0; i < s_size + 1; ++i)
+        s[i] = start[i];
+      s[s_size] = '\0';
+      //printf("tok : %s\n", s);
+      new_token->s = s;
+    }
+    else
+      return 0;
   }
   else
     new_token->s = NULL;
