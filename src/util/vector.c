@@ -15,15 +15,6 @@ static char ts2string[][20] =
   "word", "assignment_word", "name", "IO_number"
 };
 
-/*static char ts2string[][20] =
-{
-  ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&", "<>",
-  "<<-", ">|", "EOF",
-  "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
-  "until", "for", "{", "}", "(", ")", "!", "in", "function", "<new_line>",
-  "word", "assignment_word", "name", "IO_number"
-};*/
-
 void v_print(struct vector* v)
 {
   for (size_t i = 0; i < v->size; ++i)

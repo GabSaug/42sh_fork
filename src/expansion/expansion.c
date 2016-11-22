@@ -73,13 +73,6 @@ static char* parameter_expansion(char* s)
     return s;
   //printf("param expansion; s= %s ", s);
 
-  //char* param_name = s + 1; // CHANGE !!!
-  /*size_t param_size = tokenize_exp_normal(s);
-  if (param_size <= 1)
-  {
-
-    printf("fuck\n");
-  }*/
   struct expansion exp = tokenize_expansion(s);
   /*printf("exp.size = %zu, exp.type = %i, size_s = %i, exp.s = %.*s\n",
          exp.size, exp.type, (int)(exp.end - exp.start),

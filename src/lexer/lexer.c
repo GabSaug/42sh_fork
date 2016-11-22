@@ -11,11 +11,6 @@ static char operator_list[][10] =
   ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
   "<>", "<<-", ">|", "{", "}", "(", ")", "!", ""
 };
-/*static char reserved_word[][10] =
-{
-  "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
-  "until", "for", "in", "function", "\n", ""
-};*/
 
 static char quote_symbol[][10] =
 {
@@ -46,7 +41,6 @@ int lexer(char* s, struct vector* v_token)
   char part_of_operator = 0;
   char part_of_word = 0;
   char quoted[3] = {0};
-  //enum terminal_symbol curr_token = UNDIFINED;
   // Contain { is_backslah_quoted, is_single_quoted, is double_quoted }
   size_t i;
   for (i = 0; s[i]; ++i)
@@ -103,7 +97,7 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
                         size_t* i, char** start)
 {
   // Rule 6
-  int op = begin_as(s + *i, s + *i, operator_list); 
+  int op = begin_as(s + *i, s + *i, operator_list);
   if (!is_quoted(quoted) && op != -1)
   {
     if (*start != s + *i)
@@ -115,7 +109,6 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
     }
     *start = s + *i;
     *part_of_operator = 1;
-    //*curr_token = begin_as(s + *i, s + *i, operator_list);
     return 0;
   }
   // Rule 7
@@ -136,7 +129,6 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
   // Rule 10
   else
     *part_of_word = 1;
-    //*curr_token = WORD;
   return 0;
 }
 
@@ -145,8 +137,6 @@ static void rule_7(struct vector* v_token, char** start, char* s, size_t* i,
 {
   if (*start != s + *i)
     append_token(v_token, *start, s + *i - 1);
-  /*if (s[*i] == '\n')
-    append_token(v_token, NULL, NULL);*/
   *part_of_operator = 0;
   *part_of_word = 0;
   *start = s + *i + 1;
@@ -167,8 +157,6 @@ static void rule_3(struct vector* v_token, char** start, char* s, size_t i,
 
 static size_t append_token(struct vector* v_token, char* start, char* end)
 {
-  /*if (token_id == UNDIFINED)
-    return;*/
   if (end < start)
     return 0;
 
@@ -187,29 +175,7 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
   else
     new_token->s = NULL;
 
-  /*if (token_id == WORD)
-  {
-    int index_reserved_word = is_in(start, end, reserved_word);
-    if (index_reserved_word != -1)
-    {
-      new_token->id = IF + index_reserved_word;
-      new_token->s = NULL;
-    }
-    else
-    {
-      size_t s_size = (end - start) + 1;
-      char* s = my_malloc(s_size + 1); // +1 for '\0'
-      for (size_t i = 0; i < s_size + 1; ++i)
-        s[i] = start[i];
-      s[s_size] = '\0';
-      new_token->s = s;
-    }
-  }*/
-  //new_token->id = UNDIFINED;
-    return v_append(v_token, new_token);
-  /*}
-  else
-    return 0;*/
+  return v_append(v_token, new_token);
 }
 
 void token_destroy(void* p)

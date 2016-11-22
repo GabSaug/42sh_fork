@@ -18,27 +18,6 @@ static char reserved_word[][10] =
 };
 
 
-/*static char operator_list[][10] =
-{
-  ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
-  "<>", "<<-", ">|", ""
-};
-static char reserved_word[][10] =
-{
-  "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
-  "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
-};*/
-/*static enum terminal_symbol before_reserved_word[] =
-{
-  IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL, IN, PIPE, AND_IF, OR_IF, SEMI, AND, DSEMI, NL
-};*/
-
-/*static enum terminal_symbol before_reserved_word[] =
-{
-  IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL, L_BRACE, R_BRACE, L_PAR, R_PAR,
-  BANG, IN, PIPE, AND_IF, OR_IF, SEMI, AND, DSEMI, NL
-};*/
-
 static enum terminal_symbol brw_if[] =
 {
   R_BRACE,
@@ -102,16 +81,6 @@ static size_t brw_match_len[NL - IF] = //nb reserved_word
   sizeof (brw_function) / sizeof (enum terminal_symbol)
 };
 
-
-
-/*static enum terminal_symbol before_reserved_word[] =
-{
-  , , ,
-  BANG, IN, PIPE, AND_IF, OR_IF, SEMI,
-  L_BRACE, L_PAR, R_PAR, IF, THEN, ELSE, ELIF, DOi, WHILE, UNTIL,
-  AND, SEMI, NL
-};*/
-
 static int is_among(enum terminal_symbol sym, enum terminal_symbol arr[],
                     size_t len)
 {
@@ -151,9 +120,6 @@ void typer(struct vector* v_token)
       }
     }
     struct token* prev = v_get(v_token, i - 1);
-    //if (prev == NULL || (prev->id == SEMI || prev->id == AND || prev->id == NL
-  //             || prev->id == BANG))
-
     int index_rw = my_is_in(token->s, reserved_word);
     if (index_rw != -1 && index_rw != IN - IF)
     {
@@ -162,9 +128,7 @@ void typer(struct vector* v_token)
           || brw_match[index_rw] == brw_function)
         can_be_at_begining = 1;
 
-      //size_t len = sizeof (brw_match[index_rw]) / sizeof (enum terminal_symbol);
       size_t len = brw_match_len[index_rw];
-      //printf("len = %zu\n", len);
       if ((can_be_at_begining && prev == NULL)
           || (prev && is_among(prev->id, brw_match[index_rw], len) != -1))
       {
@@ -179,22 +143,6 @@ void typer(struct vector* v_token)
       continue;
     }
 
-
-    /*if (prev == NULL || is_among(prev->id, before_reserved_word, len) != -1)
-    {
-      int index_reserved_word = my_is_in(token->s, reserved_word);
-      if (index_reserved_word != -1)
-      {
-        token->id = IF + index_reserved_word;
-        continue;
-      }
-      // = not in 1st position
-      if (strchr(token->s, '=') > token->s && !is_digit(token->s[0]))
-      {
-        token->id = ASSIGNMENT_WORD;
-        continue;
-      }
-    }*/
     struct token* prev_prev = v_get(v_token, i - 2);
     if (prev_prev && (prev_prev->id == FOR || prev_prev->id == CASE))
     {

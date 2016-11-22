@@ -47,50 +47,8 @@ static int execute_bin(char** argv)
   }
 }
 
-/*static size_t get_size(struct tree *ast)
-{
-  size_t size = v_size(ast->child);
-
-  size_t i = 0;
-  size_t count = 0;
-  struct tree *son = v_get(ast->child, i);
-  son = v_get(son->child, 0);
-  while (i < size)
-  {
-    i++;
-    if (son->nts != REDIRECTION)
-      count++;
-
-    if (i < size)
-    {
-      son = v_get(ast->child, i);
-      son = v_get(son->child, 0);
-    }
-  }
-  return count;
-}*/
-
-/*static struct vector* generate_command(struct tree *ast)
-{
-  size_t size = v_size(ast->child);
-  struct vector* args = v_create();
-
-  for (size_t j = 0; j < size; j++)
-  {
-    struct vector* arg_tmp = expand(get_child_elt(ast, j));
-    v_concat(args, arg_tmp);
-    v_destroy(arg_tmp, NULL);
-  }
-
-  return args;
-}*/
-
 static char** generate_command(struct tree *ast, size_t index_start)
 {
-  /**size = get_size(ast);;
-  char **args = malloc(sizeof (char*) * (*size + 1));
-  size_t k = 0;*/
-
   struct vector* v_args = v_create();
 
   for (size_t j = index_start; j < v_size(ast->child); j++)
@@ -99,8 +57,6 @@ static char** generate_command(struct tree *ast, size_t index_start)
     son = v_get(son->child, 0);
     if (son->nts != REDIRECTION)
     {
-      /*args[k] = son->token->s;
-      k++;*/
       struct vector* v_arg_tmp = expand(my_strdup(son->token->s));
       v_concat(v_args, v_arg_tmp);
       v_destroy(v_arg_tmp, NULL);
@@ -191,43 +147,3 @@ int execute_simple_command(struct tree *ast)
   return res;
 }
 
-  /*size_t size;
-  char** argv = generate_command(ast, &size);
-
-  struct vector *to_close = NULL;
-  int std_in = dup(0);
-  int std_out = dup(1);
-  int std_err = dup(2);
-  //if (size < v_size(ast->child))
-  //{
-    to_close = managed_redirections(ast);
-    if (!to_close)
-    {
-      free(argv);
-      return 1;
-    }
-  //}
-
-  int res = execute_prog(argv);
-  for (size_t i = 0; argv[i]; ++i)
-    free(argv[i]);
-  free(argv);
-  if (to_close)
-  {
-    for (size_t i = 0; i < v_size(to_close); i++)
-    {
-      int *fd = v_get(to_close, i);
-      close(*fd);
-    }
-    v_destroy(to_close, free);
-  }
-
-  dup2(std_in, 0);
-  close(std_in);
-  dup2(std_out, 1);
-  close(std_out);
-  dup2(std_err, 2);
-  close(std_err);
-
-  //return res;
-}*/

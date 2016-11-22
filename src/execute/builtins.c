@@ -189,25 +189,6 @@ static int builtin_cd(char* argv[])
   return 1;
 }
 
-/*
-// To delete
-int builtin_execution(struct tree *ast, int bi)
-{
-  switch (bi)
-  {
-  case 0:
-    exit(EXIT_SUCCESS);
-  case 1:
-    return 0;
-  case 2:
-    return 1;
-  default:
-    warn("%s: Invalid builtin", get_child_elt(ast, 0));
-    return 1;
-  // TODO Execute buitins
-  }
-}*/
-
 static char* builtin_echo_help = "\n\
 echo: echo [-neE] [arg ...]\n\
     Write arguments to the standard output.\n\
