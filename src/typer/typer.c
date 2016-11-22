@@ -28,15 +28,88 @@ static char reserved_word[][10] =
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
   "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
 };*/
-static enum terminal_symbol before_reserved_word[] =
+/*static enum terminal_symbol before_reserved_word[] =
 {
   IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL, IN, PIPE, AND_IF, OR_IF, SEMI, AND, DSEMI, NL
-};
+};*/
 
 /*static enum terminal_symbol before_reserved_word[] =
 {
   IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL, L_BRACE, R_BRACE, L_PAR, R_PAR,
   BANG, IN, PIPE, AND_IF, OR_IF, SEMI, AND, DSEMI, NL
+};*/
+
+static enum terminal_symbol brw_if[] =
+{
+  R_BRACE,
+  BANG, PIPE,
+  AND_IF, OR_IF,
+  AND, SEMI, NL,
+  L_BRACE, L_PAR, R_PAR, IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL // + NULL
+};
+
+static enum terminal_symbol brw_function[] =
+{
+  BANG, PIPE,
+  AND_IF, OR_IF,
+  AND, SEMI, NL,
+  L_BRACE, L_PAR, R_PAR, IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL // + NULL
+};
+
+static enum terminal_symbol brw_end_compound_list[] =
+{
+  AND, SEMI, NL
+};
+
+static enum terminal_symbol brw_esac[] =
+{
+  DSEMI, IN, R_BRACE
+};
+
+static enum terminal_symbol* brw_match[NL - IF] = //nb reserved_word
+{
+  brw_if,
+  brw_end_compound_list,
+  brw_end_compound_list,
+  brw_end_compound_list,
+  brw_end_compound_list, // FI
+  brw_end_compound_list, // DO
+  brw_end_compound_list, // DONE
+  brw_end_compound_list, // CASE
+  brw_esac,
+  brw_if, // WHILE
+  brw_if, // UNTIL
+  brw_if, // FOR
+  NULL,
+  brw_function
+};
+
+static size_t brw_match_len[NL - IF] = //nb reserved_word
+{
+  sizeof (brw_if) / sizeof (enum terminal_symbol),
+  sizeof (brw_end_compound_list) / sizeof (enum terminal_symbol),
+  sizeof (brw_end_compound_list) / sizeof (enum terminal_symbol),
+  sizeof (brw_end_compound_list) / sizeof (enum terminal_symbol),
+  sizeof (brw_end_compound_list) / sizeof (enum terminal_symbol),
+  sizeof (brw_end_compound_list) / sizeof (enum terminal_symbol),
+  sizeof (brw_end_compound_list) / sizeof (enum terminal_symbol),
+  sizeof (brw_end_compound_list) / sizeof (enum terminal_symbol),
+  sizeof (brw_esac) / sizeof (enum terminal_symbol),
+  sizeof (brw_if) / sizeof (enum terminal_symbol), // WHILE
+  sizeof (brw_if) / sizeof (enum terminal_symbol), // UNTIL
+  sizeof (brw_if) / sizeof (enum terminal_symbol), // FOR
+  0,
+  sizeof (brw_function) / sizeof (enum terminal_symbol)
+};
+
+
+
+/*static enum terminal_symbol before_reserved_word[] =
+{
+  , , ,
+  BANG, IN, PIPE, AND_IF, OR_IF, SEMI,
+  L_BRACE, L_PAR, R_PAR, IF, THEN, ELSE, ELIF, DOi, WHILE, UNTIL,
+  AND, SEMI, NL
 };*/
 
 static int is_among(enum terminal_symbol sym, enum terminal_symbol arr[],
@@ -80,8 +153,34 @@ void typer(struct vector* v_token)
     struct token* prev = v_get(v_token, i - 1);
     //if (prev == NULL || (prev->id == SEMI || prev->id == AND || prev->id == NL
   //             || prev->id == BANG))
-    size_t len = sizeof (before_reserved_word) / sizeof (*before_reserved_word);
-    if (prev == NULL || is_among(prev->id, before_reserved_word, len) != -1)
+
+    int index_rw = my_is_in(token->s, reserved_word);
+    if (index_rw != -1 && index_rw != IN - IF)
+    {
+      int can_be_at_begining = 0;
+      if (brw_match[index_rw] == brw_if
+          || brw_match[index_rw] == brw_function)
+        can_be_at_begining = 1;
+
+      //size_t len = sizeof (brw_match[index_rw]) / sizeof (enum terminal_symbol);
+      size_t len = brw_match_len[index_rw];
+      //printf("len = %zu\n", len);
+      if ((can_be_at_begining && prev == NULL)
+          || (prev && is_among(prev->id, brw_match[index_rw], len) != -1))
+      {
+        token->id = IF + index_rw;
+        continue;
+      }
+    }
+    // = not in 1st position
+    if (strchr(token->s, '=') > token->s && !is_digit(token->s[0]))
+    {
+      token->id = ASSIGNMENT_WORD;
+      continue;
+    }
+
+
+    /*if (prev == NULL || is_among(prev->id, before_reserved_word, len) != -1)
     {
       int index_reserved_word = my_is_in(token->s, reserved_word);
       if (index_reserved_word != -1)
@@ -95,7 +194,7 @@ void typer(struct vector* v_token)
         token->id = ASSIGNMENT_WORD;
         continue;
       }
-    }
+    }*/
     struct token* prev_prev = v_get(v_token, i - 2);
     if (prev_prev && (prev_prev->id == FOR || prev_prev->id == CASE))
     {
