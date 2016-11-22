@@ -9,26 +9,13 @@
 static char operator_list[][10] =
 {
   ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
-  "<>", "<<-", ">|", ""
+  "<>", "<<-", ">|", "{", "}", "(", ")", "!", ""
 };
 /*static char reserved_word[][10] =
 {
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
-  "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
+  "until", "for", "in", "function", "\n", ""
 };*/
-
-static int is_digit(char c)
-{
-  return ('0' <= c && c <= '9');
-}
-
-static int is_number(char* s)
-{
-  for (size_t i = 0; s[i]; ++i)
-    if (!is_digit(s[i]))
-      return 0;
-  return 1;
-}
 
 static char quote_symbol[][10] =
 {
@@ -73,7 +60,8 @@ int lexer(char* s, struct vector* v_token)
   }
   if (i != 0) // There is not any token
     append_token(v_token, start, s + i - 1);
-  append_token(v_token, NULL, NULL);
+  struct token* new_token = v_get(v_token, append_token(v_token, NULL, NULL));
+  new_token->id = EOF_SYM;
   return 1;
 }
 
@@ -124,8 +112,7 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
     {
       size_t index = append_token(v_token, *start, s + *i - 1);
       struct token* tok = v_get(v_token, index);
-      if (is_number(tok->s) && (op == LESS || op == GREAT || op == DLESS
-          || op == CLOBBER))
+      if (is_number(tok->s) && (LESS <= op && op <= CLOBBER))
         tok->id = IO_NUMBER;
     }
     *start = s + *i;
@@ -193,10 +180,11 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
 {
   /*if (token_id == UNDIFINED)
     return;*/
+
+  struct token* new_token = my_malloc(sizeof(struct token));
+  new_token->id = UNDIFINED;
   if (start && end && end >= start)
   {
-    struct token* new_token = my_malloc(sizeof(struct token));
-    new_token->id = UNDIFINED;
     size_t s_size = (end - start) + 1;
     char* s = my_malloc(s_size + 1); // +1 for '\0'
     for (size_t i = 0; i < s_size + 1; ++i)
@@ -204,6 +192,9 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
     s[s_size] = '\0';
     //printf("tok : %s\n", s);
     new_token->s = s;
+  }
+  else
+    new_token->s = NULL;
 
   /*if (token_id == WORD)
   {
@@ -225,9 +216,9 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
   }*/
   //new_token->id = UNDIFINED;
     return v_append(v_token, new_token);
-  }
+  /*}
   else
-    return 0;
+    return 0;*/
 }
 
 static int is_quoted(char quoted[3])

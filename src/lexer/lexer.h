@@ -26,6 +26,11 @@ enum terminal_symbol
   LESSGREAT,
   DLESSDASH,
   CLOBBER,
+  L_BRACE,
+  R_BRACE,
+  L_PAR, // (
+  R_PAR, // )
+  BANG, // !
   EOF_SYM,
   IF,
   THEN,
@@ -39,11 +44,6 @@ enum terminal_symbol
   WHILE,
   UNTIL,
   FOR,
-  L_BRACE,
-  R_BRACE,
-  L_PAR, // (
-  R_PAR, // )
-  BANG, // !
   IN,
   FUNCTION,
   NL, // \n
