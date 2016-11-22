@@ -21,7 +21,7 @@ static int test_case_item(struct tree *ast, char *word)
   while (i < v_size(ast->child) && res)
   {
     struct tree *son = v_get(ast->child, i);
-    if (son->token && son->token->id != WORD)
+    if (!son->token || son->token->id != WORD)
     {
       i++;
       continue;
