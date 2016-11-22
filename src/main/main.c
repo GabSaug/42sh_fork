@@ -65,11 +65,8 @@ static int process_interactive(void)
         printf("exit\n");
         return ret;
       }
-      if (strlen(buff) != 0)
-      {
-        add_history(buff);
-        ret = process_input(buff, rules);
-      }
+      add_history(buff);
+      ret = process_input(buff, rules);
       free(buff);
 //      exit(ret);
 //    }
@@ -100,6 +97,8 @@ static int process_input(char* buff, struct rule** rules)
 {
   int ret = 0;
   processing = 1;
+  if (strlen(buff) == 0)
+    return 0;
   v_token = v_create();
   if (!lexer(buff, v_token))
   {
