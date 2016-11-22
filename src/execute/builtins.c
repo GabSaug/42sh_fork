@@ -9,6 +9,7 @@ static int builtin_true(char* argv[]);
 static int builtin_false(char* argv[]);
 static int builtin_cd(char* argv[]);
 static int builtin_echo(char* argv[]);
+static int builtin_shopt(char *argv[]);
 
 static struct builtin_fun builtin_fun_array[] =
 {
@@ -16,10 +17,10 @@ static struct builtin_fun builtin_fun_array[] =
   { "true", builtin_true },
   { "false", builtin_false },
   { "cd", builtin_cd },
-  { "echo", builtin_echo }
+  { "echo", builtin_echo },
+  { "shopt", builtin_shopt }
 };
-/*  { "shopt", builtin_shopt },
-  { "export", builtin_export },
+/*{ "export", builtin_export },
   { "alias", builtin_alias },
   { "unalias", builtin_unalias },
   { "continue", builtin_echo },
@@ -27,6 +28,83 @@ static struct builtin_fun builtin_fun_array[] =
   { "source", builtin_source },
   { "history", builtin_history }
 };*/
+
+static int builtin_shopt(char *argv[])
+{
+  char *names[] =
+  {
+    "ast-print", "dotglob", "expand_aliases", "extglob", "nocaseglob",
+    "nullglob", "sourcepath", "xpg_echo"
+  };
+
+  if (argv[1] == NULL)
+  {
+    for (size_t i = 0; i < sizeof (names) / sizeof (char*); i++)
+    {
+      char *val = get_data(ht[VAR], names[i]);
+      if (val != NULL)
+        printf("%s\t%s\n", names[i], val[0] == '0' ? "off" : "on");
+    }
+    return 0;
+  }
+  else
+  {
+    size_t i = 1;
+    char *opt = argv[1];
+    char *set = "    ";
+    if (opt[0] && opt[0] == '-')
+    {
+      i++;
+      for (size_t i = 0; opt[i]; i++)
+      {
+        if (opt[i] == 's' && strcmp(set, "off") != 0)
+          set = "on\0";
+        else if (opt[i] == 'u' && strcmp(set, "on") != 0)
+          set = "off\0";
+        else if (opt[i] == 's' || opt[i] == 'u')
+        {
+          warnx("shopt: cannot set and unset shell options simultaneously");
+          return 1;
+        }
+        else if (opt[i] == 'q' && set[0] == ' ')
+          set = "q\0";
+        else if (opt[i] != 'q')
+        {
+          warnx("shopt: invalid option");
+          return 2;
+        }
+      }
+    }
+
+    while (argv[i] && set[0] != ' ')
+    {
+      size_t j = 100;
+      for (size_t k = 0; k < sizeof (names) / sizeof (char*) && j == 100; k++)
+      {
+        if (strcmp(names[k], argv[i]) == 0)
+          j = k;
+      }
+
+      if (j < 100)
+      {
+        if (set[0] == ' ')
+        {
+          char *val = get_data(ht[VAR], names[i]);
+          printf("%s\t%s\n", names[j], val[0] == '0' ? "off" : "on");
+        }
+        else if (set[0] != 'q')
+          ht[VAR] = add_hash(ht[VAR], names[j], set);
+      }
+      else
+      {
+        warnx("shopt: %s: invalid shell option name", argv[i]);
+        return 1;
+      }
+      i++;
+    }
+    return 0;
+  }
+}
 
 int (*builtin_fun_match (char* s)) (char* argv[])
 {

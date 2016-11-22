@@ -33,7 +33,7 @@
           [X] Exit
           [X] True and false
           [X] Cd
-          [ ] Shopt
+          [x] Shopt
           [ ] Export
           [ ] Alias
           [ ] Unalias
