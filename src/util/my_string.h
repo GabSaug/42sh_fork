@@ -27,11 +27,49 @@ int is_in(char* start, char* end, char s_list[][10]);
  * \return The address of the newly malloc'd string
 */
 int my_is_in(char* str, char s_list[][10]);
+
+/**
+ * \brief Compare two strings
+ * \param str1 The first string to compare
+ * \param str2 The second string to compare
+ * \return Return 0 if the strings are equals
+*/
 int my_strcmp(char* str1, char* str2);
+
+/**
+ * \brief Verify if the character is a digit or not
+ * \param c The character to verify
+ * \return Return 1 if the character is a digit, 0 otherwise
+*/
 int is_digit(char c);
+
+/**
+ * \brief Verify if a string represents a number
+ * \param s The string to verify
+ * \return Return 1 if the string represents a number, 0 otherwise
+*/
 int is_number(char* s);
+
+/**
+ * \brief Convert a string to an int
+ * \param str The string to convert
+ * \return The intenger from the string, or - 1 if there is a problem
+*/
 int my_atoi(const char str[]);
+
+/**
+ * \brief Duplicate a string with a new allocation
+ * \param s The string to duplicate
+ * \return The duplicated string
+*/
 char* my_strdup(char* s);
+
+/**
+ * \brief Duplicate the n first byte of a string
+ * \param s The string to duplicate
+ * \param n The number of bytes to duplicate
+ * \return The duplicated string
+*/
 char* my_strndup(char* s, size_t n);
 int is_prefix_arr(char* str, char s_list[][10]);
 
