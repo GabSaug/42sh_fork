@@ -51,9 +51,9 @@ static char nts2string[][20] =
 static char ts2string[][20] =
 {
   ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&", "<>",
-  "<<-", ">|", "EOF",
+  "<<-", ">|", "{", "}", "(", ")", "!", "EOF",
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
-  "until", "for", "{", "}", "(", ")", "!", "in", "function", "<new_line>",
+  "until", "for", "in", "function", "<new_line>",
   "word", "assignment_word", "name", "IO_number"
 };
 
@@ -131,6 +131,8 @@ void tree_add_non_terminal_child(struct tree* tree, struct tree* child)
 
 void tree_delete_all_child(struct tree* tree)
 {
+  for (size_t i = 0; i < v_size(tree->child); ++i)
+    tree_destroy(v_get(tree->child, i));
   v_erase(tree->child);
 }
 
