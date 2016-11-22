@@ -5,6 +5,12 @@
  * \file my_string.h
 */
 
+enum quote_type
+{
+  BACKSLASH,
+  SINGLE_QUOTE,
+  DOUBLE_QUOTE
+};
 /**
  * \brief Determine if the string could be the begining of one of the string in
  * the array of string
@@ -72,5 +78,8 @@ char* my_strdup(char* s);
 */
 char* my_strndup(char* s, size_t n);
 int is_prefix_arr(char* str, char s_list[][10]);
+
+int update_quote(char c, char quoted[]);
+int is_quoted(char quoted[3]);
 
 #endif /* !MY_STRING_H */

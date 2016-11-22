@@ -59,13 +59,6 @@ struct token
   char* s;
 };
 
-enum quote_type
-{
-  BACKSLASH,
-  SINGLE_QUOTE,
-  DOUBLE_QUOTE
-};
-
 extern struct hash_table* ht[2];
 
 /**

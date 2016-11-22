@@ -102,3 +102,33 @@ int is_prefix_arr(char* str, char s_list[][10])
   }
   return -1;
 }
+
+int update_quote(char c, char quoted[])
+{
+  if (c == '\\' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
+  {
+    quoted[BACKSLASH] = 2; // Decrease at each loop iteration
+    return 1;
+  }
+  if (c == '\'' && !quoted[BACKSLASH] && !quoted[DOUBLE_QUOTE])
+  {
+    quoted[SINGLE_QUOTE] = !quoted[SINGLE_QUOTE];
+    return 1;
+  }
+  if (c == '"' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
+  {
+    quoted[DOUBLE_QUOTE] = !quoted[DOUBLE_QUOTE];
+    return 1;
+  }
+  return 0;
+}
+
+int is_quoted(char quoted[3])
+{
+  for (int i = 0; i < 3; i++)
+    if (quoted[i])
+      return 1;
+  return 0;
+}
+
+

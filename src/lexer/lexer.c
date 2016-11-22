@@ -28,7 +28,6 @@ static char blank_list[][10] =
 };
 
 static size_t append_token(struct vector* v_token, char* start, char* end);
-static int is_quoted(char quoted[3]);
 
 static int apply_rule(struct vector* v_token, char quoted[],
                       char* part_of_operator,
@@ -38,7 +37,6 @@ static int apply_rule_2(struct vector* v_token, char quoted[],
                         size_t* i, char** start);
 static void rule_3(struct vector* v_token, char** start, char* s, size_t i,
                    char* part_of_operator);
-static void rule_4(char c, char quoted[]);
 static void rule_7(struct vector* v_token, char** start, char* s, size_t* i,
                    char* part_of_operator, char* part_of_word);
 
@@ -84,7 +82,7 @@ static int apply_rule(struct vector* v_token, char quoted[],
     rule_3(v_token, start, s, *i, part_of_operator);
   // Rule 4
   if (begin_as(s + *i, s + *i, quote_symbol) >= 0)
-    rule_4(s[*i], quoted);
+    update_quote(s[*i], quoted);
   // Rule 5
   if ((s[*i] == '$' || s[*i] == '`') && !quoted[BACKSLASH]
       && !quoted[SINGLE_QUOTE])
@@ -167,29 +165,17 @@ static void rule_3(struct vector* v_token, char** start, char* s, size_t i,
     *part_of_operator = 0;
 }
 
-static void rule_4(char c, char quoted[])
-{
-  // inverse boolean
-  if (c == '\\' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
-    quoted[BACKSLASH] = 2; // Decrease at each loop iteration
-  if (c == '\'' && !quoted[BACKSLASH] && !quoted[DOUBLE_QUOTE])
-    quoted[SINGLE_QUOTE] = 1;
-  if (c == '"' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
-    quoted[DOUBLE_QUOTE] = 1;
-}
-
-
 static size_t append_token(struct vector* v_token, char* start, char* end)
 {
   /*if (token_id == UNDIFINED)
     return;*/
+  if (end < start)
+    return 0;
 
   struct token* new_token = my_malloc(sizeof(struct token));
   new_token->id = UNDIFINED;
   if (start && end)
   {
-    if (end >= start)
-    {
       size_t s_size = (end - start) + 1;
       char* s = my_malloc(s_size + 1); // +1 for '\0'
       for (size_t i = 0; i < s_size + 1; ++i)
@@ -197,9 +183,6 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
       s[s_size] = '\0';
       //printf("tok : %s\n", s);
       new_token->s = s;
-    }
-    else
-      return 0;
   }
   else
     new_token->s = NULL;
@@ -227,14 +210,6 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
   /*}
   else
     return 0;*/
-}
-
-static int is_quoted(char quoted[3])
-{
-  for (int i = 0; i < 3; i++)
-    if (quoted[i])
-      return 1;
-  return 0;
 }
 
 void token_destroy(void* p)
