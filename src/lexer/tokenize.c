@@ -16,9 +16,11 @@ static char operator_list[][10] =
   "<>", "<<-", ">|", ""
 };
 // Return the number of character in the expansion
-static size_t tokenize_exp_normal(char *s)
+size_t tokenize_exp_normal(char *s)
 {
   size_t i;
+  if (is_digit(s[1]))
+    return 2;
   // for (i = 2 -> wtf ?
   for (i = 1; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n'
        && s[i] != '$' && is_prefix_arr(s + i, operator_list) == -1; ++i) // To modify

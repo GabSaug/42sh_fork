@@ -9,19 +9,35 @@
 static char operator_list[][10] =
 {
   ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
+  "<>", "<<-", ">|", "{", "}", "(", ")", "!", ""
+};
+static char reserved_word[][10] =
+{
+  "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
+  "until", "for", "in", "function", "\n", ""
+};
+
+
+/*static char operator_list[][10] =
+{
+  ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
   "<>", "<<-", ">|", ""
 };
 static char reserved_word[][10] =
 {
   "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
   "until", "for", "{", "}", "(", ")", "!", "in", "function", "\n", ""
+};*/
+static enum terminal_symbol before_reserved_word[] =
+{
+  IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL, IN, PIPE, AND_IF, OR_IF, SEMI, AND, DSEMI, NL
 };
 
-static enum terminal_symbol before_reserved_word[] =
+/*static enum terminal_symbol before_reserved_word[] =
 {
   IF, THEN, ELSE, ELIF, DO, WHILE, UNTIL, L_BRACE, R_BRACE, L_PAR, R_PAR,
   BANG, IN, PIPE, AND_IF, OR_IF, SEMI, AND, DSEMI, NL
-};
+};*/
 
 static int is_among(enum terminal_symbol sym, enum terminal_symbol arr[],
                     size_t len)
@@ -30,19 +46,6 @@ static int is_among(enum terminal_symbol sym, enum terminal_symbol arr[],
     if (sym == arr[i])
       return i;
   return -1;
-}
-
-static int is_digit(char c)
-{
-  return ('0' <= c && c <= '9');
-}
-
-static int is_number(char* s)
-{
-  for (size_t i = 0; s[i]; ++i)
-    if (!is_digit(s[i]))
-      return 0;
-  return 1;
 }
 
 void typer(struct vector* v_token)
@@ -86,7 +89,8 @@ void typer(struct vector* v_token)
         token->id = IF + index_reserved_word;
         continue;
       }
-      if (strchr(token->s, '=') > token->s) // = not in 1st position
+      // = not in 1st position
+      if (strchr(token->s, '=') > token->s && !is_digit(token->s[0]))
       {
         token->id = ASSIGNMENT_WORD;
         continue;

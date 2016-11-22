@@ -4,14 +4,20 @@
 #include "expansion.h"
 #include "vector.h"
 #include "string.h"
+#include "hash_table.h"
+#include "tokenize.h"
 
-static char* tilde_expansion(char* s);
+extern struct hash_table* ht[2];
+
+//static char* tilde_expansion(char* s);
+static char* parameter_expansion(char* s);
 
 struct vector* expand(char* s)
 {
-  char* tilde_s = tilde_expansion(s);
+  //char* tilde_s = tilde_expansion(s);
+  char* param_s = parameter_expansion(s); // Change to tilde_s
 struct vector* v = v_create();
-v_append(v, tilde_s);
+v_append(v, param_s);
 return v;
 
   /*char* param_s = parameter_expansion(tilde_s);
@@ -28,7 +34,30 @@ return v;
   
 }
 
-static char* next_unquoted_slash(char* s)
+static char* parameter_expansion(char* s)
+{
+  if (!s || s[0] != '$')
+    return s;
+  printf("param expansion; s= %s ", s);
+
+  //char* param_name = s + 1; // CHANGE !!!
+  size_t param_size = tokenize_exp_normal(s);
+  if (param_size <= 1)
+    printf("fuck\n");
+  char* param_name = my_strndup(s + 1, param_size - 1);
+  char* param_value = my_strdup(get_data(ht[VAR], param_name));
+  free(param_name);
+  free(s);
+  if (param_value == NULL)
+  {
+    param_value = malloc(1);
+    param_value[0] = '\0';
+  }
+  printf("value = %s\n", param_value);
+  return param_value;
+}
+
+/*static char* next_unquoted_slash(char* s)
 {
   for (; *s; ++s)
   {
@@ -72,10 +101,12 @@ static char* tilde_expansion(char* s)
     memcpy(new + size, start, extra_size);
     size += extra_size;
     end_tilde_prefix = next_unquoted_slash(tilde);
-    /*if (end_tile_prefix == NULL)
-      end_tilde_prefix = tilde + strlen(tilde);*/
+    //if (end_tile_prefix == NULL)
+    //  end_tilde_prefix = tilde + strlen(tilde);
     printf("tilde expansion = %*s\n", (int)(end_tilde_prefix - tilde) + 1, tilde);
+
   }
+
   free(s);
-  return new;
-}
+  return s;
+}*/

@@ -1,3 +1,5 @@
+#include <stdio.h>
+
 #include "execute.h"
 #include "my_string.h"
 #include "expansion.h"
@@ -46,7 +48,7 @@ static int execute_bin(char** argv)
   }
 }
 
-static size_t get_size(struct tree *ast)
+/*static size_t get_size(struct tree *ast)
 {
   size_t size = v_size(ast->child);
 
@@ -67,7 +69,7 @@ static size_t get_size(struct tree *ast)
     }
   }
   return count;
-}
+}*/
 
 /*static struct vector* generate_command(struct tree *ast)
 {
@@ -84,7 +86,7 @@ static size_t get_size(struct tree *ast)
   return args;
 }*/
 
-static char** generate_command(struct tree *ast, size_t *size)
+static char** generate_command(struct tree *ast, size_t index_start)
 {
   /**size = get_size(ast);;
   char **args = malloc(sizeof (char*) * (*size + 1));
@@ -92,7 +94,7 @@ static char** generate_command(struct tree *ast, size_t *size)
 
   struct vector* v_args = v_create();
 
-  for (size_t j = 0; j < v_size(ast->child); j++)
+  for (size_t j = index_start; j < v_size(ast->child); j++)
   {
     struct tree *son = v_get(ast->child, j);
     son = v_get(son->child, 0);
@@ -105,11 +107,11 @@ static char** generate_command(struct tree *ast, size_t *size)
       v_destroy(v_arg_tmp, NULL);
     }
   }
-  *size = v_size(v_args);
-  char **args = malloc(sizeof (char*) * (*size + 1));
-  for (size_t i = 0; i < *size; ++i)
+  char **args = malloc(sizeof (char*) * (v_size(v_args) + 1));
+  for (size_t i = 0; i < v_size(v_args); ++i)
     args[i] = v_get(v_args, i);
-  args[*size] = NULL;
+  args[v_size(v_args)] = NULL;
+  v_destroy(v_args, NULL);
 
   return args;
 }
@@ -123,24 +125,89 @@ static int execute_prog(char** argv)
     return execute_bin(argv);
 }
 
+static int execute_assignment(struct tree* assignment)
+{
+  char* s = assignment->token->s;
+  char* equal = strchr(s, '=');
+  *equal = '\0';
+  //printf("key = %s$ data = %s$\n", s, equal + 1);
+  add_hash(ht[VAR], s, equal + 1);
+  return 0;
+}
+
 int execute_simple_command(struct tree *ast)
 {
-  size_t size;
+  int res = 0;
+  struct vector *to_close = NULL;
+  int std_in = dup(0);
+  int std_out = dup(1);
+  int std_err = dup(2);
+  to_close = managed_redirections(ast);
+  if (!to_close)
+    return 1;
+
+  size_t i = 0;
+  for (i = v_size(ast->child); i > 0; --i)
+  {
+    struct tree* child = v_get(ast->child, i - 1); // i is offset of +1
+    if (child->nts == PREFIX)
+      break;
+  }
+  if (i == v_size(ast->child)) // Only prefix
+  {
+    //printf("only prefix\n");
+    for (size_t j = 0; j < v_size(ast->child); ++j)
+    {
+      struct tree* prefix = v_get(ast->child, j);
+      res = execute_assignment(v_get(prefix->child, 0));
+    }
+  }
+  else // only element
+  {
+    //printf("element\n");
+    char** argv = generate_command(ast, i);
+    res = execute_prog(argv);
+    for (size_t i = 0; argv[i]; ++i)
+      free(argv[i]);
+    free(argv);
+  }
+    
+  if (to_close)
+  {
+    for (size_t i = 0; i < v_size(to_close); i++)
+    {
+      int *fd = v_get(to_close, i);
+      close(*fd);
+    }
+    v_destroy(to_close, free);
+  }
+
+  dup2(std_in, 0);
+  close(std_in);
+  dup2(std_out, 1);
+  close(std_out);
+  dup2(std_err, 2);
+  close(std_err);
+
+  return res;
+}
+
+  /*size_t size;
   char** argv = generate_command(ast, &size);
 
   struct vector *to_close = NULL;
   int std_in = dup(0);
   int std_out = dup(1);
   int std_err = dup(2);
-  if (size < v_size(ast->child))
-  {
+  //if (size < v_size(ast->child))
+  //{
     to_close = managed_redirections(ast);
     if (!to_close)
     {
       free(argv);
       return 1;
     }
-  }
+  //}
 
   int res = execute_prog(argv);
   for (size_t i = 0; argv[i]; ++i)
@@ -163,8 +230,5 @@ int execute_simple_command(struct tree *ast)
   dup2(std_err, 2);
   close(std_err);
 
-  /*struct vector* args = generate_command(ast);
-  int res = execute_prog(args);
-  v_destroy(args, free);*/
-  return res;
-}
+  //return res;
+}*/
