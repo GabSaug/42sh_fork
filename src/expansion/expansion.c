@@ -38,13 +38,20 @@ static char* parameter_expansion(char* s)
 {
   if (!s || s[0] != '$')
     return s;
-  printf("param expansion; s= %s ", s);
+  //printf("param expansion; s= %s ", s);
 
   //char* param_name = s + 1; // CHANGE !!!
-  size_t param_size = tokenize_exp_normal(s);
+  /*size_t param_size = tokenize_exp_normal(s);
   if (param_size <= 1)
+  {
+
     printf("fuck\n");
-  char* param_name = my_strndup(s + 1, param_size - 1);
+  }*/
+  struct expansion exp = tokenize_expansion(s);
+  /*printf("exp.size = %zu, exp.type = %i, size_s = %i, exp.s = %.*s\n",
+         exp.size, exp.type, (int)(exp.end - exp.start),
+         (int)(exp.end - exp.start), exp.start);*/
+  char* param_name = my_strndup(s + 1, exp.size - 1);
   char* param_value = my_strdup(get_data(ht[VAR], param_name));
   free(param_name);
   free(s);
@@ -53,7 +60,7 @@ static char* parameter_expansion(char* s)
     param_value = malloc(1);
     param_value[0] = '\0';
   }
-  printf("value = %s\n", param_value);
+  //printf("value = %s\n", param_value);
   return param_value;
 }
 

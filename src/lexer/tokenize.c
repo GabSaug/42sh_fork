@@ -1,3 +1,5 @@
+#include <err.h>
+
 #include "tokenize.h"
 #include "my_string.h"
 
@@ -19,10 +21,10 @@ static char operator_list[][10] =
 size_t tokenize_exp_normal(char *s)
 {
   size_t i;
-  if (is_digit(s[1]))
-    return 2;
+  if (is_digit(s[0]))
+    return 1;
   // for (i = 2 -> wtf ?
-  for (i = 1; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n'
+  for (i = 0; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n'
        && s[i] != '$' && is_prefix_arr(s + i, operator_list) == -1; ++i) // To modify
   {
     if (s[i] == '\\' && s[i + 1])
@@ -66,14 +68,79 @@ static size_t tokenize_exp_other(char *s, char b, char d)
 }
 
 // Return the number of character in the expansion
-size_t tokenize_expansion(char* s)
+struct expansion tokenize_expansion(char* s)
 {
-  char b = '{';
+  struct expansion exp =
+  {
+    BRACKET,
+    NULL,
+    NULL,
+    0,
+  };
+  char b = 0;
+  char d = 0;
+
+  if (s[0] == '`')
+  {
+    d = '`';
+    b = '`';
+    exp.type = CMD;
+    exp.start = s + 1;
+  }
+  else if (s[0] == '$')
+  {
+    if (s[1] == '{')
+    {
+      b = '{';
+      d = '}';
+      exp.type = BRACKET;
+      exp.start = s + 2;
+    }
+    else if (s[1] == '(')
+    {
+      b = '(';
+      d = ')';
+      if (s[2] == '(')
+      {
+        exp.type = ARI;
+        exp.start = s + 3;
+      }
+      else
+      {
+        exp.type = CMD;
+        exp.start = s + 2;
+      }
+    }
+    else
+    {
+      exp.type = NORMAL;
+      size_t normal_size = tokenize_exp_normal(s + 1);
+      exp.size = normal_size + 1;
+      //printf("exp.size = %zu\n", exp.size);
+      exp.start = s + 1;
+      //exp.end = exp.start + 2;
+      exp.end = exp.start + normal_size;
+      return exp;
+    }
+  }
+  else
+    errx(2, "not an expansion\n");
+
+  size_t other_size = tokenize_exp_other(s, b, d);
+  exp.end = exp.start + other_size;
+  exp.size = 2 * (exp.start - s) + other_size;
+  if (exp.type != ARI)
+    exp.size++;
+  return exp;
+
+
+  /*char b = '{';
   char d = '{';
   if (s[0] == '`')
   {
     d = '`';
     b = '`';
+    exp.type = CMD;
   }
   else
   {
@@ -82,14 +149,18 @@ size_t tokenize_expansion(char* s)
     {
     case '{':
       d = '}';
+      exp.type = BRACKET;
       break;
     case '(':
       d = ')';
+      if (s[2] == ')')
+        exp.type = ARI;
       break;
     default:
+      exp.type = NORMAL;
       return tokenize_exp_normal(s);
     }
   }
-  return tokenize_exp_other(s, b, d);
+  return tokenize_exp_other(s, b, d);*/
 }
 
