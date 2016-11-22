@@ -110,6 +110,13 @@ int execute_until(struct tree *ast);
 int execute_for(struct tree *ast);
 
 /**
+ * \brief Execute the rule ase of a AST
+ * \param ast The AST with the rule case in the root
+ * \return The success or failure of the executin of the case
+*/
+int execute_case(struct tree *ast);
+
+/**
  * \brief Managed the redirection of a command
  * \param ast The command where there is redirection
  * \return A vector of file descriptors to close after the execution of the

@@ -67,7 +67,7 @@ static struct option opt(int argc, char *argv[], struct option options)
     }
     else if (!strcmp(argv[1], "--version") || !strcmp(argv[1], "--ver"))
     {
-      printf("Version 0.5\n");
+      printf("Version 0.8\n");
       exit(0);
     }
     else

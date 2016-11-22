@@ -11,6 +11,8 @@ int execute_shell_command(struct tree *ast)
     return execute_until(child);
   else if (child->nts == RULE_FOR)
     return execute_for(child);
+  else if (child->nts == RULE_CASE)
+    return execute_case(child);
   else
     return 1;
 }
