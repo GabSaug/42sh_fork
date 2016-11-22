@@ -1,17 +1,5 @@
 #include "execute.h"
 
-static int execute_compound_list(struct tree *ast)
-{
-  int res = 0;
-  for (size_t i = 0; i < v_size(ast->child); i++)
-  {
-    struct tree *child = v_get(ast->child, i);
-    if (child->nts == AND_OR)
-      res = execute_and_or(child);
-  }
-  return res;
-}
-
 int execute_shell_command(struct tree *ast)
 {
   struct tree *child = v_get(ast->child, 0);

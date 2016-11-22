@@ -66,12 +66,19 @@ int execute_shell_command(struct tree *ast);
 int (*builtin_fun_match (char* s)) (char* argv[]);
 
 /**
- \brief get the element of the first child of the child of the AST
- \param ast The ast to get the element
- \param elt The child of ast to get the element of the first child
- \return the element found
+ * \brief Get the element of the first child of the child of the AST
+ * \param ast The ast to get the element
+ * \param elt The child of ast to get the element of the first child
+ * \return the element found
 */
 char *get_child_elt(struct tree *ast, size_t elt);
+
+/**
+ * \brief Execute a compound list of a shell command
+ * \param ast The ast with the rule compound_list in the root
+ * \return The success or failure of the last execution of the compound list
+*/
+int execute_compound_list(struct tree *ast);
 
 /**
  * \brief Execute the rule if of a AST

@@ -12,12 +12,12 @@
           [X] Operators
           [X] Pipes
           [X] Simple commands
-          [x] Redirections
-          [x] If commands
-          [x] While and until commands
-          [ ] For commands
+          [X] Redirections
+          [X] If commands
+          [X] While and until commands
+          [X] For commands
           [ ] Functions
-          [ ] Case commands
+          [x] Case commands
      [ ] History
 
 [ ] Version 0.8
