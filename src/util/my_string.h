@@ -26,10 +26,12 @@ int is_in(char* start, char* end, char s_list[][10]);
  * \param s The string to duplicate
  * \return The address of the newly malloc'd string
 */
-char* my_strdup(char* s);
 int my_is_in(char* str, char s_list[][10]);
 int my_strcmp(char* str1, char* str2);
-int my_strnum(char* s);
+int is_digit(char c);
+int is_number(char* s);
+char* my_strdup(char* s);
+char* my_strndup(char* s, size_t n);
 int is_prefix_arr(char* str, char s_list[][10]);
 
 #endif /* !MY_STRING_H */

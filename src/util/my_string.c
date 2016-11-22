@@ -37,8 +37,23 @@ int my_strcmp(char* str1, char* str2)
   return str1[i] == str2[i];
 }
 
+int is_digit(char c)
+{
+  return ('0' <= c && c <= '9');
+}
+
+int is_number(char* s)
+{
+  for (size_t i = 0; s[i]; ++i)
+    if (!is_digit(s[i]))
+      return 0;
+  return 1;
+}
+
 char* my_strdup(char* s)
 {
+  if (!s)
+    return NULL;
   size_t len = strlen(s) + 1;
   char* new_s = my_malloc(sizeof (char) * len);
   for (size_t i = 0; i < len; ++i)
@@ -46,14 +61,21 @@ char* my_strdup(char* s)
   return new_s;
 }
 
-int my_strnum(char* s)
+size_t min(size_t a, size_t b)
 {
-  for (size_t i = 0; s[i]; i++)
-  {
-    if (s[i] < '0' || s[i] > '9')
-      return 1;
-  }
-  return 1;
+  return a < b ? a : b;
+}
+
+char* my_strndup(char* s, size_t n)
+{
+  if (!s)
+    return NULL;
+  size_t len = min(strlen(s), n);
+  char* new_s = my_malloc(sizeof (char) * (len + 1));
+  for (size_t i = 0; i < len; ++i)
+    new_s[i] = s[i];
+  new_s[len] = '\0';
+  return new_s;
 }
 
 int is_prefix_arr(char* str, char s_list[][10])
