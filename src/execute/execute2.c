@@ -2,7 +2,6 @@
 
 #include "execute.h"
 #include "my_string.h"
-#include "expansion.h"
 
 extern struct hash_table* ht[2];
 

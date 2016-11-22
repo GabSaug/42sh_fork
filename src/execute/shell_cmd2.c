@@ -52,13 +52,41 @@ static int case_clause(struct tree *ast, char *word)
   return res;
 }
 
+static char *expand_word(struct vector *exp)
+{
+  size_t len = 0;
+  for (size_t i = 0; i < v_size(exp); i++)
+  {
+    char *tmp = v_get(exp, i);
+    len += strlen(tmp);
+  }
+
+  char *res = malloc(len + 1);
+  res[0] = '\0';
+
+  for (size_t i = 0; i < v_size(exp); i++)
+  {
+    char *tmp = v_get(exp, i);
+    res = strcat(res, tmp);
+  }
+  res[len] = '\0';
+  return res;
+}
+
 int execute_case(struct tree *ast)
 {
   struct tree *var = v_get(ast->child, 1);
-  char *word = expand(var->token->s);
+  char *word = expand_word(expand(var->token->s));
   struct tree *son = v_get(ast->child, 3);
   if (son->nts == CASE_CLAUSE)
-    return case_clause(son, word);
+  {
+    int res = case_clause(son, word);
+    free(word);
+    return res;
+  }
   else
+  {
+    free(word);
     return 0;
+  }
 }

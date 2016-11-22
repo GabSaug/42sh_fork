@@ -8,6 +8,7 @@
 # include <sys/wait.h>
 # include <unistd.h>
 
+#include "expansion.h"
 # include "hash_table.h"
 # include "tree.h"
 # include "vector.h"
