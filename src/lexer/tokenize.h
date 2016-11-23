@@ -6,10 +6,10 @@
 
 enum expansion_type
 {
-  NORMAL,
+  ARI,
   BRACKET,
   CMD,
-  ARI
+  NORMAL
 };
 
 struct expansion 

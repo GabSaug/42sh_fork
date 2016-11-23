@@ -21,6 +21,11 @@ int is_in(char* start, char* end, char s_list[][10])
   return -1;
 }
 
+int my_begin_as(char* str, char s_list[][10])
+{
+  return begin_as(str, str + strlen(str) - 1, s_list);
+}
+
 int my_is_in(char* str, char s_list[][10])
 {
   return is_in(str, str + strlen(str) - 1, s_list);

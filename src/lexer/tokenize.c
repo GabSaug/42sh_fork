@@ -1,4 +1,5 @@
 #include <err.h>
+#include <string.h>
 
 #include "tokenize.h"
 #include "my_string.h"
@@ -67,6 +68,29 @@ static size_t tokenize_exp_other(char *s, char b, char d)
   return s[i] ? i : 0;
 }
 
+static char exp_intro[][10] =
+{
+  "$((",
+  "$(",
+  "${",
+  "`",
+  ""
+};
+
+static char exp_begin[] =
+{
+  '(',
+  '(',
+  '{',
+  '`'
+};
+
+static char exp_end[] =
+{
+  ')', ')', '}', '`'
+};
+
+
 // Return the number of character in the expansion
 struct expansion tokenize_expansion(char* s)
 {
@@ -77,90 +101,28 @@ struct expansion tokenize_expansion(char* s)
     NULL,
     0,
   };
-  char b = 0;
-  char d = 0;
 
-  if (s[0] == '`')
+  int index_exp_type = my_begin_as(s, exp_intro);
+  if (index_exp_type != -1)
   {
-    d = '`';
-    b = '`';
-    exp.type = CMD;
-    exp.start = s + 1;
+    exp.start = s + strlen(exp_intro[index_exp_type]);
+    size_t other_size = tokenize_exp_other(s
+                                           + strlen(exp_intro[index_exp_type]),
+                    exp_begin[index_exp_type], exp_end[index_exp_type]);
+    exp.end = exp.start + other_size;
+    exp.size = 2 * (exp.start - s) + other_size;
+    exp.type = index_exp_type > CMD ? CMD : index_exp_type;
+    /*if (exp.type != ARI)
+      exp.size++;*/
+    return exp;
   }
-  else if (s[0] == '$')
-  {
-    if (s[1] == '{')
-    {
-      b = '{';
-      d = '}';
-      exp.type = BRACKET;
-      exp.start = s + 2;
-    }
-    else if (s[1] == '(')
-    {
-      b = '(';
-      d = ')';
-      if (s[2] == '(')
-      {
-        exp.type = ARI;
-        exp.start = s + 3;
-      }
-      else
-      {
-        exp.type = CMD;
-        exp.start = s + 2;
-      }
-    }
-    else
-    {
-      exp.type = NORMAL;
-      size_t normal_size = tokenize_exp_normal(s + 1);
-      exp.size = normal_size + 1;
-      //printf("exp.size = %zu\n", exp.size);
-      exp.start = s + 1;
-      //exp.end = exp.start + 2;
-      exp.end = exp.start + normal_size;
-      return exp;
-    }
-  }
-  else
-    errx(2, "not an expansion\n");
-
-  size_t other_size = tokenize_exp_other(s, b, d);
-  exp.end = exp.start + other_size;
-  exp.size = 2 * (exp.start - s) + other_size;
-  if (exp.type != ARI)
-    exp.size++;
+  exp.type = NORMAL;
+  size_t normal_size = tokenize_exp_normal(s + 1);
+  exp.size = normal_size + 1;
+  //printf("exp.size = %zu\n", exp.size);
+  exp.start = s + 1;
+  //exp.end = exp.start + 2;
+  exp.end = exp.start + normal_size;
   return exp;
-
-
-  /*char b = '{';
-  char d = '{';
-  if (s[0] == '`')
-  {
-    d = '`';
-    b = '`';
-    exp.type = CMD;
-  }
-  else
-  {
-    b = s[1];
-    switch (s[1])
-    {
-    case '{':
-      d = '}';
-      exp.type = BRACKET;
-      break;
-    case '(':
-      d = ')';
-      if (s[2] == ')')
-        exp.type = ARI;
-      break;
-    default:
-      exp.type = NORMAL;
-      return tokenize_exp_normal(s);
-    }
-  }
-  return tokenize_exp_other(s, b, d);*/
 }
 

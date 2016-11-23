@@ -33,6 +33,7 @@ int is_in(char* start, char* end, char s_list[][10]);
  * \return The address of the newly malloc'd string
 */
 int my_is_in(char* str, char s_list[][10]);
+int my_begin_as(char* str, char s_list[][10]);
 
 /**
  * \brief Compare two strings
