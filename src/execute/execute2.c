@@ -62,7 +62,7 @@ static char** generate_command(struct tree *ast, size_t index_start)
       v_destroy(v_arg_tmp, NULL);
     }
   }
-  char **args = malloc(sizeof (char*) * (v_size(v_args) + 1));
+  char **args = my_malloc(sizeof (char*) * (v_size(v_args) + 1));
   for (size_t i = 0; i < v_size(v_args); ++i)
     args[i] = v_get(v_args, i);
   args[v_size(v_args)] = NULL;
@@ -90,6 +90,38 @@ static int execute_assignment(struct tree* assignment)
   return 0;
 }
 
+static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
+                        int res)
+{
+  if (i == v_size(ast->child)) // Only prefix
+  {
+    for (size_t j = 0; j < v_size(ast->child); ++j)
+    {
+      struct tree* prefix = v_get(ast->child, j);
+      res = execute_assignment(v_get(prefix->child, 0));
+    }
+  }
+  else // only element
+  {
+    char** argv = generate_command(ast, i);
+    res = execute_prog(argv);
+    for (size_t i = 0; argv[i]; ++i)
+      free(argv[i]);
+    free(argv);
+  }
+    
+  if (to_close)
+  {
+    for (size_t i = 0; i < v_size(to_close); i++)
+    {
+      int *fd = v_get(to_close, i);
+      close(*fd);
+    }
+    v_destroy(to_close, free);
+  }
+  return res;
+}
+
 int execute_simple_command(struct tree *ast)
 {
   int res = 0;
@@ -108,34 +140,8 @@ int execute_simple_command(struct tree *ast)
     if (child->nts == PREFIX)
       break;
   }
-  if (i == v_size(ast->child)) // Only prefix
-  {
-    //printf("only prefix\n");
-    for (size_t j = 0; j < v_size(ast->child); ++j)
-    {
-      struct tree* prefix = v_get(ast->child, j);
-      res = execute_assignment(v_get(prefix->child, 0));
-    }
-  }
-  else // only element
-  {
-    //printf("element\n");
-    char** argv = generate_command(ast, i);
-    res = execute_prog(argv);
-    for (size_t i = 0; argv[i]; ++i)
-      free(argv[i]);
-    free(argv);
-  }
-    
-  if (to_close)
-  {
-    for (size_t i = 0; i < v_size(to_close); i++)
-    {
-      int *fd = v_get(to_close, i);
-      close(*fd);
-    }
-    v_destroy(to_close, free);
-  }
+
+  res = execute_args(ast, i, to_close, res);
 
   dup2(std_in, 0);
   close(std_in);

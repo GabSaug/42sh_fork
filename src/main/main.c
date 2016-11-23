@@ -93,23 +93,9 @@ static int process_file(struct option option, struct rule** rules)
   return ret;
 }
 
-static int process_input(char* buff, struct rule** rules)
+static int run_ast(struct tree *ast)
 {
   int ret = 0;
-  processing = 1;
-  if (strlen(buff) == 0)
-    return 0;
-  v_token = v_create();
-  if (!lexer(buff, v_token))
-  {
-    v_destroy(v_token, token_destroy);
-    return 1;
-  }
-  typer(v_token);
-  //v_print(v_token);
-  //printf("lexer success\n");
-  int fit_level = 0;
-  ast = parse(rules, v_token, &fit_level);
   if (ast == NULL)
   {
     warnx("Grammar error");
@@ -126,6 +112,28 @@ static int process_input(char* buff, struct rule** rules)
   }
   v_destroy(v_token, token_destroy);
   processing = 0;
+
+  return ret;
+}
+
+static int process_input(char* buff, struct rule** rules)
+{
+  processing = 1;
+  if (strlen(buff) == 0)
+    return 0;
+  v_token = v_create();
+  if (!lexer(buff, v_token))
+  {
+    v_destroy(v_token, token_destroy);
+    return 1;
+  }
+  typer(v_token);
+  //v_print(v_token);
+  //printf("lexer success\n");
+  int fit_level = 0;
+  ast = parse(rules, v_token, &fit_level);
+  int ret = run_ast(ast);
+
   return ret;
 }
 

@@ -102,7 +102,7 @@ struct vector *managed_redirections(struct tree *ast)
     son = v_get(son->child, 0);
     if (son->nts == REDIRECTION)
     {
-      int *fd = malloc(sizeof (int));
+      int *fd = my_malloc(sizeof (int));
       *fd = read_redirection(son);
       if (*fd == - 2)
       {

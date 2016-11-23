@@ -59,26 +59,23 @@ static int change_opt(char *names[], char *argv[], char *set, size_t i)
 
 static int read_opt_shopt(char *argv[], char *names[])
 {
-  size_t i = 1;
-  char *opt = argv[1];
   char *set = "    ";
-  if (opt[0] && opt[0] == '-')
+  if (argv[1][0] && argv[1][0] == '-')
   {
-    i++;
-    for (size_t l = 1; opt[l]; l++)
+    for (size_t l = 1; argv[1][l]; l++)
     {
-      if (opt[l] == 's' && strcmp(set, "0\0") != 0)
+      if (argv[1][l] == 's' && strcmp(set, "0\0") != 0)
         set = "1\0";
-      else if (opt[l] == 'u' && strcmp(set, "1\0") != 0)
+      else if (argv[1][l] == 'u' && strcmp(set, "1\0") != 0)
         set = "0\0";
-      else if (opt[l] == 's' || opt[l] == 'u')
+      else if (argv[1][l] == 's' || argv[1][l] == 'u')
       {
         warnx("shopt: cannot set and unset shell options simultaneously");
         return 1;
       }
-      else if (opt[l] == 'q' && set[0] == ' ')
+      else if (argv[1][l] == 'q' && set[0] == ' ')
         set = "q\0";
-      else if (opt[l] != 'q')
+      else if (argv[1][l] != 'q')
       {
         warnx("shopt: invalid option");
         return 2;
@@ -86,7 +83,7 @@ static int read_opt_shopt(char *argv[], char *names[])
     }
   }
 
-  return change_opt(names, argv, set, i);;
+  return change_opt(names, argv, set, argv[1][0] && argv[1][0] == '-' ? 2 : 1);
 }
 
 static int builtin_shopt(char *argv[])
