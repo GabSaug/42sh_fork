@@ -43,10 +43,10 @@
           [ ] Source
           [ ] History
      [ ] Advanced prompt
-     [X] Readline 
+     [X] Readline
 
 [ ] Version 0.9
-     [x] Completion 
+     [x] Completion
      [ ] Command substitution
      [ ] Multi-arch support
      [ ] Job control
