@@ -245,6 +245,33 @@ static int option_parser(char* argv[], int* i, char* opt_n, char* opt_e)
   return 0;
 }
 
+static int builtin_echo_print_2(char c2)
+{
+  if (!c2 || c2 == '\\')
+    printf("\\");
+  else if (c2 == 'n')
+    printf("\n");
+  else if (c2 == 'e')
+    printf("%c", 0x1b);
+  else if (c2 == 't')
+    printf("\t");
+  else if (c2 == 'a')
+    printf("\a");
+  else if (c2 == 'c')
+    return 0;
+  else if (c2 == 'f')
+    printf("\f");
+  else if (c2 == 'r')
+    printf("\r");
+  else if (c2 == 't')
+    printf("\t");
+  else if (c2 == 'v')
+    printf("\v");
+  else
+    printf("\\%i", c2);
+  return 1;
+}
+
 static int builtin_echo_print(char* s, char opt_e)
 {
   for (size_t i = 0; s[i]; i++)
@@ -253,29 +280,8 @@ static int builtin_echo_print(char* s, char opt_e)
     if (c == '\\' && opt_e)
     {
       i++;
-      char c2 = s[i];
-      if (!c2 || c2 == '\\')
-        printf("\\");
-      else if (c2 == 'n')
-        printf("\n");
-      else if (c2 == 'e')
-        printf("%c", 0x1b);
-      else if (c2 == 't')
-        printf("\t");
-      else if (c2 == 'a')
-        printf("\a");
-      else if (c2 == 'c')
+      if (builtin_echo_print_2(s[i]) == 0)
         return 0;
-      else if (c2 == 'f')
-        printf("\f");
-      else if (c2 == 'r')
-        printf("\r");
-      else if (c2 == 't')
-        printf("\t");
-      else if (c2 == 'v')
-        printf("\v");
-      else
-        printf("\\%i", c2);
     }
     else
       printf("%c", c);
