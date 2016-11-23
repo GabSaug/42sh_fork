@@ -109,7 +109,6 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
       free(argv[i]);
     free(argv);
   }
-    
   if (to_close)
   {
     for (size_t i = 0; i < v_size(to_close); i++)

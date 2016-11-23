@@ -126,8 +126,7 @@ static int typer_loop(struct token* token, struct vector* v_token, int i)
   if (index_rw != -1 && index_rw != IN - IF)
   {
     int can_be_at_begining = 0;
-    if (brw_match[index_rw] == brw_if
-        || brw_match[index_rw] == brw_function)
+    if (brw_match[index_rw] == brw_if || brw_match[index_rw] == brw_function)
       can_be_at_begining = 1;
     size_t len = brw_match_len[index_rw];
     if ((can_be_at_begining && prev == NULL)

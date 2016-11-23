@@ -20,7 +20,6 @@ void v_print(struct vector* v)
   for (size_t i = 0; i < v->size; ++i)
   {
     struct token* token = v_get(v, i);
-    
     printf("%s, ", token->id >= 0 ? ts2string[token->id] : "UNDIFINED");
   }
   printf("\n");
