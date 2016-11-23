@@ -46,3 +46,26 @@ int builtin_alias(char *argv[])
 
   return 0;
 }
+
+int builtin_unalias(char *argv[])
+{
+  if (!argv[1])
+  {
+    warnx("unalias: usage: unalias [-a] name [name ...]");
+    return 2;
+  }
+  else
+  {
+    int res = 0;
+    for (size_t i = 1; argv[i]; i++)
+    {
+      int tmp = del_hash(ht[ALIAS], argv[i]);
+      if (!tmp)
+      {
+        warnx("unalias: %s: notfound", argv[i]);
+        res = 1;
+      }
+    }
+    return res;
+  }
+}

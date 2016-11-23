@@ -20,10 +20,10 @@ static struct builtin_fun builtin_fun_array[] =
   { "cd", builtin_cd },
   { "echo", builtin_echo },
   { "shopt", builtin_shopt },
-  { "alias", builtin_alias }
+  { "alias", builtin_alias },
+  { "unalias", builtin_unalias }
 };
 /*{ "export", builtin_export },
-  { "unalias", builtin_unalias },
   { "continue", builtin_echo },
   { "break", builtin_break },
   { "source", builtin_source },
