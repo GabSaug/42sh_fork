@@ -69,6 +69,8 @@ static char *expand_word(struct vector *exp)
     char *tmp = v_get(exp, i);
     res = strcat(res, tmp);
   }
+
+  v_destroy(exp, free);
   res[len] = '\0';
   return res;
 }
@@ -76,7 +78,7 @@ static char *expand_word(struct vector *exp)
 int execute_case(struct tree *ast)
 {
   struct tree *var = v_get(ast->child, 1);
-  char *word = expand_word(expand(var->token->s));
+  char *word = expand_word(expand(my_strdup(var->token->s)));
   struct tree *son = v_get(ast->child, 3);
   if (son->nts == CASE_CLAUSE)
   {
