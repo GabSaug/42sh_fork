@@ -6,6 +6,7 @@
 #include "string.h"
 #include "hash_table.h"
 #include "tokenize.h"
+#include "arithmetic.h"
 
 extern struct hash_table* ht[2];
 
