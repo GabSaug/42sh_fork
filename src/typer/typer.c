@@ -93,11 +93,11 @@ static int is_among(enum terminal_symbol sym, enum terminal_symbol arr[],
 
 static int typer_loop2(struct token* token, struct vector* v_token, int i)
 {
-  if (strchr(token->s, '=') > token->s && !is_digit(token->s[0]))
+  /*if (strchr(token->s, '=') > token->s && !is_digit(token->s[0]))
   {
     token->id = ASSIGNMENT_WORD;
     return 1;
-  }
+  }*/
   struct token* prev_prev = v_get(v_token, i - 2);
   if (prev_prev && (prev_prev->id == FOR || prev_prev->id == CASE))
   {

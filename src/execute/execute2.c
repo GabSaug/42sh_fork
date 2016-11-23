@@ -133,11 +133,16 @@ int execute_simple_command(struct tree *ast)
     return 1;
 
   size_t i = 0;
-  for (i = v_size(ast->child); i > 0; --i)
+  for (i = 0; i < v_size(ast->child); ++i)
   {
-    struct tree* child = v_get(ast->child, i - 1); // i is offset of +1
-    if (child->nts == PREFIX)
-      break;
+    struct tree* element = v_get(ast->child, i); // i is offset of +1
+    struct tree* child = v_get(element->child, 0);
+    if (child->nts == 0)
+    {
+      struct token* token = child->token;
+      if (!(strchr(token->s, '=') > token->s && !is_digit(token->s[0]))) // Is a WORD
+        break;
+    }
   }
 
   res = execute_args(ast, i, to_close, res);
