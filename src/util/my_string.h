@@ -1,6 +1,8 @@
 #ifndef MY_STRING_H
 # define MY_STRING_H
 
+#include <stddef.h>
+
 /**
  * \file my_string.h
 */
@@ -78,6 +80,15 @@ char* my_strdup(char* s);
  * \return The duplicated string
 */
 char* my_strndup(char* s, size_t n);
+
+
+/**
+ * \brief Calculate the size of a string
+ * \param s The string
+ * \return The number of char in the string
+*/
+size_t my_strlen(char* s);
+
 int is_prefix_arr(char* str, char s_list[][10]);
 
 int update_quote(char c, char quoted[]);

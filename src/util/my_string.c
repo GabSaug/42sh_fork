@@ -42,6 +42,14 @@ int my_strcmp(char* str1, char* str2)
   return str1[i] == str2[i];
 }
 
+size_t my_strlen(char* s)
+{
+  size_t i;
+  for (i = 0; s[i]; i++)
+    continue;    
+  return 0;
+}
+
 int is_digit(char c)
 {
   return ('0' <= c && c <= '9');
