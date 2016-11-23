@@ -145,26 +145,8 @@ static int builtin_false(char* argv[])
   return 1;
 }
 
-static int builtin_cd(char* argv[])
+static int chdir_cd(char* argv[], char* directory)
 {
-  if (argv[1] && !strcmp(argv[1], "-"))
-  {
-    char* old_pwd = get_data(ht[VAR], "OLDPWD");
-    if (old_pwd)
-      chdir(old_pwd);
-    else
-    {
-      warnx("OLDPWD not set");
-      return 1;
-    }
-
-    add_hash(ht[VAR], "OLDPWD", get_data(ht[VAR], "PWD"));
-    add_hash(ht[VAR], "PWD", getcwd(NULL, 0));
-    return 0;
-  }
-  
-  char* directory = argv[1];
-  //Rule 1 and 2
   if (argv[1] == NULL)
   {
     char* home = get_data(ht[VAR], "HOME");
@@ -179,9 +161,31 @@ static int builtin_cd(char* argv[])
   {
     add_hash(ht[VAR], "OLDPWD", get_data(ht[VAR], "PWD"));
     add_hash(ht[VAR], "PWD", getcwd(NULL, 0));
-
     return 0;
   }
+  return 1;
+}
+
+static int builtin_cd(char* argv[])
+{
+  if (argv[1] && !strcmp(argv[1], "-"))
+  {
+    char* old_pwd = get_data(ht[VAR], "OLDPWD");
+    if (old_pwd)
+      chdir(old_pwd);
+    else
+    {
+      warnx("OLDPWD not set");
+      return 1;
+    }
+    add_hash(ht[VAR], "OLDPWD", get_data(ht[VAR], "PWD"));
+    add_hash(ht[VAR], "PWD", getcwd(NULL, 0));
+    return 0;
+  }
+  char* directory = argv[1];
+  //Rule 1 and 2
+  if (chdir_cd(argv, directory) == 0)
+    return 0;
   warn("cd: %s", argv[1]);
   return 1;
 }
