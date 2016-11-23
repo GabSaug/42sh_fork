@@ -90,6 +90,56 @@ static int is_among(enum terminal_symbol sym, enum terminal_symbol arr[],
   return -1;
 }
 
+
+static int typer_loop2(struct token* token, struct vector* v_token, int i)
+{
+  if (strchr(token->s, '=') > token->s && !is_digit(token->s[0]))
+  {
+    token->id = ASSIGNMENT_WORD;
+    return 1;
+  }
+  struct token* prev_prev = v_get(v_token, i - 2);
+  if (prev_prev && (prev_prev->id == FOR || prev_prev->id == CASE))
+  {
+    if (my_is_in(token->s, reserved_word) == IN - IF)
+    {
+      token->id = IN;
+      return 1;
+    }
+  }
+  return 0;
+}
+
+static int typer_loop(struct token* token, struct vector* v_token, int i)
+{
+  if (is_number(token->s))
+  {
+    struct token* next = v_get(v_token, i + 1);
+    if (next && next->s && (next->s[0] == '<' || next->s[0] == '>'))
+    {
+      token->id = IO_NUMBER;
+      return 1;
+    }
+  }
+  struct token* prev = v_get(v_token, i - 1);
+  int index_rw = my_is_in(token->s, reserved_word);
+  if (index_rw != -1 && index_rw != IN - IF)
+  {
+    int can_be_at_begining = 0;
+    if (brw_match[index_rw] == brw_if
+        || brw_match[index_rw] == brw_function)
+      can_be_at_begining = 1;
+    size_t len = brw_match_len[index_rw];
+    if ((can_be_at_begining && prev == NULL)
+        || (prev && is_among(prev->id, brw_match[index_rw], len) != -1))
+    {
+      token->id = IF + index_rw;
+      return 1;
+    }
+  }
+  return typer_loop2(token, v_token, i);
+}
+
 void typer(struct vector* v_token)
 {
   struct token* token;
@@ -110,49 +160,8 @@ void typer(struct vector* v_token)
       token->id = index_operator_list;
       continue;
     }
-    if (is_number(token->s))
-    {
-      struct token* next = v_get(v_token, i + 1);
-      if (next && next->s && (next->s[0] == '<' || next->s[0] == '>'))
-      {
-        token->id = IO_NUMBER;
-        continue;
-      }
-    }
-    struct token* prev = v_get(v_token, i - 1);
-    int index_rw = my_is_in(token->s, reserved_word);
-    if (index_rw != -1 && index_rw != IN - IF)
-    {
-      int can_be_at_begining = 0;
-      if (brw_match[index_rw] == brw_if
-          || brw_match[index_rw] == brw_function)
-        can_be_at_begining = 1;
-
-      size_t len = brw_match_len[index_rw];
-      if ((can_be_at_begining && prev == NULL)
-          || (prev && is_among(prev->id, brw_match[index_rw], len) != -1))
-      {
-        token->id = IF + index_rw;
-        continue;
-      }
-    }
-    // = not in 1st position
-    if (strchr(token->s, '=') > token->s && !is_digit(token->s[0]))
-    {
-      token->id = ASSIGNMENT_WORD;
+    if (typer_loop(token, v_token, i))
       continue;
-    }
-
-    struct token* prev_prev = v_get(v_token, i - 2);
-    if (prev_prev && (prev_prev->id == FOR || prev_prev->id == CASE))
-    {
-      if (my_is_in(token->s, reserved_word) == IN - IF)
-      {
-        token->id = IN;
-        continue;
-      }
-    }
     token->id = WORD;
-    
   }
 }
