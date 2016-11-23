@@ -3,7 +3,7 @@
 #include "execute.h"
 #include "my_string.h"
 
-extern struct hash_table* ht[2];
+extern struct hash_table* ht[3];
 
 int execute_command(struct tree* ast)
 {
@@ -151,4 +151,3 @@ int execute_simple_command(struct tree *ast)
 
   return res;
 }
-

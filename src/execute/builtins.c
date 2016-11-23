@@ -1,8 +1,9 @@
 #include <stdio.h>
 
 #include "execute.h"
+#include "builtins.h"
 
-extern struct hash_table* ht[2];
+extern struct hash_table* ht[3];
 
 static int builtin_exit(char* argv[]);
 static int builtin_true(char* argv[]);
@@ -18,10 +19,10 @@ static struct builtin_fun builtin_fun_array[] =
   { "false", builtin_false },
   { "cd", builtin_cd },
   { "echo", builtin_echo },
-  { "shopt", builtin_shopt }
+  { "shopt", builtin_shopt },
+  { "alias", builtin_alias }
 };
 /*{ "export", builtin_export },
-  { "alias", builtin_alias },
   { "unalias", builtin_unalias },
   { "continue", builtin_echo },
   { "break", builtin_break },

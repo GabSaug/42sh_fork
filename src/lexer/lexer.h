@@ -59,7 +59,7 @@ struct token
   char* s;
 };
 
-extern struct hash_table* ht[2];
+extern struct hash_table* ht[3];
 
 /**
  * \brief Fill a vector of token based on the input string

@@ -14,7 +14,8 @@
 enum hash_table_id
 {
   VAR,
-  FUN
+  FUN,
+  ALIAS
 };
 
 struct elt_hash

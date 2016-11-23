@@ -23,7 +23,7 @@ static int process_input(char* buff, struct rule** rules);
 static int process_file(struct option option, struct rule** rules);
 static int process_interactive(void);
 
-struct hash_table* ht[2] = { NULL, NULL };
+struct hash_table* ht[3] = { NULL, NULL, NULL };
 static struct rule** rules = NULL;
 static struct vector* v_token = NULL;
 static struct tree* ast = NULL;
@@ -37,6 +37,7 @@ int main(int argc, char* argv[])
   set_sigacts();
   ht[VAR] = create_hash(256);
   ht[FUN] = create_hash(256);
+  ht[ALIAS] = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv);
   rules = init_all_rules();
