@@ -119,9 +119,9 @@ static struct a_token* a_create_tok(char* exp, size_t start, size_t end)
 static struct vector* a_lexer(char* exp)
 {
   struct vector* v_tok = v_create();
-  size_t start_tok = 1;
+  size_t start_tok = 0;
   int in_tok = 0;
-  for (size_t i = 1; exp[i]; i++)
+  for (size_t i = 0; exp[i]; i++)
   {
     if (in_tok)
     {
@@ -217,9 +217,9 @@ static long int a_eval(struct vector* v_tok)
 
 char* arithmetic_expansion(char* s)
 {
-  if (!s || !(s + 1) || !(s + 2) || s[0] != '$' || s[1] != '(' || s[2] != '(')
+  if (!s || s[0] != '$')
     return s;
-  if (my_strcmp("$(())", s))
+  if (my_strlen(s))
   {
     char *res = malloc(2);
     res[0] = '0';
