@@ -44,10 +44,10 @@ return v;*/
     output[0] = '\0';
   }
 
-struct vector* v = v_create();
-v_append(v, output);
+  struct vector* v = v_create();
+  v_append(v, output);
 
-//printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
+  //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 
   /*for (size_t i = 0; i < v_size(v); ++i)
     v_set(v, i, remove_quote(v_get(v, i)));*/
