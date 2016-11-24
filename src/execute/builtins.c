@@ -301,12 +301,12 @@ static int builtin_echo(char* argv[])
   char opt_e = 0;
   if (argv[1])
   {
-    if (!strcmp(argv[1], "--help"))  //Handle this extension the same as the others
+    if (!strcmp(argv[1], "--help") && !argv[2])  //Handle this extension the same as the others
     {
       printf("%s", builtin_echo_help);
       return 0;
     }
-    if (!strcmp(argv[1], "--version"))
+    if (!strcmp(argv[1], "--version") && !argv[2])
     {
       printf("%s", builtin_echo_version);
       return 0;

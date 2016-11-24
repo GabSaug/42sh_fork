@@ -93,15 +93,18 @@ static int execute_assignment(struct tree* assignment)
 static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
                         int res)
 {
-  if (i == v_size(ast->child)) // Only prefix
+  if (i == v_size(ast->child)) // Only prefix (assignment_word)
   {
     for (size_t j = 0; j < v_size(ast->child); ++j)
     {
       struct tree* prefix = v_get(ast->child, j);
-      res = execute_assignment(v_get(prefix->child, 0));
+      struct tree* child = v_get(prefix->child, 0);
+      if (child->nts == REDIRECTION)
+        continue;
+      res = execute_assignment(child);
     }
   }
-  else // only element
+  else // only element (word)
   {
     char** argv = generate_command(ast, i);
     res = execute_prog(argv);
@@ -136,8 +139,10 @@ int execute_simple_command(struct tree *ast)
   for (i = 0; i < v_size(ast->child); ++i)
   {
     struct tree* element = v_get(ast->child, i); // i is offset of +1
+    /*if (element->nts != ELEMENT)
+      continue;*/
     struct tree* child = v_get(element->child, 0);
-    if (child->nts == 0)
+    if (child->nts == 0) // its a word or assignment_word
     {
       struct token* token = child->token;
       if (!(strchr(token->s, '=') > token->s && !is_digit(token->s[0]))) // Is a WORD
