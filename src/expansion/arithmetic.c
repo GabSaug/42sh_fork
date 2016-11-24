@@ -98,7 +98,7 @@ static struct a_token* a_create_tok(char* exp, size_t start, size_t end)
   int op_num = -1;
   long int num;
   exp[end] = '\0';
-  //printf("%s\n", str);
+//  printf("tok = [%s]\n", str);
   for (int i = 0; i < size_operators && op_num == -1; i++)
   {
     if (my_strcmp(operators[i], str))
@@ -121,14 +121,15 @@ static struct vector* a_lexer(char* exp)
   struct vector* v_tok = v_create();
   size_t start_tok = 0;
   int in_tok = 0;
-  for (size_t i = 0; exp[i]; i++)
+  size_t i;
+  for (i = 0; exp[i]; i++)
   {
     if (in_tok)
     {
       if (exp[i] == ' ' || exp[i] == '\n' || exp[i] == '\t')
       {
         in_tok = 0;
-        struct a_token* tok = a_create_tok(exp, start_tok, i + 1);
+        struct a_token* tok = a_create_tok(exp, start_tok, i);
         v_append(v_tok, tok);
       }
       else if (i != 0 && ((is_in_op(exp[i]) && !is_in_op(exp[i - 1]))
@@ -146,8 +147,11 @@ static struct vector* a_lexer(char* exp)
         start_tok = i;
       }
   }
-  struct a_token* tok = a_create_tok(exp, start_tok, my_strlen(exp));
-  v_append(v_tok, tok);
+  if (!(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
+  {
+    struct a_token* tok = a_create_tok(exp, start_tok, i);
+    v_append(v_tok, tok);
+  }
   return v_tok;
 }
 
@@ -179,14 +183,14 @@ static long int a_eval(struct vector* v_tok)
     }
     else if (tok->type == PLUS || tok->type == MINUS || tok->type == TIMES
              || tok->type == DIV || tok->type == UPLUS || tok->type == UMINUS
-	     || tok->type == POW)
+             || tok->type == POW)
     {
       while (s_operator && priority(tok->type) < priority(stack_o_peek(s_operator)))
         if (!pop_and_eval(&s_operator, &s_result))
-	{
-	  warnx("Expansion error");
-          return 0;
-	}
+        {
+	        warnx("Expansion error");
+            return 0;
+        }
       stack_o_push(&s_operator, tok->type);
       unary = 1;
     }
@@ -194,10 +198,10 @@ static long int a_eval(struct vector* v_tok)
     {
       while (s_operator && stack_o_peek(s_operator) != OP_BRAKET)
         if (!pop_and_eval(&s_operator, &s_result))
-	{
-	  warnx("Expansion error");
-          return 0;
-	}
+        {
+          warnx("Expansion error");
+            return 0;
+        }
       stack_o_pop(&s_operator);
       unary = 0;
     }
@@ -217,8 +221,6 @@ static long int a_eval(struct vector* v_tok)
 
 char* arithmetic_expansion(char* s)
 {
-  if (!s || s[0] != '$')
-    return s;
   if (my_strlen(s))
   {
     char *res = malloc(2);
