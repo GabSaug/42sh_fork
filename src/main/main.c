@@ -19,7 +19,7 @@
 #include "signals.h"
 
 static char* get_PS(void);
-static int process_file(struct option option, struct rule** rules);
+static int process_file(struct option option);
 static int process_interactive(void);
 
 struct hash_table* ht[3] = { NULL, NULL, NULL };
@@ -43,9 +43,9 @@ int main(int argc, char* argv[])
   if (option.input_mode == INTERACTIVE)
     return process_interactive();
   else if (option.input_mode == COMMAND_LINE)
-    return process_input(option.input);
+    return process_input(option.input, v_token);
   else
-    return process_file(option, rules);
+    return process_file(option);
 }
 
 static int process_interactive(void)
@@ -63,14 +63,14 @@ static int process_interactive(void)
     if (strlen(buff) != 0)
     {
       add_history(buff);
-      ret = process_input(buff);
+      ret = process_input(buff, v_token);
     }
     free(buff);
   }
   return ret;
 }
 
-static int process_file(struct option option, struct rule** rules)
+static int process_file(struct option option)
 {
   int ret = 0;
   int fd = open(option.input, O_RDONLY | O_CLOEXEC);
@@ -87,13 +87,13 @@ static int process_file(struct option option, struct rule** rules)
   }
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-  ret = process_input(file);
+  ret = process_input(file, v_token);
   munmap(file, size_file);
   close(fd);
   return ret;
 }
 
-static int run_ast(struct tree *ast)
+static int run_ast(struct tree *ast, struct vector *token)
 {
   int ret = 0;
   if (ast == NULL)
@@ -110,30 +110,31 @@ static int run_ast(struct tree *ast)
     //printf("returned %i\n", execute(ast, ht));
     tree_destroy(ast);
   }
-  v_destroy(v_token, token_destroy);
+  v_destroy(token, token_destroy);
+  token = NULL;
   processing = 0;
 
   return ret;
 }
 
-int process_input(char* buff)
+int process_input(char* buff, struct vector *token)
 {
   processing = 1;
   //printf("buff = %s\n", buff);
-  v_token = v_create();
-  if (!lexer(buff, v_token))
+  token = v_create();
+  if (!lexer(buff, token))
   {
     //printf("lexer failure\n");
-    v_destroy(v_token, token_destroy);
-    v_token = NULL;
+    v_destroy(token, token_destroy);
+    token = NULL;
     return 1;
   }
-  typer(v_token);
-  //v_print(v_token);
+  typer(token);
+  //v_print(token);
   //printf("lexer success\n");
   int fit_level = 0;
-  ast = parse(rules, v_token, &fit_level);
-  int ret = run_ast(ast);
+  ast = parse(rules, token, &fit_level);
+  int ret = run_ast(ast, token);
 
   return ret;
 }

@@ -40,7 +40,7 @@
           [X] Echo
           [ ] Continue
           [ ] Break
-          [ ] Source
+          [x] Source
           [ ] History
      [ ] Advanced prompt
      [X] Readline

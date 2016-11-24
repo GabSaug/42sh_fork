@@ -22,12 +22,12 @@ static struct builtin_fun builtin_fun_array[] =
   { "shopt", builtin_shopt },
   { "export", builtin_export },
   { "alias", builtin_alias },
-  { "unalias", builtin_unalias }
+  { "unalias", builtin_unalias },
+  { "source", builtin_source }
 };
 /*
   { "continue", builtin_echo },
   { "break", builtin_break },
-  { "source", builtin_source },
   { "history", builtin_history }
 };*/
 
