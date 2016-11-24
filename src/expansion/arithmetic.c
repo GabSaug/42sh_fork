@@ -228,7 +228,7 @@ char* arithmetic_expansion(char* s)
   }
   struct vector* v_tok = a_lexer(s);
   long int res = a_eval(v_tok);
-  char* s_res = malloc(50);
+  char* s_res = malloc(50); // Change to dynamic allocation
   sprintf(s_res, "%ld", res);
   free(s);
   return s_res;

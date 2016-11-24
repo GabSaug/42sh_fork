@@ -81,10 +81,14 @@ static int apply_rule(struct vector* v_token, char quoted[],
   if ((s[*i] == '$' || s[*i] == '`') && !quoted[BACKSLASH]
       && !quoted[SINGLE_QUOTE])
   {
-    size_t size_exp = tokenize_expansion(s + *i).size;
-    if (size_exp == 0)
-      return -1;
-    *i += size_exp - 1;
+    struct expansion exp = tokenize_expansion(s + *i);
+    if (exp.type == NO_EXPANSION)
+    {
+      warnx("This expansion is not handle : %s\n", s + *i);
+      return 0;
+    }
+    //printf("size_exp = %zu\n", size_exp);
+    *i += exp.size - 1;
     return 0;
   }
   apply_rule_2(v_token, quoted, part_of_operator,

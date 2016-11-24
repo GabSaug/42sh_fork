@@ -9,7 +9,8 @@ enum expansion_type
   ARI,
   BRACKET,
   CMD,
-  NORMAL
+  NORMAL,
+  NO_EXPANSION
 };
 
 struct expansion 

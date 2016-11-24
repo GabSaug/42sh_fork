@@ -7,6 +7,7 @@
 #include "hash_table.h"
 #include "tokenize.h"
 #include "arithmetic.h"
+#include "my_malloc.h"
 
 extern struct hash_table* ht[2];
 
@@ -14,13 +15,40 @@ extern struct hash_table* ht[2];
 static char* parameter_expansion(char* s);
 static char* remove_quote(char* s);
 
-struct vector* expand(char* s)
+struct vector* expand(char* input)
 {
+  /*struct vector* v = v_create();
+v_append(v, input);
+
+return v;*/
+
+ 
+  struct expansion exp = tokenize_expansion(input);
+  char* output = NULL;
+  if (exp.type == NORMAL)
+    output = parameter_expansion(my_strndup(exp.start, exp.start - exp.end)); // Change to tilde_s
+  else if (exp.type == ARI)
+  {
+    //printf("ARITHMETIC\n");
+    char* content = my_strndup(exp.start, exp.end - exp.start);
+    //printf("content = ^%s$\n", content);
+    output = arithmetic_expansion(content);
+    free(content);
+  }
+  else
+    output = my_strdup(input);
+  
+
   //char* tilde_s = tilde_expansion(s);
-  char* param_s = parameter_expansion(s); // Change to tilde_s
-  char* expan_s = arithmetic_expansion(param_s);
-  struct vector* v = v_create();
-  v_append(v, expan_s);
+  free(input);
+  if (!output)
+  {
+    output = my_malloc(1);
+    output[0] = '\0';
+  }
+
+struct vector* v = v_create();
+v_append(v, output);
 
 //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 
@@ -69,20 +97,16 @@ static char* remove_quote(char* s)
   return new;
 }
 
-static char* parameter_expansion(char* s)
+static char* parameter_expansion(char* param_name)
 {
-  if (!s || !(s + 1) || s[0] != '$' || s[1] == '(')
-    return s;
-  //printf("param expansion; s= %s ", s);
+  //printf("param expansion; param_name= %s ", param_name);
 
-  struct expansion exp = tokenize_expansion(s);
   /*printf("exp.size = %zu, exp.type = %i, size_s = %i, exp.s = %.*s\n",
          exp.size, exp.type, (int)(exp.end - exp.start),
          (int)(exp.end - exp.start), exp.start);*/
-  char* param_name = my_strndup(s + 1, exp.size - 1);
+
   char* param_value = my_strdup(get_data(ht[VAR], param_name));
   free(param_name);
-  free(s);
   if (param_value == NULL)
   {
     param_value = malloc(1);

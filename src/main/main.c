@@ -120,12 +120,15 @@ static int run_ast(struct tree *ast)
 static int process_input(char* buff, struct rule** rules)
 {
   processing = 1;
+  //printf("buff = %s\n", buff);
   if (strlen(buff) == 0)
     return 0;
   v_token = v_create();
   if (!lexer(buff, v_token))
   {
+    //printf("lexer failure\n");
     v_destroy(v_token, token_destroy);
+    v_token = NULL;
     return 1;
   }
   typer(v_token);

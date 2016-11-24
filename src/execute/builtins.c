@@ -298,6 +298,7 @@ static int builtin_echo(char* argv[])
 {
   char opt_n = 0; 
   char opt_e = 0;
+  //printf("echo builtin\n");
   if (argv[1])
   {
     if (!strcmp(argv[1], "--help"))  //Handle this extension the same as the others

@@ -1,5 +1,6 @@
 #include <err.h>
 #include <string.h>
+#include <stdio.h>
 
 #include "tokenize.h"
 #include "my_string.h"
@@ -40,16 +41,41 @@ size_t tokenize_exp_normal(char *s)
   return i;
 }
 
-static size_t tokenize_exp_other(char *s, char b, char d)
+// Modify so that $(( abc ) def ) triggers an error
+static size_t tokenize_exp_other(char *s, char b, char d, char** start, char** end, int nb_char_intro)
 {
   int count = 0;
-  size_t i = 2;
-  while (s[i] && (s[i] != d || count > 0))
+  size_t i = 0;
+  //int nb_char_intro = 1;
+  //int in_intro = 1;
+  //printf("char = %c\n", d);
+  while (s[i] != b)
+    ++i;
+  for (int j = 0; j < nb_char_intro; ++i, ++j)
+    count++;
+  *start = s + i;
+  for (; s[i] && count > 0; ++i)
   {
+    //printf("%c, count = %i\n", s[i], count);
+    /*if (in_intro)
+    {
+      if (s[i] != b)
+      {
+        in_intro = 0;
+        *start = s + i;
+      }
+      else
+        nb_char_intro++;
+    }*/
+
     if (s[i] == b)
       count++;
     else if (s[i] == d)
+    {
       count--;
+      if (count == 0)
+        break;
+    }
 
     if (s[i] == '\\')
       i++;
@@ -59,9 +85,17 @@ static size_t tokenize_exp_other(char *s, char b, char d)
       for (i++; s[i] && s[i] != c; ++i) // add back_slash escape
         continue;
     }
-
-    i++;
   }
+  for (int j = 0; j < nb_char_intro; ++j)
+  {
+    if (s[i - j] !=  d)
+    {
+      warn("End pattern not found");
+      return 0;
+    }
+  }
+
+  *end = s + i - nb_char_intro + 1;
 
   if (!s[i])
     warn("Unexpected EOF, expected '%c;", d);
@@ -71,23 +105,27 @@ static size_t tokenize_exp_other(char *s, char b, char d)
 static char exp_intro[][10] =
 {
   "$((",
-  "$(",
   "${",
+  "$(",
   "`",
+  "$",
   ""
 };
 
 static char exp_begin[] =
 {
   '(',
-  '(',
   '{',
+  '(',
   '`'
 };
 
 static char exp_end[] =
 {
-  ')', ')', '}', '`'
+  ')',
+  '}',
+  ')',
+  '`'
 };
 
 
@@ -96,33 +134,41 @@ struct expansion tokenize_expansion(char* s)
 {
   struct expansion exp =
   {
-    BRACKET,
+    NO_EXPANSION,
     NULL,
     NULL,
     0,
   };
 
-  int index_exp_type = my_begin_as(s, exp_intro);
+  int index_exp_type = is_prefix_arr(s, exp_intro);
   if (index_exp_type != -1)
   {
-    exp.start = s + strlen(exp_intro[index_exp_type]);
-    size_t other_size = tokenize_exp_other(s
-                                           + strlen(exp_intro[index_exp_type]),
-                    exp_begin[index_exp_type], exp_end[index_exp_type]);
-    exp.end = exp.start + other_size;
-    exp.size = 2 * (exp.start - s) + other_size;
-    exp.type = index_exp_type > CMD ? CMD : index_exp_type;
-    /*if (exp.type != ARI)
-      exp.size++;*/
-    return exp;
+    exp.type = index_exp_type > CMD ? index_exp_type - 1 : index_exp_type;
+    if (exp.type == NORMAL)
+    {
+      size_t normal_size = tokenize_exp_normal(s + 1);
+      exp.size = normal_size + 1;
+      //printf("exp.size = %zu\n", exp.size);
+      exp.start = s + 1;
+      //exp.end = exp.start + 2;
+      exp.end = exp.start + normal_size;
+    }
+    else
+    {
+      //exp.start = s + strlen(exp_intro[index_exp_type]);
+      size_t other_size = tokenize_exp_other(s, exp_begin[index_exp_type],
+          exp_end[index_exp_type], &exp.start, &exp.end, (exp.type == ARI) + 1);
+      //printf("other_size = %zu\n", other_size);
+      //exp.end = exp.start + other_size - exp_intro[index_exp_type];
+      //exp.size = 2 * (exp.start - s) + other_size;
+      if (other_size <= 0)
+      {
+        exp.type = NO_EXPANSION;
+        return exp;
+      }
+      exp.size = other_size + 1;
+    }
   }
-  exp.type = NORMAL;
-  size_t normal_size = tokenize_exp_normal(s + 1);
-  exp.size = normal_size + 1;
-  //printf("exp.size = %zu\n", exp.size);
-  exp.start = s + 1;
-  //exp.end = exp.start + 2;
-  exp.end = exp.start + normal_size;
   return exp;
 }
 
