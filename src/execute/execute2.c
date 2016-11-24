@@ -57,7 +57,7 @@ static char** generate_command(struct tree *ast, size_t index_start)
     son = v_get(son->child, 0);
     if (son->nts != REDIRECTION)
     {
-      struct vector* v_arg_tmp = expand(my_strdup(son->token->s));
+      struct vector* v_arg_tmp = expand(my_strdup(son->token->s), 0);
       v_concat(v_args, v_arg_tmp);
       v_destroy(v_arg_tmp, NULL);
     }

@@ -15,7 +15,7 @@ extern struct hash_table* ht[2];
 static char* parameter_expansion(char* s);
 static char* remove_quote(char* s);
 
-struct vector* expand(char* input)
+struct vector* expand(char* input, int in_ari_exp)
 {
   /*struct vector* v = v_create();
 v_append(v, input);
@@ -25,13 +25,10 @@ return v;*/
  
   struct expansion exp = tokenize_expansion(input);
   char* output = NULL;
-  if (exp.type == NORMAL)
-    output = parameter_expansion(my_strndup(exp.start, exp.start - exp.end)); // Change to tilde_s
-  else if (exp.type == ARI)
-  {
-    //printf("ARITHMETIC\n");
+  if (exp.type == ARI)
     output = arithmetic_expansion(my_strndup(exp.start, exp.end - exp.start));
-  }
+  else if (exp.type == NORMAL || in_ari_exp) // in_ari_exp must be the last elseif
+    output = parameter_expansion(my_strndup(exp.start, exp.start - exp.end)); // Change to tilde_s
   else
     output = my_strdup(input);
   
