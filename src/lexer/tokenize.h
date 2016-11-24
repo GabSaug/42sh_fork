@@ -16,9 +16,9 @@ enum expansion_type
 struct expansion 
 {
   enum expansion_type type;
-  char* start;
-  char* end;
   size_t size;
+  char* content_start;
+  size_t content_size;
 };
 
 struct expansion tokenize_expansion(char* s);

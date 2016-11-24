@@ -42,7 +42,7 @@ size_t tokenize_exp_normal(char *s)
 }
 
 // Modify so that $(( abc ) def ) triggers an error
-static size_t tokenize_exp_other(char *s, char b, char d, char** start, char** end, int nb_char_intro)
+static size_t tokenize_exp_other(char *s, char b, char d, char** start, size_t *content_size, int nb_char_intro)
 {
   int count = 0;
   size_t i = 0;
@@ -95,7 +95,7 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start, char** e
     }
   }
 
-  *end = s + i - nb_char_intro + 1;
+  *content_size = (s+i) - *start - nb_char_intro + 1;
 
   if (!s[i])
     warn("Unexpected EOF, expected '%c;", d);
@@ -135,7 +135,7 @@ struct expansion tokenize_expansion(char* s)
   struct expansion exp =
   {
     NO_EXPANSION,
-    NULL,
+    0,
     NULL,
     0,
   };
@@ -146,19 +146,20 @@ struct expansion tokenize_expansion(char* s)
     exp.type = index_exp_type > CMD ? index_exp_type - 1 : index_exp_type;
     if (exp.type == NORMAL)
     {
-      size_t normal_size = tokenize_exp_normal(s + 1);
-      exp.size = normal_size + 1;
+      exp.content_size = tokenize_exp_normal(s + 1);
+      exp.size = exp.content_size + 1;
       //printf("exp.size = %zu\n", exp.size);
-      exp.start = s + 1;
+      exp.content_start = s + 1;
       //exp.end = exp.start + 2;
-      exp.end = exp.start + normal_size;
+      //exp.end = exp.start + normal_size;
     }
     else
     {
       //exp.start = s + strlen(exp_intro[index_exp_type]);
       size_t other_size = tokenize_exp_other(s, exp_begin[index_exp_type],
-          exp_end[index_exp_type], &exp.start, &exp.end, (exp.type == ARI) + 1);
+          exp_end[index_exp_type], &exp.content_start, &exp.content_size, (exp.type == ARI) + 1);
       //printf("other_size = %zu\n", other_size);
+      //printf("s = ^%.*s$\n", (int)(exp.content_size), exp.content_start);
       //exp.end = exp.start + other_size - exp_intro[index_exp_type];
       //exp.size = 2 * (exp.start - s) + other_size;
       if (other_size <= 0)
