@@ -3,6 +3,7 @@
 
 #include "expansion.h"
 #include "vector.h"
+#include "str.h"
 #include "string.h"
 #include "hash_table.h"
 #include "tokenize.h"
@@ -22,27 +23,47 @@ v_append(v, input);
 
 return v;*/
 
- 
-  struct expansion exp = tokenize_expansion(input);
-  char* output = NULL;
-  if (exp.type == ARI)
-    output = arithmetic_expansion(my_strndup(exp.start, exp.end - exp.start));
-  else if (exp.type == NORMAL || in_ari_exp) // in_ari_exp must be the last elseif
-    output = parameter_expansion(my_strndup(exp.start, exp.start - exp.end)); // Change to tilde_s
-  else
-    output = my_strdup(input);
-  
+  struct str* output = str_create();
+  size_t start = 0;
+  size_t i_input;
+  for (i_input = 0; input[i_input]; ++i_input)
+  {
+    struct expansion exp = tokenize_expansion(input + i_input);
+
+    if (exp.type == ARI)
+    {
+      str_append(output, input + start, i_input - start, 0);
+      str_append(output, arithmetic_expansion(my_strndup(exp.content_start, exp.content_size)), -1, 1);
+      i_input += exp.size - 1;
+      start = i_input;
+    }
+    else if (exp.type == NORMAL || exp.type == BRACKET || in_ari_exp)
+      // in_ari_exp must be the last elseif
+    {
+      str_append(output, input + start, i_input - start, 0);
+      str_append(output, parameter_expansion(my_strndup(exp.content_start, exp.content_size)), -1, 1);
+      //printf("exp.size = %zu\n", exp.size);
+      start = i_input + exp.size;
+      i_input = start - 1;
+    }
+    /*else
+      str_append(output, input, -1, 0);*/
+  }
+  str_append(output, input + start, i_input - start, 0);
+  //output[i_output] = '\0';
 
   //char* tilde_s = tilde_expansion(s);
   free(input);
-  if (!output)
+  /*if (!output)
   {
     output = my_malloc(1);
     output[0] = '\0';
-  }
+  }*/
 
   struct vector* v = v_create();
-  v_append(v, output);
+  v_append(v, output->s);
+
+  str_destroy(output, 0);
 
   //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 

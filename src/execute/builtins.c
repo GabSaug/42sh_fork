@@ -128,7 +128,7 @@ static int builtin_exit(char* argv[])
     ret_string = argv[1];
   if (ret_string == NULL)
     ret_string = get_data(ht[VAR], "$?");
-  int ret = 0; 
+  int ret = 0;
   if (ret_string)
     ret = atoi(ret_string);
   exit(ret);
@@ -296,9 +296,8 @@ static int builtin_echo_print(char* s, char opt_e)
 
 static int builtin_echo(char* argv[])
 {
-  char opt_n = 0; 
+  char opt_n = 0;
   char opt_e = 0;
-  //printf("echo builtin\n");
   if (argv[1])
   {
     if (!strcmp(argv[1], "--help"))  //Handle this extension the same as the others
@@ -316,12 +315,13 @@ static int builtin_echo(char* argv[])
     if (option_parser(argv, &i, &opt_n, &opt_e) == -1)
       return 0;
     for (; argv[i] && builtin_echo_print(argv[i], opt_e) && argv[i + 1]; ++i)
-      printf(" ");
+      if (argv[i + 1][0])
+        printf(" ");
   }
   if (!opt_n)
     printf("\n");
   fflush(stdout);
- return 0; 
+ return 0;
 }
 
 /*static void builtin_alias_print_all(struct hash_table* ht_alias)
