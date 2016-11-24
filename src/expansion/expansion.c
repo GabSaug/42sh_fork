@@ -18,8 +18,9 @@ struct vector* expand(char* s)
 {
   //char* tilde_s = tilde_expansion(s);
   char* param_s = parameter_expansion(s); // Change to tilde_s
+  char* expan_s = arithmetic_expansion(param_s);
   struct vector* v = v_create();
-  v_append(v, param_s);
+  v_append(v, expan_s);
 
 //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 
@@ -70,10 +71,8 @@ static char* remove_quote(char* s)
 
 static char* parameter_expansion(char* s)
 {
-  if (!s || s[0] != '$')
+  if (!s || !(s + 1) || s[0] != '$' || s[1] == '(')
     return s;
-  else
-    return arithmetic_expansion(s);
   //printf("param expansion; s= %s ", s);
 
   struct expansion exp = tokenize_expansion(s);

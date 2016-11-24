@@ -215,11 +215,21 @@ static long int a_eval(struct vector* v_tok)
   return result;
 }
 
-char* arithmetic_expansion(char* exp)
+char* arithmetic_expansion(char* s)
 {
-  struct vector* v_tok = a_lexer(exp);
+  if (!s || !(s + 1) || !(s + 2) || s[0] != '$' || s[1] != '(' || s[2] != '(')
+    return s;
+  if (my_strcmp("$(())", s))
+  {
+    char *res = malloc(2);
+    res[0] = '0';
+    res[1] = '\0';
+    return res;
+  }
+  struct vector* v_tok = a_lexer(s);
   long int res = a_eval(v_tok);
   char* s_res = malloc(50);
   sprintf(s_res, "%ld", res);
+  free(s);
   return s_res;
 }
