@@ -1,6 +1,6 @@
-#include <stdio.h>
 #define _POSIX_C_SOURCE 200112L
 #include <stdlib.h>
+#include <stdio.h>
 #include "execute.h"
 
 extern char **environ;
