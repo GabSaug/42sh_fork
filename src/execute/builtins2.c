@@ -74,9 +74,57 @@ int builtin_unalias(char *argv[])
   }
 }
 
+static int set_environ(char *argv[], size_t i)
+{
+  int res = 0;
+  for (i = i; argv[i]; i++)
+  {
+    if (argv[i][0] == '-')
+    {
+      warnx("export: `%s': not a valid identifier", argv[i]);
+      res = 1;
+      continue;
+    }
+
+    size_t j = 0;
+    for (j = 0; argv[i][j] && argv[i][j] != '='; j++)
+      continue;
+    if (argv[i][j])
+    {
+      argv[i][j] = '\0';
+      setenv(argv[i], argv[i] + j + 1, 1);
+    }
+    else
+    {
+      char *env = getenv(argv[i]);
+      if (env)
+        continue;
+      else
+        setenv(argv[i], "", 1);
+    }
+  }
+  return res;
+}
+
+static int unset_environ(char *argv[], size_t i)
+{
+  int res = 0;
+  for (i = i; argv[i]; i++)
+  {
+    if (argv[i][0] == '-')
+    {
+      warnx("export: `%s': not a valid identifier", argv[i]);
+      res = 1;
+    }
+    else
+      unsetenv(argv[i]);
+  }
+  return res;
+}
+
 int builtin_export(char *argv[])
 {
-  if (!argv[1])
+  if (!argv[1] || (strcmp(argv[1], "-p") == 0 && !argv[2]))
   {
     for (size_t i = 0; environ[i]; i++)
       printf("declare - x %s\n", environ[i]);
@@ -85,26 +133,16 @@ int builtin_export(char *argv[])
   else
   {
     size_t i = 1;
-    // TODO read options of the builtin
-    for (i = i; argv[i]; i++)
+    int set = 1;
+    if (strcmp(argv[1], "-n") == 0)
     {
-      size_t j = 0;
-      for (j = 0; argv[i][j] && argv[i][j] != '='; j++)
-        continue;
-      if (argv[i][j])
-      {
-        argv[i][j] = '\0';
-        setenv(argv[i], argv[i] + j + 1, 1);
-      }
-      else
-      {
-        char *env = getenv(argv[i]);
-        if (env)
-          continue;
-        else
-          setenv(argv[i], "", 1);
-      }
+      i++;
+      set = 0;
     }
-    return 0;
+    // TODO read options of the builtin
+    if (set)
+      return set_environ(argv, i);
+    else
+      return unset_environ(argv, i);
   }
 }

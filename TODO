@@ -34,9 +34,9 @@
           [X] True and false
           [X] Cd
           [X] Shopt
-          [ ] Export
-          [ ] Alias
-          [ ] Unalias
+          [x] Export
+          [X] Alias
+          [X] Unalias
           [X] Echo
           [ ] Continue
           [ ] Break
