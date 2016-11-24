@@ -49,8 +49,8 @@ return v;*/
 
   //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 
-  /*for (size_t i = 0; i < v_size(v); ++i)
-    v_set(v, i, remove_quote(v_get(v, i)));*/
+  for (size_t i = 0; i < v_size(v); ++i)
+    v_set(v, i, remove_quote(v_get(v, i)));
 
   return v;
 
