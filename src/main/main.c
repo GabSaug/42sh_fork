@@ -152,6 +152,7 @@ void exit_42sh(void)
 {
   destroy_hash(ht[VAR]);
   destroy_hash(ht[FUN]);
+  destroy_hash(ht[ALIAS]);
   rules_destroy(rules);
   if (processing)
   {
