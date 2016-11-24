@@ -30,10 +30,7 @@ return v;*/
   else if (exp.type == ARI)
   {
     //printf("ARITHMETIC\n");
-    char* content = my_strndup(exp.start, exp.end - exp.start);
-    //printf("content = ^%s$\n", content);
-    output = arithmetic_expansion(content);
-    free(content);
+    output = arithmetic_expansion(my_strndup(exp.start, exp.end - exp.start));
   }
   else
     output = my_strdup(input);
@@ -52,8 +49,8 @@ v_append(v, output);
 
 //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 
-  for (size_t i = 0; i < v_size(v); ++i)
-    v_set(v, i, remove_quote(v_get(v, i)));
+  /*for (size_t i = 0; i < v_size(v); ++i)
+    v_set(v, i, remove_quote(v_get(v, i)));*/
 
   return v;
 
