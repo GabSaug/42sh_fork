@@ -3,6 +3,7 @@
 #include <stdio.h>
 
 #include "arithmetic.h"
+#include "expansion.h"
 #include "vector.h"
 #include "my_string.h"
 #include "stack.h"
@@ -47,8 +48,10 @@ static int priority(enum a_exp_type op)
   return 0;
 }
 
-static long int compute(long int operand1, enum a_exp_type op, long int operand2)
+static long int compute(long int operand1, enum a_exp_type op,
+                        long int operand2, int* success)
 {
+  *success = 1;
   if (op == UPLUS)
     return operand2;
   else if (op == UMINUS)
@@ -63,6 +66,7 @@ static long int compute(long int operand1, enum a_exp_type op, long int operand2
   {
     if (operand2 == 0)
     {
+      *success = 0;
       warnx("%li/%li: division by zero (error token is \"%li\")", operand1,
             operand2, operand2);
       return 0;
@@ -71,15 +75,14 @@ static long int compute(long int operand1, enum a_exp_type op, long int operand2
   }
   else if (op == POW)
     return my_pow(operand1, operand2);
-  else
-    return 0;
+  return 0;
 }
 
 static int pop_and_eval(stack_operator **ptr_operator, stack_result **ptr_result)
 {
   if (!(*ptr_result))
   {
-    warnx("Expansion error");
+    warnx("Expansion error: missing operand");
     return 0;
   }
   long int operand2 = stack_r_pop(ptr_result);
@@ -89,38 +92,44 @@ static int pop_and_eval(stack_operator **ptr_operator, stack_result **ptr_result
   {
     if (!(*ptr_result))
     {
-      warnx("Expansion error");
+      warnx("Expansion error: missing operand");
       return 0;
     }
     operand1 = stack_r_pop(ptr_result);
   }
-  long int res = compute(operand1, op, operand2);
+  int success;
+  long int res = compute(operand1, op, operand2, &success);
+  if (!success)
+    return 0;
   stack_r_push(ptr_result, res);
   return 1;
 }
 
-static struct a_token* a_create_tok(char* exp, size_t start, size_t end)
+static int match_op(char* str)
 {
-  char* str = exp + start;
-  char end_c = exp[end];
   int op_num = -1;
-  long int num;
-  exp[end] = '\0';
-  //printf("tok = [%s]\n", str);
   for (int i = 0; i < size_operators && op_num == -1; i++)
   {
     if (my_strcmp(operators[i], str))
-    {
-      //printf("Operator %i\n", i);
       op_num = i;
-    }
   }
+  return op_num;
+}
+
+static struct a_token* create_tok(char* str)
+{
+  int op_num = match_op(str);
+  char* endptr;
+  long int num;
   if (op_num == -1)
-    num = atol(str);
+  {
+    num = strtol(str, &endptr, 10);
+    if (*endptr)
+      return NULL;
+  }
   struct a_token* token = my_malloc(sizeof (struct a_token));
   token->type = op_num;
   token->val = num;
-  exp[end] = end_c;
   return token;
 }
 
@@ -137,6 +146,33 @@ static void a_v_append(struct vector* v, struct a_token* tok)
     v_append(v, tok);
 }
 
+static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
+{
+  struct vector* v_new_str;
+  char* str = exp + start;
+  char end_c = exp[end];
+  exp[end] = '\0';
+  if (!is_in_op(str[0]) && !is_digit(str[0]))
+  {
+    char* str2 = my_strdup(str);
+    printf("%s\n", str2);
+    v_new_str = expand(str2, 1);
+  }
+  else
+  {
+    v_new_str = v_create();
+    v_append(v_new_str, str);
+  }
+  for (size_t i = 0; i < v_size(v_new_str); i++)
+  {
+  //  printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
+    a_v_append(v_tok, create_tok(v_get(v_new_str, i)));
+  }
+  v_destroy(v_new_str, NULL);
+  exp[end] = end_c;
+  return 1;
+}
+
 static struct vector* a_lexer(char* exp)
 {
   struct vector* v_tok = v_create();
@@ -150,15 +186,13 @@ static struct vector* a_lexer(char* exp)
       if (exp[i] == ' ' || exp[i] == '\n' || exp[i] == '\t')
       {
         in_tok = 0;
-        struct a_token* tok = a_create_tok(exp, start_tok, i);
-        a_v_append(v_tok, tok);
+        add_tok(v_tok, exp, start_tok, i);
       }
       else if (i != 0 && ((is_in_op(exp[i]) && !is_in_op(exp[i - 1]))
                || is_in_op(exp[i - 1])))
       {
-        struct a_token* tok = a_create_tok(exp, start_tok, i);
+        add_tok(v_tok, exp, start_tok, i);
         start_tok = i;
-        a_v_append(v_tok, tok);
       }
     }
     else
@@ -169,14 +203,11 @@ static struct vector* a_lexer(char* exp)
       }
   }
   if (!(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
-  {
-    struct a_token* tok = a_create_tok(exp, start_tok, i);
-    v_append(v_tok, tok);
-  }
+    add_tok(v_tok, exp, start_tok, i);
   return v_tok;
 }
 
-static long int a_eval(struct vector* v_tok)
+static int a_eval(struct vector* v_tok, long int* res)
 {
   stack_operator *s_operator = NULL;
   stack_result *s_result = NULL;
@@ -208,10 +239,7 @@ static long int a_eval(struct vector* v_tok)
     {
       while (s_operator && priority(tok->type) <= priority(stack_o_peek(s_operator)))
         if (!pop_and_eval(&s_operator, &s_result))
-        {
-	        warnx("Expansion error");
-            return 0;
-        }
+          return 0;
       stack_o_push(&s_operator, tok->type);
       unary = 1;
     }
@@ -219,10 +247,7 @@ static long int a_eval(struct vector* v_tok)
     {
       while (s_operator && stack_o_peek(s_operator) != OP_BRAKET)
         if (!pop_and_eval(&s_operator, &s_result))
-        {
-          warnx("Expansion error");
-            return 0;
-        }
+          return 0;
       stack_o_pop(&s_operator);
       unary = 0;
     }
@@ -231,13 +256,13 @@ static long int a_eval(struct vector* v_tok)
     pop_and_eval(&s_operator, &s_result);
   if (stack_r_size(s_result) != 1)
   {
-    warnx("Expansion error");
+    warnx("Expansion error: operand missing");
     return 0;
   }
-  long int result = stack_r_peek(s_result);
+  *res = stack_r_peek(s_result);
   stack_o_destroy(&s_operator);
   stack_r_destroy(&s_result);
-  return result;
+  return 1;
 }
 
 char* arithmetic_expansion(char* s)
@@ -250,8 +275,10 @@ char* arithmetic_expansion(char* s)
     return res;
   }
   struct vector* v_tok = a_lexer(s);
-  long int res = a_eval(v_tok);
-  char* s_res = malloc(50); // Change to dynamic allocation
+  long int res;
+  if (!a_eval(v_tok, &res))
+    return NULL;
+  char* s_res = malloc(50);
   sprintf(s_res, "%ld", res);
   free(s);
   return s_res;
