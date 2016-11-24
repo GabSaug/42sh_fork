@@ -1,5 +1,9 @@
 #include <stdio.h>
+#define _POSIX_C_SOURCE 200112L
+#include <stdlib.h>
 #include "execute.h"
+
+extern char **environ;
 
 static void print_alias(struct elt_hash *e)
 {
@@ -67,5 +71,40 @@ int builtin_unalias(char *argv[])
       }
     }
     return res;
+  }
+}
+
+int builtin_export(char *argv[])
+{
+  if (!argv[1])
+  {
+    for (size_t i = 0; environ[i]; i++)
+      printf("declare - x %s\n", environ[i]);
+    return 0;
+  }
+  else
+  {
+    size_t i = 1;
+    // TODO read options of the builtin
+    for (i = i; argv[i]; i++)
+    {
+      size_t j = 0;
+      for (j = 0; argv[i][j] && argv[i][j] != '='; j++)
+        continue;
+      if (argv[i][j])
+      {
+        argv[i][j] = '\0';
+        setenv(argv[i], argv[i] + j + 1, 1);
+      }
+      else
+      {
+        char *env = getenv(argv[i]);
+        if (env)
+          continue;
+        else
+          setenv(argv[i], "", 1);
+      }
+    }
+    return 0;
   }
 }

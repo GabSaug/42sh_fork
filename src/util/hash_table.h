@@ -4,6 +4,7 @@
 #define _DEFAULT_SOURCE
 #include <string.h>
 #include <stdlib.h>
+#undef _DEFAULT_SOURCE
 
 #include "my_string.h"
 
