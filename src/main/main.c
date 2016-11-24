@@ -19,7 +19,6 @@
 #include "signals.h"
 
 static char* get_PS(void);
-static int process_input(char* buff, struct rule** rules);
 static int process_file(struct option option, struct rule** rules);
 static int process_interactive(void);
 
@@ -44,7 +43,7 @@ int main(int argc, char* argv[])
   if (option.input_mode == INTERACTIVE)
     return process_interactive();
   else if (option.input_mode == COMMAND_LINE)
-    return process_input(option.input, rules);
+    return process_input(option.input);
   else
     return process_file(option, rules);
 }
@@ -54,25 +53,19 @@ static int process_interactive(void)
   int ret = 0;
   while (1)
   {
-//    int pid = fork();
-//    if (pid == -1)
-//      err(1, "Fork fail");
-//    else if (pid == 0)
-//    {
-      char* prompt = get_PS();
-      buff = readline(prompt);
-      if (!buff)
-      {
-        printf("exit\n");
-        return ret;
-      }
+    char* prompt = get_PS();
+    buff = readline(prompt);
+    if (!buff)
+    {
+      printf("exit\n");
+      return ret;
+    }
+    if (strlen(buff) != 0)
+    {
       add_history(buff);
-      ret = process_input(buff, rules);
-      free(buff);
-//      exit(ret);
-//    }
-//    else
-//      waitpid(pid, &ret, 0);
+      ret = process_input(buff);
+    }
+    free(buff);
   }
   return ret;
 }
@@ -88,7 +81,7 @@ static int process_file(struct option option, struct rule** rules)
     err(1, "Impossible to read stat from %s", option.input);
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-  ret = process_input(file, rules);
+  ret = process_input(file);
   munmap(file, size_file);
   close(fd);
   return ret;
@@ -117,12 +110,10 @@ static int run_ast(struct tree *ast)
   return ret;
 }
 
-static int process_input(char* buff, struct rule** rules)
+int process_input(char* buff)
 {
   processing = 1;
   //printf("buff = %s\n", buff);
-  if (strlen(buff) == 0)
-    return 0;
   v_token = v_create();
   if (!lexer(buff, v_token))
   {

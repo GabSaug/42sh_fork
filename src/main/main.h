@@ -16,6 +16,7 @@
 */
 int main(int argc, char* argv[]);
 
+int process_input(char* buff);
 /**
  * \brief Free all resource before exiting
 */
