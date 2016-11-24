@@ -75,10 +75,16 @@ static int process_file(struct option option, struct rule** rules)
   int ret = 0;
   int fd = open(option.input, O_RDONLY | O_CLOEXEC);
   if (fd == -1)
-    err(1, NULL);
+  {
+    warn("Error to open file");
+    return 1;
+  }
   struct stat stat_buf;
   if (stat(option.input, &stat_buf) == -1)
-    err(1, "Impossible to read stat from %s", option.input);
+  {
+    warn("Impossible to read stat from %s", option.input);
+    return 1;
+  }
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
   ret = process_input(file);

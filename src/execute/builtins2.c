@@ -146,3 +146,15 @@ int builtin_export(char *argv[])
       return unset_environ(argv, i);
   }
 }
+
+int builtin_source(char *argv[])
+{
+  if (!argv[1])
+  {
+    warnx("source: filename argument required");
+    return 2;
+  }
+  struct option temp_opt;
+  temp_opt.input = argv[i];
+  return process_file(option);
+}
