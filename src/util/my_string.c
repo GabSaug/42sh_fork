@@ -63,6 +63,26 @@ int is_number(char* s) // Negative number are NOT recognize as number
   return 1;
 }
 
+int is_lower_case(char c)
+{
+  return 'a' <= c && c <= 'z';
+}
+
+int is_upper_case(char c)
+{
+  return 'A' <= c && c <= 'Z';
+}
+
+int is_alpha(char c)
+{
+  return is_lower_case(c) || is_upper_case(c);
+}
+
+int is_name_char(char c)
+{
+  return c == '_' || is_digit(c) || is_alpha(c);
+}
+
 int my_atoi(const char str[])
 {
   int res = 0;

@@ -145,3 +145,20 @@ void tree_destroy(struct tree* tree)
   v_destroy(tree->child, NULL);
   free(tree);
 }
+
+// What if 2 functions are nested in each other ?
+void tree_destroy_ast(struct tree* tree, struct vector* v_fun)
+{
+  if (!tree)
+    return;
+  for (size_t i = 0; i < v_size(tree->child); ++i)
+  {
+    struct tree* child = v_get(tree->child, i);
+    if (child->nts == FUNCDEC)
+      v_append(v_fun, child);
+    else
+      tree_destroy_ast(child, v_fun);
+  }
+  v_destroy(tree->child, NULL);
+  free(tree);
+}
