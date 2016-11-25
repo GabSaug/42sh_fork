@@ -177,10 +177,11 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
   char* str = exp + start;
   char end_c = exp[end];
   exp[end] = '\0';
-  if (!is_in_op(str[0]) && !is_digit(str[0]))
+  if (!(exp[0] == ' ' || exp[0] == '\n' || exp[0] == '\t')
+      && !is_in_op(str[0]) && !is_digit(str[0]))
   {
     char* str2 = my_strdup(str);
-    printf("Ci-après la string envoyée à expand : [%s]\n", str2);
+    //printf("Ci-après la string envoyée à expand : [%s]\n", str2);
     v_new_str = expand(str2, 1);
   }
   else
@@ -192,8 +193,11 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
   {
     char* str = v_get(v_new_str, i);
     if (str[0] == '\0')
+    {
       str[0] = '0';
-    printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
+      str[1] = '\0';
+    }
+    //printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
     a_v_append(v_tok, create_tok(v_get(v_new_str, i)));
   }
   v_destroy(v_new_str, NULL);
@@ -205,9 +209,9 @@ static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 {
   if (is_in_exp(exp[i]))
   {
-    printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
+    //printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
     size_t new_pos = tokenize_expansion(exp + i, 1).size;
-    printf("New pos = %zu\n", new_pos);
+    //printf("New pos = %zu\n", new_pos);
     if (new_pos == 0)
       warnx("error");
     else
@@ -250,8 +254,10 @@ static struct vector* a_lexer(char* exp)
         i = start_tok;
       }
   }
-  if (!(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
+  if (exp[i - 1] && !(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
+  {
     add_tok(v_tok, exp, start_tok, i);
+  }
   return v_tok;
 }
 
@@ -260,6 +266,7 @@ static int a_eval(struct vector* v_tok, long int* res)
   stack_operator *s_operator = NULL;
   stack_result *s_result = NULL;
   int unary = 1;
+  int last_num = 0;
   for (size_t i = 0; v_get(v_tok, i); ++i)
   {
   //  printf("token %zu\n", i);
@@ -273,10 +280,18 @@ static int a_eval(struct vector* v_tok, long int* res)
     }
     if (tok->type == ID)
     {
+      if (last_num == 1)
+      {
+        warnx("Expansion error: operator missing");
+        return 0;
+      }
+      last_num = 1;
       stack_r_push(&s_result, tok->val);
       unary = 0;
     }
-    else if (tok->type == OP_BRAKET)
+    else
+      last_num = 0;
+    if (tok->type == OP_BRAKET)
     {
       stack_o_push(&s_operator, OP_BRAKET);
       unary = 1;
@@ -305,7 +320,7 @@ static int a_eval(struct vector* v_tok, long int* res)
     pop_and_eval(&s_operator, &s_result);
   if (stack_r_size(s_result) != 1)
   {
-    warnx("Expansion error: operand missing");
+    warnx("Expansion error: operator missing");
     return 0;
   }
   *res = stack_r_peek(s_result);
@@ -316,7 +331,7 @@ static int a_eval(struct vector* v_tok, long int* res)
 
 char* arithmetic_expansion(char* s)
 {
-  if (my_strlen(s))
+  if (!my_strlen(s))
   {
     char *res = malloc(2);
     res[0] = '0';

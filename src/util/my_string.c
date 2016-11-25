@@ -47,7 +47,7 @@ size_t my_strlen(char* s)
   size_t i;
   for (i = 0; s[i]; i++)
     continue;
-  return 0;
+  return i;
 }
 
 int is_digit(char c)
