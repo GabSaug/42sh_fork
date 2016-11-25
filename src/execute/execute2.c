@@ -86,7 +86,7 @@ static int execute_assignment(struct tree* assignment)
   char* equal = strchr(s, '=');
   *equal = '\0';
   //printf("key = %s$ data = %s$\n", s, equal + 1);
-  add_hash(ht[VAR], s, equal + 1);
+  add_hash(ht[VAR], s, equal + 1); // Add tilde expansion
   return 0;
 }
 

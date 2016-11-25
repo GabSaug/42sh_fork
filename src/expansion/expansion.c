@@ -12,12 +12,13 @@
 
 extern struct hash_table* ht[2];
 
-//static char* tilde_expansion(char* s);
+static char* tilde_expansion(char* s);
 static char* parameter_expansion(char* s);
 static char* remove_quote(char* s);
 
 struct vector* expand(char* input, int in_ari_exp)
 {
+  input = tilde_expansion(input);
   struct str* output = str_create();
   size_t start = 0;
   size_t i_input;
@@ -126,6 +127,50 @@ static char* parameter_expansion(char* param_name)
   }
   //printf("value = %s\n", param_value);
   return param_value;
+}
+
+static ssize_t next_unquoted_slash(char* s)
+{
+  char quoted[3] = { 0 };
+  size_t i; 
+  for (i = 0; s[i]; ++i)
+  {
+    update_quote(s[i], quoted);
+    if (!is_quoted(quoted) && s[i] == '/')
+      return i;
+  }
+  return -1;
+}
+
+static char* tilde_expansion(char* input)
+{
+  if (!input || input[0] != '~')
+    return input;
+  /*for (start = s; *start != '\0' && (tilde = strchr(start, '~')) != NULL;
+       start = end_tilde_prefix)
+  {*/
+  ssize_t end_tp = next_unquoted_slash(input);
+  //if (end_tile_prefix == NULL)
+  //  end_tilde_prefix = tilde + strlen(tilde);
+  if (end_tp <= 1)
+  {
+    struct str* output = str_create();
+    str_append(output, get_data(ht[VAR], "HOME"), -1, 0);
+    if (end_tp == -1)
+      end_tp = 1;
+    str_append(output, input + end_tp, -1, 0);
+    free(input);
+    char* res = output->s;
+    str_destroy(output, 0);
+    return res;
+  }
+
+  else
+  {
+    printf("tilde expansion = %.*s\n", (int)(end_tp), input);
+    return input;
+
+  }
 }
 
 /*static char* next_unquoted_slash(char* s)

@@ -8,7 +8,7 @@ struct str* str_create(void)
 {
   struct str* new_str = my_malloc(sizeof (struct str));
   new_str->len = 0;
-  new_str->capacity = 2;
+  new_str->capacity = 1;
   new_str->s = my_malloc(sizeof (char) * new_str->capacity);
   new_str->s[0] = '\0';
   return new_str;

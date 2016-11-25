@@ -83,6 +83,11 @@ int is_name_char(char c)
   return c == '_' || is_digit(c) || is_alpha(c);
 }
 
+int is_login_char(char c)
+{
+  return is_alpha(c) || is_digit(c) || c == '.' || c == '_' || c == '-';
+}
+
 int my_atoi(const char str[])
 {
   int res = 0;
