@@ -1,5 +1,6 @@
+#define _DEFAULT_SOURCE
 #include <stdio.h>
-#include <unistd.h>
+#undef _DEFAULT_SOURCE
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <sys/stat.h>
@@ -17,6 +18,7 @@
 #include "main.h"
 #include "typer.h"
 #include "signals.h"
+#include "str.h"
 
 static int process_file(struct option option);
 static int process_interactive(void);
@@ -30,12 +32,14 @@ static struct tree* ast = NULL;
 static char* buff = NULL;
 
 static int processing = 0;
-static int tty;
 
 int main(int argc, char* argv[])
 {
+<<<<<<< HEAD
   rl_already_prompted = 1;
   g_in_readline = 0;
+=======
+>>>>>>> [HISTORY] Added write_history_log
   atexit(exit_42sh);
   set_sigacts();
   ht[VAR] = create_hash(256);
@@ -44,13 +48,31 @@ int main(int argc, char* argv[])
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv);
   rules = init_all_rules();
-  tty = isatty(STDIN_FILENO);
   if (option.input_mode == INTERACTIVE)
     return process_interactive();
   else if (option.input_mode == COMMAND_LINE)
     return process_input(option.input, v_token);
   else
     return process_file(option);
+}
+
+static void write_history_log(char* s)
+{
+  char* home = getenv("HOME");
+  if (!home)
+    return;
+  struct str* str = str_create();
+  str_append(str, home, -1, 0);
+  str_append(str, "/.42sh_history", -1, 0);
+  int fd = open(str->s, O_WRONLY | O_CLOEXEC | O_CREAT | O_APPEND, 0666);
+  str_destroy(str, 1);
+  if (fd == -1)
+  {
+    warn("write_history");
+    return;
+  }
+  printf("write %i byte\n", dprintf(fd, "%s\n", s));
+  close(fd);
 }
 
 static int process_interactive(void)
@@ -72,6 +94,8 @@ static int process_interactive(void)
     if (strlen(buff) != 0)
     {
       add_history(buff);
+      printf("history = %s\n", buff);
+      write_history_log(buff);
       ret = process_input(buff, v_token);
     }
     free(buff);
