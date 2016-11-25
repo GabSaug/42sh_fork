@@ -59,6 +59,7 @@ int is_digit(char c);
 */
 int is_number(char* s);
 
+int is_name_char(char c);
 /**
  * \brief Convert a string to an int
  * \param str The string to convert

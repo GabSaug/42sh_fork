@@ -14,11 +14,6 @@ size_t tokenize_comment(char* s, size_t i)
   return j - 1;
 }
 
-static char operator_list[][10] =
-{
-  ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&",
-  "<>", "<<-", ">|", ""
-};
 // Return the number of character in the expansion
 size_t tokenize_exp_normal(char *s)
 {
