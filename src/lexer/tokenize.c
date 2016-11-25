@@ -14,12 +14,18 @@ size_t tokenize_comment(char* s, size_t i)
   return j - 1;
 }
 
+static char g_special_parameter[] = "@*#?-$!0";
+
 // Return the number of character in the expansion
 size_t tokenize_exp_normal(char *s)
 {
   size_t i;
   if (!is_name_char(s[0]))
-      return 0;
+  {
+    if (strchr(g_special_parameter, s[0]))
+      return 1;
+    return 0;
+  }
   if (is_digit(s[0]))
     return 1;
   // for (i = 2 -> wtf ?
@@ -54,17 +60,6 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
   for (; s[i] && count > 0; ++i)
   {
     //printf("%c, count = %i\n", s[i], count);
-    /*if (in_intro)
-    {
-      if (s[i] != b)
-      {
-        in_intro = 0;
-        *start = s + i;
-      }
-      else
-        nb_char_intro++;
-    }*/
-
     if (s[i] == b)
       count++;
     else if (s[i] == d)
@@ -87,7 +82,7 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
   {
     if (s[i - j] !=  d)
     {
-      warn("End pattern not found");
+      warnx("End pattern not found");
       return 0;
     }
   }
@@ -95,10 +90,29 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
   *content_size = (s+i) - *start - nb_char_intro + 1;
 
   if (!s[i])
-    warn("Unexpected EOF, expected '%c;", d);
+    warnx("Unexpected EOF, expected '%c;", d);
   return s[i] ? i : 0;
 }
 
+
+static size_t tokenize_exp_quote(char *s, char** start, size_t *content_size)
+{
+  char quoted[3] = { 0 };
+  update_quote(s[0], quoted);
+  *start = s + 1;
+  size_t i;
+  for (i = 0; s[i] && is_quoted(quoted); ++i)
+    update_quote(s[i], quoted);
+  *content_size = (s + i) - *start;
+  if (is_quoted(quoted))
+  {
+    warnx("Unexpected EOF, expected '%c;", s[0]);
+    return 0;
+  }
+  return i;
+}
+
+// must be null-terminated
 static char exp_intro[][10] =
 {
   "$((",
@@ -108,6 +122,7 @@ static char exp_intro[][10] =
   "$",
   "'",
   "\"",
+  ""
 };
 
 static char exp_begin[] =
@@ -116,9 +131,6 @@ static char exp_begin[] =
   '{', // BRACKET
   '(', // CMD
   '`', // CMD2
-  0,
-  '\'', // SINGLE_QUOTE
-  '"'  // DOUBLE_QUOTE
 };
 
 static char exp_end[] =
@@ -127,9 +139,6 @@ static char exp_end[] =
   '}',
   ')',
   '`',
-  0,
-  '\'',
-  '"'
 };
 
 
@@ -157,7 +166,7 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
       //exp.end = exp.start + 2;
       //exp.end = exp.start + normal_size;
     }
-    else
+    else if (exp.type < SQ)
     {
       //exp.start = s + strlen(exp_intro[index_exp_type]);
       size_t other_size = tokenize_exp_other(s, exp_begin[exp.type],
@@ -174,6 +183,21 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
         return exp;
       }
       exp.size = other_size + 1;
+    }
+    else // quote
+    {
+      size_t quote_size = tokenize_exp_quote(s, &exp.content_start,
+          &exp.content_size);
+      //printf("other_size = %zu\n", other_size);
+      //printf("s = ^%.*s$\n", (int)(exp.content_size), exp.content_start);
+      //exp.end = exp.start + other_size - exp_intro[index_exp_type];
+      //exp.size = 2 * (exp.start - s) + other_size;
+      if (quote_size <= 0)
+      {
+        exp.type = NO_EXPANSION;
+        return exp;
+      }
+      exp.size = quote_size + 1;
     }
   }
   else if (in_ari_exp)
