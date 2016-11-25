@@ -60,7 +60,7 @@ static int process_interactive(void)
   {
     char* prompt = get_PS();
     if (tty)
-      write(STDOUT_FILENO, prompt, my_strlen(prompt));
+      write(STDERR_FILENO, prompt, my_strlen(prompt));
     g_in_readline = 1;
     buff = readline(prompt);
     g_in_readline = 0;
