@@ -9,6 +9,7 @@
 #include "stack.h"
 #include "my_malloc.h"
 #include "my_math.h"
+#include "tokenize.h"
 
 static const int size_operators = 7;
 static char* operators[10] =
@@ -24,8 +25,13 @@ static char* operators[10] =
 
 static int is_in_op(char c)
 {
-//  int res = 0;
   return c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')';
+}
+
+static int is_in_exp(char c)
+{
+  return c == '$' || c == '_' || c == '`' || (c >= 'a' && c <= 'z')
+         || (c >= 'A' && c <= 'Z');
 }
 
 static inline int is_unary(char op)
@@ -165,12 +171,29 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
   }
   for (size_t i = 0; i < v_size(v_new_str); i++)
   {
-  //  printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
+    printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
     a_v_append(v_tok, create_tok(v_get(v_new_str, i)));
   }
   v_destroy(v_new_str, NULL);
   exp[end] = end_c;
   return 1;
+}
+
+static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
+{
+  if (is_in_exp(exp[i]))
+  {
+    printf("[%s]\n", exp + i);
+    size_t new_pos = tokenize_expansion(exp + i, 1).size;
+    if (new_pos == 0)
+      warnx("error");
+    else
+    {
+      add_tok(v_tok, exp, i, i + new_pos);
+      return i + new_pos;
+    }
+  }
+  return i;
 }
 
 static struct vector* a_lexer(char* exp)
@@ -189,17 +212,17 @@ static struct vector* a_lexer(char* exp)
         add_tok(v_tok, exp, start_tok, i);
       }
       else if (i != 0 && ((is_in_op(exp[i]) && !is_in_op(exp[i - 1]))
-               || is_in_op(exp[i - 1])))
+               || is_in_op(exp[i - 1]) || is_in_exp(exp[i])))
       {
         add_tok(v_tok, exp, start_tok, i);
-        start_tok = i;
+        start_tok = new_start_tok(v_tok, exp, i);
       }
     }
     else
       if (!(exp[i] == ' ' || exp[i] == '\n' || exp[i] == '\t'))
       {
         in_tok = 1;
-        start_tok = i;
+        start_tok = new_start_tok(v_tok, exp, i);
       }
   }
   if (!(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
