@@ -1,10 +1,6 @@
-#define _POSIX_C_SOURCE 200112L
-#include <stdlib.h>
 #include <stdio.h>
 #include "builtins.h"
 #include "execute.h"
-
-extern char **environ;
 
 static int change_opt(char *names[], char *argv[], char *set, size_t i)
 {
@@ -95,6 +91,28 @@ static void print_alias(struct elt_hash *e)
   print_alias(e->next);
 }
 
+static int print_one_alias(char *tmp, size_t j)
+{
+  if (tmp[j])
+  {
+    tmp[j] = '\0';
+    ht[ALIAS] = add_hash(ht[ALIAS], tmp, tmp + j + 1);
+  }
+  else
+  {
+    char *to_disp = get_data(ht[ALIAS], tmp);
+    if (to_disp)
+      printf("alias %s=%s\n", tmp, to_disp);
+    else
+    {
+      warnx("alias: %s: not found", tmp);
+      return 1;
+    }
+  }
+
+  return 0;
+}
+
 int builtin_alias(char *argv[])
 {
   if (!argv[1])
@@ -110,22 +128,8 @@ int builtin_alias(char *argv[])
       size_t j = 0;
       for (j = 0; tmp[j] && tmp[j] != '='; j++)
         continue;
-      if (tmp[j])
-      {
-        tmp[j] = '\0';
-        ht[ALIAS] = add_hash(ht[ALIAS], tmp, tmp + j + 1);
-      }
-      else
-      {
-        char *to_disp = get_data(ht[ALIAS], tmp);
-        if (to_disp)
-          printf("alias %s=%s\n", tmp, to_disp);
-        else
-        {
-          warnx("alias: %s: not found", tmp);
-          return 1;
-        }
-      }
+      if (print_one_alias(tmp, j) == 1)
+        return 1;
     }
   }
 
@@ -153,113 +157,4 @@ int builtin_unalias(char *argv[])
     }
     return res;
   }
-}
-
-static int set_environ(char *argv[], size_t i)
-{
-  int res = 0;
-  for (i = i; argv[i]; i++)
-  {
-    if (argv[i][0] == '-')
-    {
-      warnx("export: `%s': not a valid identifier", argv[i]);
-      res = 1;
-      continue;
-    }
-
-    size_t j = 0;
-    for (j = 0; argv[i][j] && argv[i][j] != '='; j++)
-      continue;
-    if (argv[i][j])
-    {
-      argv[i][j] = '\0';
-      setenv(argv[i], argv[i] + j + 1, 1);
-    }
-    else
-    {
-      char *env = getenv(argv[i]);
-      if (env)
-        continue;
-      else
-        setenv(argv[i], "", 1);
-    }
-  }
-  return res;
-}
-
-static int unset_environ(char *argv[], size_t i)
-{
-  int res = 0;
-  for (i = i; argv[i]; i++)
-  {
-    if (argv[i][0] == '-')
-    {
-      warnx("export: `%s': not a valid identifier", argv[i]);
-      res = 1;
-    }
-    else
-      unsetenv(argv[i]);
-  }
-  return res;
-}
-
-int builtin_export(char *argv[])
-{
-  if (!argv[1] || (strcmp(argv[1], "-p") == 0 && !argv[2]))
-  {
-    for (size_t i = 0; environ[i]; i++)
-      printf("declare - x %s\n", environ[i]);
-    return 0;
-  }
-  else
-  {
-    size_t i = 1;
-    int set = 1;
-    if (strcmp(argv[1], "-n") == 0)
-    {
-      i++;
-      set = 0;
-    }
-    // TODO read options of the builtin
-    if (set)
-      return set_environ(argv, i);
-    else
-      return unset_environ(argv, i);
-  }
-}
-
-int builtin_source(char *argv[])
-{
-  if (!argv[1])
-  {
-    warnx("source: filename argument required");
-    return 2;
-  }
-
-  int fd = open(argv[1], O_RDONLY | O_CLOEXEC);
-  if (fd == -1)
-  {
-    warn("Error to open file");
-    return 1;
-  }
-  struct stat stat_buf;
-  if (stat(argv[1], &stat_buf) == -1)
-  {
-    warn("Impossible to read stat from %s", argv[1]);
-    return 1;
-  }
-
-  if (S_ISDIR(stat_buf.st_mode))
-  {
-    warnx("source: %s: is a directory", argv[1]);
-    return 1;
-  }
-
-  size_t size_file = stat_buf.st_size;
-  char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-  struct vector *token = NULL;
-  int ret = process_input(file, token);
-  munmap(file, size_file);
-  close(fd);
-  return ret;
 }
