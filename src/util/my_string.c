@@ -52,7 +52,7 @@ size_t my_strlen(char* s)
 
 int is_digit(char c)
 {
-  return ('0' <= c && c <= '9');
+  return '0' <= c && c <= '9';
 }
 
 int is_number(char* s) // Negative number are NOT recognize as number

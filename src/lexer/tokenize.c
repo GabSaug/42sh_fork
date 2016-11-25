@@ -20,14 +20,15 @@ static char operator_list[][10] =
   "<>", "<<-", ">|", ""
 };
 // Return the number of character in the expansion
-size_t tokenize_exp_normal(char *s) // TODO is_name_char
+size_t tokenize_exp_normal(char *s)
 {
   size_t i;
+  if (!is_name_char(s[0]))
+      return 0;
   if (is_digit(s[0]))
     return 1;
   // for (i = 2 -> wtf ?
-  for (i = 0; s[i] && s[i] != ' ' && s[i] != '\t' && s[i] != '\n'
-       && s[i] != '$' && is_prefix_arr(s + i, operator_list) == -1; ++i) // To modify
+  for (i = 1; s[i] && is_name_char(s[i]); ++i) // To modify
   {
     if (s[i] == '\\' && s[i + 1])
       i++;
@@ -173,7 +174,7 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
   else if (in_ari_exp)
   {
     exp.type = NORMAL;
-    exp.content_size = tokenize_exp_normal(s + 1);
+    exp.content_size = tokenize_exp_normal(s);
     exp.size = exp.content_size;
     exp.content_start = s;
   }
