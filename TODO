@@ -23,7 +23,7 @@
 [ ] Version 0.8
      [ ] Expansion
           [ ] Tilde
-          [x] Variables
+          [X] Variables
           [X] Quoting removal
           [ ] Path
           [ ] Arithmetic
