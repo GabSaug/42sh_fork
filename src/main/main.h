@@ -19,6 +19,7 @@
 int main(int argc, char* argv[]);
 
 int process_input(char* buff, struct vector *token);
+char* get_PS(void);
 /**
  * \brief Free all resource before exiting
 */

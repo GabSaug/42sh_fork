@@ -18,9 +18,10 @@
 #include "typer.h"
 #include "signals.h"
 
-static char* get_PS(void);
 static int process_file(struct option option);
 static int process_interactive(void);
+
+extern int g_in_readline;
 
 struct hash_table* ht[3] = { NULL, NULL, NULL };
 static struct rule** rules = NULL;
@@ -34,6 +35,7 @@ static int tty;
 int main(int argc, char* argv[])
 {
   rl_already_prompted = 1;
+  g_in_readline = 0;
   atexit(exit_42sh);
   set_sigacts();
   ht[VAR] = create_hash(256);
@@ -59,7 +61,9 @@ static int process_interactive(void)
     char* prompt = get_PS();
     if (tty)
       write(STDOUT_FILENO, prompt, my_strlen(prompt));
+    g_in_readline = 1;
     buff = readline(prompt);
+    g_in_readline = 0;
     if (!buff)
     {
       printf("exit\n");
@@ -147,8 +151,7 @@ int process_input(char* buff, struct vector *token)
   return ret;
 }
 
-
-static char* get_PS(void)
+char* get_PS(void)
 {
   char* ps1 = get_data(ht[VAR], "PS1");
   return ps1;

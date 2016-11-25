@@ -5,12 +5,28 @@
 #include <unistd.h>
 #include <err.h>
 #include <stdio.h>
+#include <readline/readline.h>
 
 #include "signals.h"
+#include "main.h"
+#include "my_string.h"
+
+int g_in_readline;
 
 static void sigint(int signum, siginfo_t* siginfo, void* data)
 {
-  puts("");
+  if (!g_in_readline)
+    puts("");
+  else
+  {
+    char* ps = get_PS();
+    write(STDERR_FILENO, "\n", 1);
+    write(STDERR_FILENO, ps, my_strlen(ps));
+    rl_line_buffer[0] = ' ';
+    rl_line_buffer[1] = '\0';
+    rl_point = 0;
+    rl_end = 0;
+  }
   data = data;
   signum = signum;
   siginfo = siginfo;
