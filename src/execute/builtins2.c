@@ -23,7 +23,7 @@ static int change_opt(char *names[], char *argv[], char *set, size_t i)
       {
         char *val = get_data(ht[VAR], names[j]);
         if (val)
-          printf("%s\t%s\n", names[j], val[0] == '0' ? "off" : "on");
+          printf("%-*s\t%s\n", 15 , names[j], val[0] == '0' ? "off" : "on");
       }
       else if (set[0] != 'q')
         ht[VAR] = add_hash(ht[VAR], names[j], set);
@@ -78,7 +78,7 @@ int builtin_shopt(char *argv[])
     {
       char *val = get_data(ht[VAR], names[i]);
       if (val != NULL)
-        printf("%s\t%s\n", names[i], val[0] == '0' ? "off" : "on");
+        printf("%-*s\t%s\n", 15, names[i], val[0] == '0' ? "off" : "on");
     }
     return 0;
   }
