@@ -18,26 +18,21 @@ static char* remove_quote(char* s);
 
 struct vector* expand(char* input, int in_ari_exp)
 {
-  /*struct vector* v = v_create();
-v_append(v, input);
-
-return v;*/
-
   struct str* output = str_create();
   size_t start = 0;
   size_t i_input;
   for (i_input = 0; input[i_input]; ++i_input)
   {
-    struct expansion exp = tokenize_expansion(input + i_input);
+    struct expansion exp = tokenize_expansion(input + i_input, in_ari_exp);
 
     if (exp.type == ARI)
     {
       str_append(output, input + start, i_input - start, 0);
       str_append(output, arithmetic_expansion(my_strndup(exp.content_start, exp.content_size)), -1, 1);
-      i_input += exp.size - 1;
-      start = i_input;
+      start = i_input + exp.size;
+      i_input = start - 1;
     }
-    else if (exp.type == NORMAL || exp.type == BRACKET || in_ari_exp)
+    else if (exp.type == NORMAL || exp.type == BRACKET)
       // in_ari_exp must be the last elseif
     {
       str_append(output, input + start, i_input - start, 0);

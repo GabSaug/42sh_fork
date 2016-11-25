@@ -20,7 +20,7 @@ static char operator_list[][10] =
   "<>", "<<-", ">|", ""
 };
 // Return the number of character in the expansion
-size_t tokenize_exp_normal(char *s)
+size_t tokenize_exp_normal(char *s) // TODO is_name_char
 {
   size_t i;
   if (is_digit(s[0]))
@@ -130,7 +130,7 @@ static char exp_end[] =
 
 
 // Return the number of character in the expansion
-struct expansion tokenize_expansion(char* s)
+struct expansion tokenize_expansion(char* s, int in_ari_exp)
 {
   struct expansion exp =
   {
@@ -169,6 +169,13 @@ struct expansion tokenize_expansion(char* s)
       }
       exp.size = other_size + 1;
     }
+  }
+  else if (in_ari_exp)
+  {
+    exp.type = NORMAL;
+    exp.content_size = tokenize_exp_normal(s + 1);
+    exp.size = exp.content_size;
+    exp.content_start = s;
   }
   return exp;
 }

@@ -21,7 +21,7 @@ struct expansion
   size_t content_size;
 };
 
-struct expansion tokenize_expansion(char* s);
+struct expansion tokenize_expansion(char* s, int in_ari_exp);
 size_t tokenize_comment(char* s, size_t i);
 size_t tokenize_exp_normal(char *s);
 
