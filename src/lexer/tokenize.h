@@ -6,11 +6,14 @@
 
 enum expansion_type
 {
+  NO_EXPANSION = -1,
   ARI,
   BRACKET,
   CMD,
+  CMD2,
   NORMAL,
-  NO_EXPANSION
+  SQ,
+  DQ,
 };
 
 struct expansion 

@@ -31,4 +31,7 @@ void tree_add_non_terminal_child(struct tree* tree, struct tree* child);
 void tree_delete_all_child(struct tree* tree);
 void tree_destroy(struct tree* tree);
 
+void tree_destroy_ast_extract_fun(struct tree* tree, struct vector* v_fun);
+void tree_destroy_fun(void* p);
+
 #endif /* !TREE_H */

@@ -106,15 +106,19 @@ static char exp_intro[][10] =
   "$(",
   "`",
   "$",
-  ""
+  "'",
+  "\"",
 };
 
 static char exp_begin[] =
 {
-  '(',
-  '{',
-  '(',
-  '`'
+  '(', // ARI
+  '{', // BRACKET
+  '(', // CMD
+  '`', // CMD2
+  0,
+  '\'', // SINGLE_QUOTE
+  '"'  // DOUBLE_QUOTE
 };
 
 static char exp_end[] =
@@ -122,7 +126,10 @@ static char exp_end[] =
   ')',
   '}',
   ')',
-  '`'
+  '`',
+  0,
+  '\'',
+  '"'
 };
 
 
@@ -137,10 +144,10 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
     0,
   };
 
-  int index_exp_type = is_prefix_arr(s, exp_intro);
-  if (index_exp_type != -1)
+  exp.type = is_prefix_arr(s, exp_intro);
+  if (exp.type != -1)
   {
-    exp.type = index_exp_type > CMD ? index_exp_type - 1 : index_exp_type;
+    //exp.type = index_exp_type > CMD ? index_exp_type - 1 : index_exp_type;
     if (exp.type == NORMAL)
     {
       exp.content_size = tokenize_exp_normal(s + 1);
@@ -153,12 +160,14 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
     else
     {
       //exp.start = s + strlen(exp_intro[index_exp_type]);
-      size_t other_size = tokenize_exp_other(s, exp_begin[index_exp_type],
-          exp_end[index_exp_type], &exp.content_start, &exp.content_size, (exp.type == ARI) + 1);
+      size_t other_size = tokenize_exp_other(s, exp_begin[exp.type],
+          exp_end[exp.type], &exp.content_start, &exp.content_size, (exp.type == ARI) + 1);
       //printf("other_size = %zu\n", other_size);
       //printf("s = ^%.*s$\n", (int)(exp.content_size), exp.content_start);
       //exp.end = exp.start + other_size - exp_intro[index_exp_type];
       //exp.size = 2 * (exp.start - s) + other_size;
+      if (exp.type == CMD2)
+        exp.type = CMD;
       if (other_size <= 0)
       {
         exp.type = NO_EXPANSION;

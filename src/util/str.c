@@ -7,10 +7,10 @@
 struct str* str_create(void)
 {
   struct str* new_str = my_malloc(sizeof (struct str));
-  new_str->s = malloc(sizeof (char));
-  new_str->s[0] = '\0';
   new_str->len = 0;
-  new_str->capacity = 1;
+  new_str->capacity = 2;
+  new_str->s = my_malloc(sizeof (char) * new_str->capacity);
+  new_str->s[0] = '\0';
   return new_str;
 }
 
@@ -22,7 +22,7 @@ void str_append(struct str* str, char* s, ssize_t len_s, int free_s)
     len_s = strlen(s);
   if (str->capacity < str->len + len_s + 1)
   {
-    while (str->capacity < str->len + len_s + 1)
+    while (str->capacity <= str->len + len_s + 1)
       str->capacity *= 2;
     str->s = realloc(str->s, sizeof (char) * str->capacity);
   }

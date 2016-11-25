@@ -108,7 +108,10 @@ static int run_ast(struct tree *ast, struct vector *token)
       tree_print_dot(ast);
     ret = execute(ast);
     //printf("returned %i\n", execute(ast, ht));
+    //struct vector* v_fun = v_create();
+    //tree_destroy_ast_extract_fun(ast, v_fun);
     tree_destroy(ast);
+    //v_destroy(v_fun, tree_destroy_fun);
   }
   v_destroy(token, token_destroy);
   token = NULL;
