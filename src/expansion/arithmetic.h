@@ -14,7 +14,7 @@ enum a_exp_type
   OP_BRAKET,    // 7
   CL_BRAKET,    // 8  
   TILDE,        // 9
-  BW_XOR,        // 9
+  BW_XOR,       // 9
   UMINUS,       // 10
   UPLUS,        // 11
 };

@@ -29,9 +29,11 @@ static struct tree* ast = NULL;
 static char* buff = NULL;
 
 static int processing = 0;
+static int tty;
 
 int main(int argc, char* argv[])
 {
+  rl_already_prompted = 1;
   atexit(exit_42sh);
   set_sigacts();
   ht[VAR] = create_hash(256);
@@ -40,6 +42,7 @@ int main(int argc, char* argv[])
   // Remove backslash followed by <newline> cf. 2.2.1
   struct option option = parse_options(argc, argv);
   rules = init_all_rules();
+  tty = isatty(STDIN_FILENO);
   if (option.input_mode == INTERACTIVE)
     return process_interactive();
   else if (option.input_mode == COMMAND_LINE)
@@ -54,6 +57,8 @@ static int process_interactive(void)
   while (1)
   {
     char* prompt = get_PS();
+    if (tty)
+      write(STDOUT_FILENO, prompt, my_strlen(prompt));
     buff = readline(prompt);
     if (!buff)
     {

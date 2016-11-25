@@ -150,7 +150,7 @@ static struct a_token* create_tok(char* str)
   {
     num = strtol(str, &endptr, 10);
     if (*endptr)
-      return NULL;
+      num = 0;
   }
   struct a_token* token = my_malloc(sizeof (struct a_token));
   token->type = op_num;
