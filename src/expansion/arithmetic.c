@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <err.h>
 #include <stdio.h>
+#include <unistd.h>
 
 #include "arithmetic.h"
 #include "expansion.h"
@@ -203,7 +204,7 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
   return 1;
 }
 
-static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
+static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 {
   if (is_in_exp(exp[i]))
   {
@@ -211,7 +212,10 @@ static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
     size_t new_pos = tokenize_expansion(exp + i, 1).size;
 //    printf("New pos = %zu\n", new_pos);
     if (new_pos == 0)
+    {
       warnx("error");
+      return -1;
+    }
     else
     {
       add_tok(v_tok, exp, i, i + new_pos);
@@ -224,7 +228,7 @@ static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 static struct vector* a_lexer(char* exp)
 {
   struct vector* v_tok = v_create();
-  size_t start_tok = 0;
+  ssize_t start_tok = 0;
   int in_tok = 0;
   size_t i;
   for (i = 0; i < my_strlen(exp); i++)
@@ -240,16 +244,18 @@ static struct vector* a_lexer(char* exp)
                || is_in_op(exp[i - 1]) || is_in_exp(exp[i])))
       {
         add_tok(v_tok, exp, start_tok, i);
-        start_tok = new_start_tok(v_tok, exp, i);
-        i = start_tok;
+        i = start_tok = new_start_tok(v_tok, exp, i);
+        if (start_tok == -1)
+          return NULL;
       }
     }
     else
       if (!(exp[i] == ' ' || exp[i] == '\n' || exp[i] == '\t'))
       {
         in_tok = 1;
-        start_tok = new_start_tok(v_tok, exp, i);
-        i = start_tok;
+        i = start_tok = new_start_tok(v_tok, exp, i);
+        if (start_tok == -1)
+          return NULL;
       }
   }
   if (exp[i - 1] && !(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
@@ -338,6 +344,8 @@ char* arithmetic_expansion(char* s)
     return res;
   }
   struct vector* v_tok = a_lexer(s);
+  if (!v_tok)
+    return NULL;
   long int res;
   int success = a_eval(v_tok, &res);
   v_destroy(v_tok, free);
