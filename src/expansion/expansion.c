@@ -28,7 +28,8 @@ struct vector* expand(char* input, int in_ari_exp)
     if (exp.type == ARI)
     {
       str_append(output, input + start, i_input - start, 0);
-      str_append(output, arithmetic_expansion(my_strndup(exp.content_start, exp.content_size)), -1, 1);
+      str_append(output, arithmetic_expansion(my_strndup(exp.content_start,
+                                                   exp.content_size)), -1, 1);
       start = i_input + exp.size;
       i_input = start - 1;
     }
@@ -36,7 +37,8 @@ struct vector* expand(char* input, int in_ari_exp)
       // in_ari_exp must be the last elseif
     {
       str_append(output, input + start, i_input - start, 0);
-      str_append(output, parameter_expansion(my_strndup(exp.content_start, exp.content_size)), -1, 1);
+      str_append(output, parameter_expansion(my_strndup(exp.content_start,
+                                                   exp.content_size)), -1, 1);
       //printf("exp.size = %zu\n", exp.size);
       start = i_input + exp.size;
       i_input = start - 1;
@@ -172,7 +174,8 @@ static char* tilde_expansion(char* s)
     end_tilde_prefix = next_unquoted_slash(tilde);
     //if (end_tile_prefix == NULL)
     //  end_tilde_prefix = tilde + strlen(tilde);
-    printf("tilde expansion = %*s\n", (int)(end_tilde_prefix - tilde) + 1, tilde);
+    printf("tilde expansion = %*s\n",
+           (int)(end_tilde_prefix - tilde) + 1, tilde);
 
   }
 

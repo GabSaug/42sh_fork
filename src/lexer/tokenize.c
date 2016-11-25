@@ -38,7 +38,8 @@ size_t tokenize_exp_normal(char *s)
 }
 
 // Modify so that $(( abc ) def ) triggers an error
-static size_t tokenize_exp_other(char *s, char b, char d, char** start, size_t *content_size, int nb_char_intro)
+static size_t tokenize_exp_other(char *s, char b, char d, char** start,
+                                 size_t *content_size, int nb_char_intro)
 {
   int count = 0;
   size_t i = 0;

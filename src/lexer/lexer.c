@@ -164,7 +164,7 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
   if (end < start)
     return 0;
 
-  struct token* new_token = my_malloc(sizeof(struct token));
+  struct token* new_token = my_malloc(sizeof (struct token));
   new_token->id = UNDIFINED;
   if (start && end)
   {

@@ -14,7 +14,7 @@ void create_sym(struct symbol* sym, int terminal, enum repeat repeat,
 
 struct rule** init_all_rules(void)
 {
-  struct rule** rules = my_malloc(sizeof(struct rule*) * NB_RULE);
+  struct rule** rules = my_malloc(sizeof (struct rule*) * NB_RULE);
   rules = init_all_rules2(rules);
   rules = init_all_rules3(rules);
   rules = init_all_rules4(rules);

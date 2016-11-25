@@ -84,7 +84,8 @@ static long int compute(long int operand1, enum a_exp_type op,
   return 0;
 }
 
-static int pop_and_eval(stack_operator **ptr_operator, stack_result **ptr_result)
+static int pop_and_eval(stack_operator **ptr_operator,
+                        stack_result **ptr_result)
 {
   if (!(*ptr_result))
   {
@@ -260,7 +261,8 @@ static int a_eval(struct vector* v_tok, long int* res)
              || tok->type == DIV || tok->type == UPLUS || tok->type == UMINUS
              || tok->type == POW)
     {
-      while (s_operator && priority(tok->type) <= priority(stack_o_peek(s_operator)))
+      while (s_operator && priority(tok->type)
+             <= priority(stack_o_peek(s_operator)))
         if (!pop_and_eval(&s_operator, &s_result))
           return 0;
       stack_o_push(&s_operator, tok->type);

@@ -19,7 +19,7 @@ static void set_o(int o, char *str)
   if (!b)
     errx(2, "%s: invalid shell option name", str);
 
-  char *val = malloc(2 * sizeof(char));
+  char *val = malloc(2 * sizeof (char));
   val[1] = '\0';
   val[0] = o ? '1' : '0';
 
@@ -33,7 +33,7 @@ static struct option opt2(int argc, char *argv[], struct option options)
     options.norc = 1;
     return opt(argc - 1, argv + 1, options);
   }
-  else if(!strcmp(argv[1], "--ast-print"))
+  else if (!strcmp(argv[1], "--ast-print"))
   {
     add_hash(ht[VAR], "ast-print", "1");
     return opt(argc - 1, argv + 1, options);
