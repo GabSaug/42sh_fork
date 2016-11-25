@@ -9,10 +9,13 @@ enum a_exp_type
   TIMES,        // 2
   DIV,          // 3
   POW,          // 4
-  OP_BRAKET,    // 5
-  CL_BRAKET,    // 6
-  UMINUS,       // 7
-  UPLUS         // 8
+  BW_AND,       // 5
+  BW_OR,        // 6
+  OP_BRAKET,    // 7
+  CL_BRAKET,    // 8  
+  TILDE,        // 9
+  UMINUS,       // 10
+  UPLUS,        // 11
 };
 
 struct a_token

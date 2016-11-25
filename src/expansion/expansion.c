@@ -121,7 +121,7 @@ static char* parameter_expansion(char* param_name)
   free(param_name);
   if (param_value == NULL)
   {
-    param_value = malloc(1);
+    param_value = my_malloc(1);
     param_value[0] = '\0';
   }
   //printf("value = %s\n", param_value);

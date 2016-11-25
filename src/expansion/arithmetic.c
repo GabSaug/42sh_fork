@@ -11,7 +11,7 @@
 #include "my_math.h"
 #include "tokenize.h"
 
-static const int size_operators = 7;
+static const int size_operators = 10;
 static char* operators[10] =
 {
   "+",
@@ -19,31 +19,35 @@ static char* operators[10] =
   "*",
   "/",
   "**",
+  "&",
+  "|",
   "(",
-  ")"
+  ")",
+  "~"
 };
 
 static int is_in_op(char c)
 {
-  return c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')';
+  return c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')'
+         || c == '&' || c == '|' || c == '~';
 }
 
 static int is_in_exp(char c)
 {
   return c == '$' || c == '_' || c == '`' || (c >= 'a' && c <= 'z')
-         || (c >= 'A' && c <= 'Z');
+         || (c >= 'A' && c <= 'Z') || c == '"' || c == '\'';
 }
 
 static inline int is_unary(char op)
 {
-  return op == UPLUS || op == UMINUS;
+  return op == UPLUS || op == UMINUS || op == TILDE;
 }
 
 static int priority(enum a_exp_type op)
 {
   if (op == OP_BRAKET || op == CL_BRAKET)
     return 0;
-  else if (op == UPLUS || op == UMINUS)
+  else if (op == UPLUS || op == UMINUS || op == TILDE)
     return 4;
   else if (op == POW)
     return 3;
@@ -62,6 +66,12 @@ static long int compute(long int operand1, enum a_exp_type op,
     return operand2;
   else if (op == UMINUS)
     return -operand2;
+  else if (op == TILDE)
+    return ~operand2;
+  else if (op == BW_AND)
+    return operand1 & operand2;
+  else if (op == BW_OR)
+    return operand1 | operand2;
   else if (op == PLUS)
     return operand1 + operand2;
   else if (op == MINUS)
@@ -172,7 +182,10 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
   }
   for (size_t i = 0; i < v_size(v_new_str); i++)
   {
-    //printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
+    char* str = v_get(v_new_str, i);
+    if (str[0] == '\0')
+      str[0] = '0';
+    printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
     a_v_append(v_tok, create_tok(v_get(v_new_str, i)));
   }
   v_destroy(v_new_str, NULL);
@@ -184,7 +197,7 @@ static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 {
   if (is_in_exp(exp[i]))
   {
-    printf("[%s]\n", exp + i);
+    printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
     size_t new_pos = tokenize_expansion(exp + i, 1).size;
     printf("New pos = %zu\n", new_pos);
     if (new_pos == 0)
@@ -218,6 +231,7 @@ static struct vector* a_lexer(char* exp)
       {
         add_tok(v_tok, exp, start_tok, i);
         start_tok = new_start_tok(v_tok, exp, i);
+        i = start_tok;
       }
     }
     else
@@ -225,6 +239,7 @@ static struct vector* a_lexer(char* exp)
       {
         in_tok = 1;
         start_tok = new_start_tok(v_tok, exp, i);
+        i = start_tok;
       }
   }
   if (!(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
@@ -260,7 +275,8 @@ static int a_eval(struct vector* v_tok, long int* res)
     }
     else if (tok->type == PLUS || tok->type == MINUS || tok->type == TIMES
              || tok->type == DIV || tok->type == UPLUS || tok->type == UMINUS
-             || tok->type == POW)
+             || tok->type == POW || tok->type == BW_AND || tok->type == BW_OR
+             || tok->type == TILDE)
     {
       while (s_operator && priority(tok->type)
              <= priority(stack_o_peek(s_operator)))
