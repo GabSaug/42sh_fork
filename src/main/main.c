@@ -71,7 +71,7 @@ static void write_history_log(char* s)
     warn("write_history");
     return;
   }
-  printf("write %i byte\n", dprintf(fd, "%s\n", s));
+  dprintf(fd, "%s\n", s);
   close(fd);
 }
 
@@ -94,7 +94,6 @@ static int process_interactive(void)
     if (strlen(buff) != 0)
     {
       add_history(buff);
-      printf("history = %s\n", buff);
       write_history_log(buff);
       ret = process_input(buff, v_token);
     }
