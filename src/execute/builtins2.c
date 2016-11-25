@@ -168,6 +168,13 @@ int builtin_source(char *argv[])
     warn("Impossible to read stat from %s", argv[1]);
     return 1;
   }
+
+  if (S_ISDIR(stat_buf.st_mode))
+  {
+    warnx("source: %s: is a directory", argv[1]);
+    return 1;
+  }
+
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
   struct vector *token = NULL;

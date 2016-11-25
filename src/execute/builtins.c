@@ -47,7 +47,8 @@ static int change_opt(char *names[], char *argv[], char *set, size_t i)
       if (set[0] == ' ')
       {
         char *val = get_data(ht[VAR], names[j]);
-        printf("%s\t%s\n", names[j], val[0] == '0' ? "off" : "on");
+        if (val)
+          printf("%s\t%s\n", names[j], val[0] == '0' ? "off" : "on");
       }
       else if (set[0] != 'q')
         ht[VAR] = add_hash(ht[VAR], names[j], set);
@@ -131,7 +132,15 @@ static int builtin_exit(char* argv[])
     ret_string = get_data(ht[VAR], "$?");
   int ret = 0;
   if (ret_string)
-    ret = atoi(ret_string);
+  {
+    if (is_number(ret_string))
+      ret = atoi(ret_string);
+    else
+    {
+      warnx("exit: %s: numeric argument required", ret_string);
+      ret = 2;
+    }
+  }
   exit(ret);
 }
 
@@ -325,38 +334,3 @@ static int builtin_echo(char* argv[])
   fflush(stdout);
  return 0;
 }
-
-/*static void builtin_alias_print_all(struct hash_table* ht_alias)
-{
-  hash_dump(ht_alias);
-}
-
-static int builtin_alias(char* argv[])
-{
-  if (argv[1] == NULL)
-  {
-    builtin_alias_print_all(ht_alias);
-    return 0;
-  }
-  size_t i = 1;
-  for (i = 1; argv[i]; ++i)
-  {
-    char* ptr_equal = strchr(argv[1], '=');
-    if (ptr_equal) // Assignment
-    {
-      argv[1][ptr_equal] = '\0';
-      add_hash(ht, argv[1], arg[1] + ptr_equal + 1);
-    }
-    else // print
-    {
-      char* alias_value = get_data(ht_alias, agrv[1]);
-      if (alias_value == NULL)
-      {
-        warn("not found");
-        return 0;
-      }
-      printf("alias %s=\'%s\'\n", argv[i], alias_value);
-    }
-  }
-  return 0;
-}*/
