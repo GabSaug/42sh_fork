@@ -340,7 +340,9 @@ char* arithmetic_expansion(char* s)
   }
   struct vector* v_tok = a_lexer(s);
   long int res;
-  if (!a_eval(v_tok, &res))
+  int success = a_eval(v_tok, &res);
+  v_destroy(v_tok, free);
+  if (!success)
     return NULL;
   char* s_res = malloc(50);
   sprintf(s_res, "%ld", res);

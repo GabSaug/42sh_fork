@@ -55,8 +55,6 @@ void stack_r_push(stack_result **ptr_s, long int data)
     return;
   stack_result *s = *ptr_s;
   stack_result *new = my_malloc(sizeof (stack_result));
-  if (!new)
-    return;
   new->data = data;
   new->next = s;
   *ptr_s = new;
@@ -89,7 +87,7 @@ int stack_r_size(stack_result *s)
 
 void stack_r_destroy(stack_result **ptr_s)
 {
-  //while (stack_r_size(*ptr_s) > 0)
-  //  free(stack_r_pop(ptr_s));
+  while (stack_r_size(*ptr_s) > 0)
+    stack_r_pop(ptr_s);
   *ptr_s = NULL;
 }
