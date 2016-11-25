@@ -143,6 +143,7 @@ static int match_op(char* str)
 
 static struct a_token* create_tok(char* str)
 {
+//  printf("\t\t\t\t[%s]\n", str);
   int op_num = match_op(str);
   char* endptr;
   long int num;
@@ -173,34 +174,31 @@ static void a_v_append(struct vector* v, struct a_token* tok)
 
 static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
 {
-  struct vector* v_new_str;
   char* str = exp + start;
   char end_c = exp[end];
   exp[end] = '\0';
-  if (!(exp[0] == ' ' || exp[0] == '\n' || exp[0] == '\t')
-      && !is_in_op(str[0]) && !is_digit(str[0]))
+  if (!(str[0] == ' ' || str[0] == '\n' || str[0] == '\t'))
   {
-    char* str2 = my_strdup(str);
-    //printf("Ci-après la string envoyée à expand : [%s]\n", str2);
-    v_new_str = expand(str2, 1);
-  }
-  else
-  {
-    v_new_str = v_create();
-    v_append(v_new_str, str);
-  }
-  for (size_t i = 0; i < v_size(v_new_str); i++)
-  {
-    char* str = v_get(v_new_str, i);
-    if (str[0] == '\0')
+    if (is_in_exp(str[0]))
     {
-      str[0] = '0';
-      str[1] = '\0';
+      struct vector* v_new_str;
+      char* str2 = my_strdup(str);
+//      printf("Ci-après la string envoyée à expand : [%s]\n", str2);
+      v_new_str = expand(str2, 1);
+      for (size_t i = 0; i < v_size(v_new_str); i++)
+      {
+        char* str = v_get(v_new_str, i);
+//        printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
+        if (str[0] == '\0')
+          a_v_append(v_tok, create_tok("0"));
+        else  
+          a_v_append(v_tok, create_tok(str));
+      }
+      v_destroy(v_new_str, free);
     }
-    //printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
-    a_v_append(v_tok, create_tok(v_get(v_new_str, i)));
+    else
+      a_v_append(v_tok, create_tok(str));
   }
-  v_destroy(v_new_str, NULL);
   exp[end] = end_c;
   return 1;
 }
@@ -209,9 +207,9 @@ static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 {
   if (is_in_exp(exp[i]))
   {
-    //printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
+//    printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
     size_t new_pos = tokenize_expansion(exp + i, 1).size;
-    //printf("New pos = %zu\n", new_pos);
+//    printf("New pos = %zu\n", new_pos);
     if (new_pos == 0)
       warnx("error");
     else
@@ -229,7 +227,7 @@ static struct vector* a_lexer(char* exp)
   size_t start_tok = 0;
   int in_tok = 0;
   size_t i;
-  for (i = 0; exp[i]; i++)
+  for (i = 0; i < my_strlen(exp); i++)
   {
     if (in_tok)
     {
@@ -333,6 +331,7 @@ char* arithmetic_expansion(char* s)
 {
   if (!my_strlen(s))
   {
+    free(s);
     char *res = malloc(2);
     res[0] = '0';
     res[1] = '\0';
@@ -342,10 +341,10 @@ char* arithmetic_expansion(char* s)
   long int res;
   int success = a_eval(v_tok, &res);
   v_destroy(v_tok, free);
+  free(s);
   if (!success)
     return NULL;
   char* s_res = malloc(50);
   sprintf(s_res, "%ld", res);
-  free(s);
   return s_res;
 }
