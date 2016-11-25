@@ -13,6 +13,7 @@
 #include "main.h"
 #include "option_parser.h"
 
+int builtin_shopt(char *argv[]);
 int builtin_alias(char *argv[]);
 int builtin_unalias(char *argv[]);
 int builtin_export(char *argv[]);
