@@ -11,8 +11,8 @@
 #include "my_math.h"
 #include "tokenize.h"
 
-static const int size_operators = 10;
-static char* operators[10] =
+static const int size_operators = 11;
+static char* operators[11] =
 {
   "+",
   "-",
@@ -23,7 +23,8 @@ static char* operators[10] =
   "|",
   "(",
   ")",
-  "~"
+  "~",
+  "^"
 };
 
 static int is_in_op(char c)
@@ -48,13 +49,19 @@ static int priority(enum a_exp_type op)
   if (op == OP_BRAKET || op == CL_BRAKET)
     return 0;
   else if (op == UPLUS || op == UMINUS || op == TILDE)
-    return 4;
+    return 9;
   else if (op == POW)
-    return 3;
+    return 8;
   else if (op == TIMES || op == DIV)
-    return 2;
+    return 7;
   else if (op == PLUS || op == MINUS)
-    return 1;
+    return 6;
+  else if (op == BW_AND)
+    return 5;
+  else if (op == BW_XOR)
+    return 4;
+  else if (op == BW_OR)
+    return 3;
   return 0;
 }
 
@@ -72,6 +79,8 @@ static long int compute(long int operand1, enum a_exp_type op,
     return operand1 & operand2;
   else if (op == BW_OR)
     return operand1 | operand2;
+  else if (op == BW_XOR)
+    return operand1 ^ operand2;
   else if (op == PLUS)
     return operand1 + operand2;
   else if (op == MINUS)
@@ -94,8 +103,7 @@ static long int compute(long int operand1, enum a_exp_type op,
   return 0;
 }
 
-static int pop_and_eval(stack_operator **ptr_operator,
-                        stack_result **ptr_result)
+static int pop_and_eval(stack_operator **ptr_operator, stack_result **ptr_result)
 {
   if (!(*ptr_result))
   {
@@ -276,10 +284,9 @@ static int a_eval(struct vector* v_tok, long int* res)
     else if (tok->type == PLUS || tok->type == MINUS || tok->type == TIMES
              || tok->type == DIV || tok->type == UPLUS || tok->type == UMINUS
              || tok->type == POW || tok->type == BW_AND || tok->type == BW_OR
-             || tok->type == TILDE)
+             || tok->type == TILDE || tok->type == BW_XOR)
     {
-      while (s_operator && priority(tok->type)
-             <= priority(stack_o_peek(s_operator)))
+      while (s_operator && priority(tok->type) <= priority(stack_o_peek(s_operator)))
         if (!pop_and_eval(&s_operator, &s_result))
           return 0;
       stack_o_push(&s_operator, tok->type);
