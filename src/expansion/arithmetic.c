@@ -162,7 +162,7 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
   if (!is_in_op(str[0]) && !is_digit(str[0]))
   {
     char* str2 = my_strdup(str);
-    printf("%s\n", str2);
+    printf("Ci-après la string envoyée à expand : [%s]\n", str2);
     v_new_str = expand(str2, 1);
   }
   else
@@ -186,6 +186,7 @@ static size_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
   {
     printf("[%s]\n", exp + i);
     size_t new_pos = tokenize_expansion(exp + i, 1).size;
+    printf("New pos = %zu\n", new_pos);
     if (new_pos == 0)
       warnx("error");
     else
