@@ -195,7 +195,7 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
   {
     exp.type = NORMAL;
     exp.content_size = tokenize_exp_normal(s);
-    if (exp.content_size == 0)
+    if (exp.content_size == 0 || is_digit(s[0]))
       exp.type = NO_EXPANSION;
     exp.size = exp.content_size;
     exp.content_start = s;
