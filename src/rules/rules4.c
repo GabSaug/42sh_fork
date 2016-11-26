@@ -156,7 +156,7 @@ static struct rule *init_rule_compound_list_aux(void)
   // Rule 1
   rule->s_r[0].nb_sym = 3;
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 3);
-  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, COM_AMP, 0);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, COM_AMP_NL, 0);
   create_sym(rule->s_r[0].sym_arr + 1, 0, STAR, NEW_LINE_RULE, 0);
   create_sym(rule->s_r[0].sym_arr + 2, 0, MANDATORY, AND_OR, 0);
 
@@ -171,7 +171,7 @@ static struct rule *init_rule_compound_list_aux_2(void)
   // Rule 1
   rule->s_r[0].nb_sym = 2;
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 2);
-  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, COM_AMP, 0);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, MANDATORY, COM_AMP_NL, 0);
   create_sym(rule->s_r[0].sym_arr + 1, 0, STAR, NEW_LINE_RULE, 0);
 
   return rule;

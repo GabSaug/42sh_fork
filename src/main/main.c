@@ -145,8 +145,6 @@ static int run_ast(struct tree *ast, struct vector *token)
   else
   {
     //tree_print(ast);
-    if (!strcmp(get_data(ht[VAR], "ast-print"), "1"))
-      tree_print_dot(ast);
     ret = execute(ast);
     char* ret_itoa = my_malloc(sizeof (char) * 50);
     sprintf(ret_itoa, "%i", ret);
@@ -158,9 +156,6 @@ static int run_ast(struct tree *ast, struct vector *token)
     tree_destroy(ast);
     //v_destroy(v_fun, tree_destroy_fun);
   }
-  v_destroy(token, token_destroy);
-  token = NULL;
-  processing = 0;
 
   return ret;
 }
@@ -182,8 +177,20 @@ int process_input(char* buff, struct vector *token)
   //printf("lexer success\n");
   int fit_level = 0;
   ast = parse(rules, token, &fit_level);
-  int ret = run_ast(ast, token);
+  if (!strcmp(get_data(ht[VAR], "ast-print"), "1"))
+      tree_print_dot(ast);
 
+  int ret = 0;
+  for (size_t i = 0; i < v_size(ast->child); ++i)
+  {
+    //printf("input %zu\n", i);
+    struct tree* input = v_get(ast->child, i);
+    ret = run_ast(input, token);
+  }
+
+  v_destroy(token, token_destroy);
+  token = NULL;
+  processing = 0;
   return ret;
 }
 

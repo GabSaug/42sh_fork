@@ -1,6 +1,7 @@
 #include <string.h>
 
 #include "my_malloc.h"
+#include "str.h"
 #include "my_string.h"
 
 int begin_as(char* start, char* end, char s_list[][10])
@@ -169,4 +170,17 @@ int is_quoted(char quoted[3])
   return 0;
 }
 
+char* escape_quote(char* input)
+{
+  struct str* output = str_create();
+  for (size_t i = 0; input[i]; ++i)
+  {
+    if (input[i] == '"' || input[i] == '\'')
+      str_append(output, "\\", 1, 0);
+    str_append(output, input + i, 1, 0);
+  }
+  char* res = output->s;
+  str_destroy(output, 0);
+  return res;
+}
 

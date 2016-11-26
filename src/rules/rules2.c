@@ -1,5 +1,18 @@
 #include "rules.h"
 
+static struct rule* init_rule_script(void)
+{
+  struct rule* rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule) * rule->nb_s_r);
+  // Rule 1
+  rule->s_r[0].nb_sym = 1;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 1);
+  create_sym(rule->s_r[0].sym_arr + 0, 0, STAR, INPUT, 0);
+
+  return rule;
+}
+
 static struct rule* init_rule_input(void)
 {
   struct rule* rule = my_malloc(sizeof (struct rule));
@@ -12,9 +25,10 @@ static struct rule* init_rule_input(void)
   create_sym(rule->s_r[0].sym_arr + 1, 1, 0, 0, EOF_SYM);
 
   // Rule 2
-  rule->s_r[1].nb_sym = 1;
-  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
+  rule->s_r[1].nb_sym = 2;
+  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol) * 2);
   create_sym(rule->s_r[1].sym_arr + 0, 0, MANDATORY, LIST, 0);
+  create_sym(rule->s_r[1].sym_arr + 1, 1, 0, 0, NL);
 
   // Rule 3
   rule->s_r[2].nb_sym = 1;
@@ -59,6 +73,24 @@ static struct rule* init_rule_list_aux(void)
 }
 
 static struct rule* init_rule_com_amp(void)
+{
+  struct rule* rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 2;
+  rule->s_r = my_malloc(sizeof (struct simple_rule) * rule->nb_s_r);
+  // Rule 1
+  rule->s_r[0].nb_sym = 1;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[0].sym_arr, 1, 0, 0, SEMI);
+
+  // Rule 2
+  rule->s_r[1].nb_sym = 1;
+  rule->s_r[1].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[1].sym_arr, 1, 0, 0, AND);
+
+  return rule;
+}
+
+static struct rule* init_rule_com_amp_nl(void)
 {
   struct rule* rule = my_malloc(sizeof (struct rule));
   rule->nb_s_r = 3;
@@ -143,10 +175,12 @@ static struct rule *init_rule_new_line(void)
 
 struct rule **init_all_rules2(struct rule **rules)
 {
+  rules[SCRIPT] = init_rule_script();
   rules[INPUT] = init_rule_input();
   rules[LIST] = init_rule_list();
   rules[LIST_AUX] = init_rule_list_aux();
   rules[COM_AMP] = init_rule_com_amp();
+  rules[COM_AMP_NL] = init_rule_com_amp_nl();
   rules[AND_OR] = init_rule_and_or();
   rules[AND_OR_AUX] = init_rule_and_or_aux();
   rules[BOOL_OP] = init_rule_bool_op();

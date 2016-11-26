@@ -96,5 +96,6 @@ int is_prefix_arr(char* str, char s_list[][10]);
 
 int update_quote(char c, char quoted[]);
 int is_quoted(char quoted[3]);
+char* escape_quote(char* input);
 
 #endif /* !MY_STRING_H */

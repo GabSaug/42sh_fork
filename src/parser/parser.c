@@ -13,7 +13,7 @@ static struct tree* parse_rec_chap(struct rule** rules, struct vector* v_token,
                                    size_t* nb_token_read)
 {
   *nb_token_read = 0;
-  return parse_rec(rules, v_token, INPUT, nb_token_read);
+  return parse_rec(rules, v_token, SCRIPT, nb_token_read);
 }
 
 

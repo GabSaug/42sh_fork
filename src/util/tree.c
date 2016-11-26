@@ -4,13 +4,15 @@
 #include "my_malloc.h"
 #include "vector.h"
 #include "tree.h"
-
+#include "my_string.h"
 
 static char nts2string[][20] =
 {
+  "SCRIPT",
   "INPUT",
   "LIST",
   "COM_AMP",
+  "COM_AMP_NL",
   "AND_OR",
   "BOOL_OP",
   "NEW_LINE_RULE",
@@ -67,8 +69,11 @@ static void tree_print_dot_rec(struct tree* tree, FILE* file)
   if (tree->token)
   {
     if (tree->token->id == WORD)
-      fprintf(file, "%u [label=\"%s = %s\"]\n", num_dot,
-              ts2string[tree->token->id], tree->token->s);
+    {
+      char* escaped = escape_quote(tree->token->s);
+      fprintf(file, "%u [label=\"%s\"; shape=note]\n", num_dot, escaped);
+      free(escaped);
+    }
     else if (tree->token->id == IO_NUMBER)
       fprintf(file, "%u [label=\"%s = %s\"]\n", num_dot,
               ts2string[tree->token->id], tree->token->s);

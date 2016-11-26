@@ -11,9 +11,11 @@
 
 enum non_terminal_symbol
 {
+  SCRIPT,
   INPUT,
   LIST,
   COM_AMP,
+  COM_AMP_NL,
   AND_OR,
   BOOL_OP,
   NEW_LINE_RULE,
