@@ -10,9 +10,9 @@ static char ts2string[][20] =
 {
   ";", "&", "|", "&&", "||", ";;", "<", ">", "<<", ">>", "<&", ">&", "<>",
   "<<-", ">|", "{", "}", "(", ")", "!", "EOF",
-  "if", "then", "else", "elif", "fi", "do", "done", "case", "esac", "while",
-  "until", "for", "in", "function", "<new_line>",
-  "word", "assignment_word", "name", "IO_number"
+  "IF", "THEN", "ELSE", "ELIF", "FI", "DO", "DONE", "CASE", "ESAC", "WHILE",
+  "UNTIL", "FOR", "IN", "FUNCTION", "<NEW_LINE>",
+  "WORD", "ASSIGNMENT_WORD", "NAME", "IO_NUMBER"
 };
 
 void v_print(struct vector* v)
@@ -20,7 +20,10 @@ void v_print(struct vector* v)
   for (size_t i = 0; i < v->size; ++i)
   {
     struct token* token = v_get(v, i);
-    printf("%s, ", token->id >= 0 ? ts2string[token->id] : "UNDIFINED");
+    if (token->id != WORD)
+      printf("%s\n", token->id >= 0 ? ts2string[token->id] : "UNDIFINED");
+    else
+      printf("WORD = %s\n", token->s);
   }
   printf("\n");
 }

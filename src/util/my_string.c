@@ -152,12 +152,12 @@ int update_quote(char c, char quoted[])
   if (c == '\'' && !quoted[BACKSLASH] && !quoted[DOUBLE_QUOTE])
   {
     quoted[SINGLE_QUOTE] = !quoted[SINGLE_QUOTE];
-    return 1;
+    return 2 * quoted[SINGLE_QUOTE] - 1; // 1 if set; -1 if unset
   }
   if (c == '"' && !quoted[BACKSLASH] && !quoted[SINGLE_QUOTE])
   {
     quoted[DOUBLE_QUOTE] = !quoted[DOUBLE_QUOTE];
-    return 1;
+    return 2 * quoted[DOUBLE_QUOTE] - 1; // 1 if set; -1 if unset
   }
   return 0;
 }
