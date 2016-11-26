@@ -171,7 +171,7 @@ int process_input(char* buff, struct vector *token, struct shell_tools tools)
 
   int fit_level = 0;
   ast = parse(rules, token, &fit_level);
-  if (!strcmp(get_data(ht[VAR], "ast-print"), "1"))
+  if (!strcmp(get_data(tools.ht[VAR], "ast-print"), "1"))
       tree_print_dot(ast);
 
   int ret = 0;
