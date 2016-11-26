@@ -26,7 +26,9 @@ struct vector* expand(char* input, int in_ari_exp)
   {
     struct expansion exp = tokenize_expansion(input + i_input, in_ari_exp);
 
-    if (exp.type == ARI)
+    if (exp.type == NO_EXPANSION)
+      continue;
+    else if (exp.type == ARI)
     {
       str_append(output, input + start, i_input - start, 0);
       char* ret = arithmetic_expansion(my_strndup(exp.content_start,
@@ -39,7 +41,6 @@ struct vector* expand(char* input, int in_ari_exp)
       }
       str_append(output, ret, -1, 1);
       start = i_input + exp.size;
-      i_input = start - 1;
     }
     else if (exp.type == NORMAL || exp.type == BRACKET)
       // in_ari_exp must be the last elseif
@@ -47,12 +48,9 @@ struct vector* expand(char* input, int in_ari_exp)
       str_append(output, input + start, i_input - start, 0);
       str_append(output, parameter_expansion(my_strndup(exp.content_start,
                                                    exp.content_size)), -1, 1);
-      //printf("exp.size = %zu\n", exp.size);
       start = i_input + exp.size;
-      i_input = start - 1;
     }
-    /*else
-      str_append(output, input, -1, 0);*/
+    i_input += exp.size - 1;
   }
   str_append(output, input + start, i_input - start, 0);
   //output[i_output] = '\0';

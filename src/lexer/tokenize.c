@@ -90,7 +90,7 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
   *content_size = (s+i) - *start - nb_char_intro + 1;
 
   if (!s[i])
-    warnx("Unexpected EOF, expected '%c;", d);
+    warnx("Unexpected EOF, expected %c;", d);
   return s[i] ? i : 0;
 }
 
@@ -101,15 +101,19 @@ static size_t tokenize_exp_quote(char *s, char** start, size_t *content_size)
   update_quote(s[0], quoted);
   *start = s + 1;
   size_t i;
-  for (i = 0; s[i] && is_quoted(quoted); ++i)
+  for (i = 1; s[i]; ++i)
+  {
     update_quote(s[i], quoted);
+    if (!is_quoted(quoted))
+      break;
+  }
   *content_size = (s + i) - *start;
   if (is_quoted(quoted))
   {
-    warnx("Unexpected EOF, expected '%c;", s[0]);
+    warnx("Unexpected EOF, expected %c;", s[0]);
     return 0;
   }
-  return i;
+  return i + 1;
 }
 
 // must be null-terminated
@@ -182,7 +186,9 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
           &exp.content_size);
       if (quote_size == 0)
         exp.type = NO_EXPANSION;
-      exp.size = quote_size + 1;
+      exp.size = quote_size;
+      //printf ("^%.*s$\n", exp.content_size, exp.content_start);
+      //printf("content size = %zu\n", exp.content_size);
     }
   }
   else if (in_ari_exp)
