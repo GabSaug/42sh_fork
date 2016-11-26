@@ -151,7 +151,6 @@ static int run_ast(struct tree *ast, struct vector *token,
     sprintf(ret_itoa, "%i", ret);
     add_hash(tools.ht[VAR], "?", ret_itoa);
     free(ret_itoa);
-    tree_destroy(ast);
   }
 
   return ret;
@@ -171,15 +170,25 @@ int process_input(char* buff, struct vector *token, struct shell_tools tools)
 
   int fit_level = 0;
   ast = parse(rules, token, &fit_level);
-  if (!strcmp(get_data(tools.ht[VAR], "ast-print"), "1"))
+  int ret = 0;
+  if (ast != NULL)
+  {
+    if (!strcmp(get_data(ht[VAR], "ast-print"), "1"))
       tree_print_dot(ast);
 
-  int ret = 0;
-  for (size_t i = 0; i < v_size(ast->child); ++i)
+    for (size_t i = 0; i < v_size(ast->child); ++i)
+    {
+      //printf("input %zu\n", i);
+      struct tree* input = v_get(ast->child, i);
+      ret = run_ast(input, token);
+    }
+
+    tree_destroy(ast);
+  }
+  else
   {
-    //printf("input %zu\n", i);
-    struct tree* input = v_get(ast->child, i);
-    ret = run_ast(input, token, tools);
+    warnx("Grammar error");
+    ret = 1;
   }
 
   v_destroy(token, token_destroy);

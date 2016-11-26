@@ -180,7 +180,10 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
         new_token->s = NULL;
         struct token* prev = v_get(v_token, v_size(v_token) - 1);
         if (prev && prev->id == NL)
+        {
+          free(new_token);
           return 0;
+        }
         else
         {
           new_token->id = NL;
