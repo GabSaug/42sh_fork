@@ -189,7 +189,7 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
       for (size_t i = 0; i < v_size(v_new_str); i++)
       {
         char* str = v_get(v_new_str, i);
-//        printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
+        printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
         if (str[0] == '\0')
           a_v_append(v_tok, create_tok("0"));
         else  
