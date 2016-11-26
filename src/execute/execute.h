@@ -116,6 +116,8 @@ int execute_for(struct tree *ast);
 */
 int execute_case(struct tree *ast);
 
+char *expand_word(struct vector *exp);
+
 /**
  * \brief Managed the redirection of a command
  * \param ast The command where there is redirection

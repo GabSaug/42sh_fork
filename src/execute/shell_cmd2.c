@@ -52,7 +52,7 @@ static int case_clause(struct tree *ast, char *word)
   return res;
 }
 
-static char *expand_word(struct vector *exp)
+char *expand_word(struct vector *exp)
 {
   size_t len = 0;
   for (size_t i = 0; i < v_size(exp); i++)

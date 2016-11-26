@@ -90,8 +90,10 @@ static int execute_assignment(struct tree* assignment)
   char* s = assignment->token->s;
   char* equal = strchr(s, '=');
   *equal = '\0';
+  char* expanded_value = expand_word(expand(my_strdup(equal + 1), 0));
   //printf("key = %s$ data = %s$\n", s, equal + 1);
-  add_hash(ht[VAR], s, equal + 1); // Add tilde expansion
+  add_hash(ht[VAR], s, expanded_value);
+  free(expanded_value);
   return 0;
 }
 
