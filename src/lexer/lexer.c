@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 
 #include "lexer.h"
 #include "my_malloc.h"
@@ -138,6 +139,8 @@ static void rule_7(struct vector* v_token, char** start, char* s, size_t* i,
 {
   if (*start != s + *i)
     append_token(v_token, *start, s + *i - 1);
+  if (s[*i] == '\n')
+    append_token(v_token, s + *i, s + *i);
   *part_of_operator = 0;
   *part_of_word = 0;
   *start = s + *i + 1;
@@ -172,6 +175,18 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
       s[s_size] = '\0';
       //printf("tok : %s\n", s);
       new_token->s = s;
+      if (!strcmp(new_token->s, "\n"))
+      {
+        free(new_token->s);
+        new_token->s = NULL;
+        struct token* prev = v_get(v_token, v_size(v_token) - 1);
+        if (prev && prev->id == NL)
+          return 0;
+        else
+        {
+          new_token->id = NL;
+        }
+      }
   }
   else
     new_token->s = NULL;
