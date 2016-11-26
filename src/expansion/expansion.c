@@ -15,6 +15,7 @@ extern struct hash_table* ht[2];
 static char* tilde_expansion(char* s);
 static char* parameter_expansion(char* s);
 static char* remove_quote(char* s);
+static struct vector* field_split(struct vector* v_input);
 
 struct vector* expand(char* input, int in_ari_exp)
 {
@@ -22,11 +23,14 @@ struct vector* expand(char* input, int in_ari_exp)
   struct str* output = str_create();
   size_t start = 0;
   size_t i_input;
+  char quoted[3] = { 0 };
   for (i_input = 0; input[i_input]; ++i_input)
   {
+    if (update_quote(input[i_input], quoted) == -1)
+      continue;
     struct expansion exp = tokenize_expansion(input + i_input, in_ari_exp);
 
-    if (exp.type == NO_EXPANSION)
+    if (exp.type == NO_EXPANSION || exp.type == DQ)
       continue;
     else if (exp.type == ARI)
     {
@@ -70,6 +74,8 @@ struct vector* expand(char* input, int in_ari_exp)
 
   //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 
+  v = field_split(v);
+
   for (size_t i = 0; i < v_size(v); ++i)
     v_set(v, i, remove_quote(v_get(v, i)));
 
@@ -85,6 +91,39 @@ struct vector* expand(char* input, int in_ari_exp)
   char* IFS = get_data(ht[VAR], "IFS");
   if (IFS && IFS != '\0') // IFS is not null
     field_split(v);*/
+}
+
+static struct vector* field_split(struct vector* v_input)
+{
+  char* ifs = get_data(ht[VAR], "IFS");
+  if (!v_input || !ifs)
+    return v_input;
+  struct vector* v_output = v_create();
+  for (size_t i = 0; i < v_size(v_input); ++i)
+  {
+    char* s = v_get(v_input, i);
+    size_t start = 0;
+    size_t j;
+    char quoted[3] = { 0 };
+    for (j = 0; s[j]; ++j)
+    {
+      update_quote(s[j], quoted);
+      if (is_quoted(quoted))
+        continue;
+      char* dl = strchr(ifs, s[j]);
+      if (dl)
+      {
+        v_append(v_output, my_strndup(s + start, j - start));
+        while (strchr(ifs, s[j]))
+          j++;
+        start = j;
+        //j--;
+      }
+    }
+    v_append(v_output, my_strndup(s + start, j - start));
+  }
+  v_destroy(v_input, free);
+  return v_output;
 }
 
 static char* remove_quote(char* s)

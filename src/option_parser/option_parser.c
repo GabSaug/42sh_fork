@@ -96,6 +96,7 @@ static void set_env(void)
       //printf("var %s not found\n", var[i]);
   }
 
+  add_hash(ht[VAR], "IFS", " \t\n");
   add_hash(ht[VAR], "PS1", "42sh$ ");
   add_hash(ht[VAR], "PS2", "> ");
   add_hash(ht[VAR], "PS4", "+ ");
