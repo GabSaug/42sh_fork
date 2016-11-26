@@ -2,14 +2,14 @@
 
 #include "execute.h"
 
-int execute_compound_list(struct tree *ast)
+int execute_compound_list(struct tree *ast, struct hash_table *ht[])
 {
   int res = 0;
   for (size_t i = 0; i < v_size(ast->child); i++)
   {
     struct tree *child = v_get(ast->child, i);
     if (child->nts == AND_OR)
-      res = execute_and_or(child);
+      res = execute_and_or(child, ht);
   }
   return res;
 }
@@ -33,7 +33,7 @@ static int test_case_item(struct tree *ast, char *word)
   return res;
 }
 
-static int case_clause(struct tree *ast, char *word)
+static int case_clause(struct tree *ast, char *word, struct hash_table *ht[])
 {
   int res = 0;
 
@@ -44,7 +44,7 @@ static int case_clause(struct tree *ast, char *word)
     {
       son = v_get(son->child, v_size(son->child) - 1);
       if (son->nts == COMPOUND_LIST)
-        res = execute_compound_list(son);
+        res = execute_compound_list(son, ht);
       break;
     }
   }
@@ -75,14 +75,14 @@ char *expand_word(struct vector *exp)
   return res;
 }
 
-int execute_case(struct tree *ast)
+int execute_case(struct tree *ast, struct hash_table *ht[])
 {
   struct tree *var = v_get(ast->child, 1);
   char *word = expand_word(expand(my_strdup(var->token->s), 0));
   struct tree *son = v_get(ast->child, 3);
   if (son->nts == CASE_CLAUSE)
   {
-    int res = case_clause(son, word);
+    int res = case_clause(son, word, ht);
     free(word);
     return res;
   }

@@ -7,7 +7,6 @@
 #include <fcntl.h>
 #include <sys/mman.h>
 
-#include "option_parser.h"
 #include "vector.h"
 #include "lexer.h"
 #include "parser.h"
@@ -19,12 +18,13 @@
 #include "signals.h"
 #include "str.h"
 
-static int process_file(struct option option);
-static int process_interactive(void);
+static int process_file(struct shell_tools tools);
+static int process_interactive(struct shell_tools tools);
 
 static struct rule** rules = NULL;
 static struct vector* v_token = NULL;
 static struct tree* ast = NULL;
+static char *buff;
 
 static int processing = 0;
 static int tty;
@@ -32,6 +32,8 @@ static int pid;
 struct option option = { 0 };
 
 extern int g_in_readline;
+
+char *prompt;
 
 static FILE* get_null_file(void)
 {
@@ -43,8 +45,8 @@ int main(int argc, char* argv[])
 {
   rl_already_prompted = 1;
   g_in_readline = 0;
-  atexit(exit_42sh);
   set_sigacts();
+  atexit(exit_42sh);
   struct shell_tools tools;
   tools.ht[VAR] = create_hash(256);
   tools.ht[FUN] = create_hash(256);
@@ -58,9 +60,9 @@ int main(int argc, char* argv[])
   if (!tty)
     rl_outstream = get_null_file();
   if (tools.option.input_mode == INTERACTIVE)
-    return process_interactive();
+    return process_interactive(tools);
   else if (tools.option.input_mode == COMMAND_LINE)
-    return process_input(tools, v_token);
+    return process_input(tools.option.input, v_token, tools);
   else
     return process_file(tools);
 }
@@ -84,16 +86,16 @@ static void write_history_log(char* s)
   close(fd);
 }
 
-static int process_interactive(void)
+static int process_interactive(struct shell_tools tools)
 {
   int ret = 0;
   while (1)
   {
-    char* prompt = get_PS();
+    char* prompt = get_PS(tools.ht);
     if (tty)
       write(STDERR_FILENO, prompt, my_strlen(prompt));
     g_in_readline = 1;
-    char *buff = readline(prompt);
+    buff = readline(prompt);
     g_in_readline = 0;
     if (!buff)
     {
@@ -103,7 +105,7 @@ static int process_interactive(void)
     {
       add_history(buff);
       write_history_log(buff);
-      ret = process_input(buff, v_token);
+      ret = process_input(buff, v_token, tools);
     }
     free(buff);
   }
@@ -127,7 +129,7 @@ static int process_file(struct shell_tools tools)
   }
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-  ret = process_input(file, v_token);
+  ret = process_input(file, v_token, tools);
   munmap(file, size_file);
   close(fd);
   return ret;
@@ -147,7 +149,7 @@ static int run_ast(struct tree *ast, struct vector *token,
     ret = execute(ast, tools.ht);
     char* ret_itoa = my_malloc(sizeof (char) * 50);
     sprintf(ret_itoa, "%i", ret);
-    add_hash(ht[VAR], "?", ret_itoa);
+    add_hash(tools.ht[VAR], "?", ret_itoa);
     free(ret_itoa);
     tree_destroy(ast);
   }
@@ -155,7 +157,7 @@ static int run_ast(struct tree *ast, struct vector *token,
   return ret;
 }
 
-int process_input(char* buff, struct vector *token)
+int process_input(char* buff, struct vector *token, struct shell_tools tools)
 {
   processing = 1;
   token = v_create();
@@ -177,7 +179,7 @@ int process_input(char* buff, struct vector *token)
   {
     //printf("input %zu\n", i);
     struct tree* input = v_get(ast->child, i);
-    ret = run_ast(input, token);
+    ret = run_ast(input, token, tools);
   }
 
   v_destroy(token, token_destroy);
@@ -186,21 +188,21 @@ int process_input(char* buff, struct vector *token)
   return ret;
 }
 
-char* get_PS(void)
+char* get_PS(struct hash_table *ht[])
 {
   char* ps1 = get_data(ht[VAR], "PS1");
   return ps1;
 }
 
-void exit_42sh(struct shell_tools tools)
+void exit_42sh(void)
 {
   if (!tty)
     fclose(rl_outstream);
-  else if (tools.option.input_mode == INTERACTIVE && getpid() == pid)
-    printf("exit\n");
-  destroy_hash(tools.ht[VAR]);
-  destroy_hash(tools.ht[FUN]);
-  destroy_hash(tools.ht[ALIAS]);
+  //else if (tools.option.input_mode == INTERACTIVE && getpid() == pid)
+  //  printf("exit\n");
+  //destroy_hash(tools.ht[VAR]);
+  //destroy_hash(tools.ht[FUN]);
+  //destroy_hash(tools.ht[ALIAS]);
   rules_destroy(rules);
   if (processing)
   {
