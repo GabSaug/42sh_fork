@@ -203,6 +203,14 @@ int eval_loop(struct a_token* tok, int* unary, int* last_num,
   return eval_looop(tok, unary, s_operator, s_result);
 }
 
+static int return_and_free(int ret, stack_operator** s_operator,
+                           stack_result** s_result)
+{
+  stack_o_destroy(s_operator);
+  stack_r_destroy(s_result);
+  return ret;
+}
+
 static int a_eval(struct vector* v_tok, long int* res)
 {
   stack_operator* s_operator = NULL;
@@ -212,17 +220,17 @@ static int a_eval(struct vector* v_tok, long int* res)
   for (size_t i = 0; v_get(v_tok, i); ++i)
   {
     if (!eval_loop(v_get(v_tok, i), &unary, &last_num, &s_operator, &s_result))
-      return 0;
+      return return_and_free(0, &s_operator, &s_result);
   }
   while (s_operator)
   {
     if (!pop_and_eval(&s_operator, &s_result))
-      return 0;
+      return return_and_free(0, &s_operator, &s_result);
   }
   if (stack_r_size(s_result) != 1)
   {
     warnx("Expansion error: operator missing");
-    return 0;
+    return return_and_free(0, &s_operator, &s_result);
   }
   *res = stack_r_peek(s_result);
   stack_o_destroy(&s_operator);
