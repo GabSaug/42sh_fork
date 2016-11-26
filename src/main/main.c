@@ -30,15 +30,19 @@ static int processing = 0;
 static int tty;
 static int pid;
 struct option option = { 0 };
-
 extern int g_in_readline;
 
-char *prompt;
+static char* prompt = NULL;
 
 static FILE* get_null_file(void)
 {
   FILE* f = fopen("/dev/null", "a");
   return f;
+}
+
+void print_prompt(void)
+{
+  write(STDERR_FILENO, prompt, my_strlen(prompt));
 }
 
 int main(int argc, char* argv[])
@@ -53,7 +57,7 @@ int main(int argc, char* argv[])
   tools.ht[ALIAS] = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   tools.option = parse_options(argc, argv, tools.ht);
-
+  prompt = NULL;
   rules = init_all_rules();
   tty = isatty(STDIN_FILENO);
   pid = getpid();
@@ -91,9 +95,9 @@ static int process_interactive(struct shell_tools tools)
   int ret = 0;
   while (1)
   {
-    char* prompt = get_PS(tools.ht);
+    prompt = get_PS(tools.ht);
     if (tty)
-      write(STDERR_FILENO, prompt, my_strlen(prompt));
+      print_prompt();
     g_in_readline = 1;
     buff = readline(prompt);
     g_in_readline = 0;
@@ -121,6 +125,7 @@ static int process_file(struct shell_tools tools)
     warn("Error to open file");
     return 1;
   }
+
   struct stat stat_buf;
   if (stat(tools.option.input, &stat_buf) == -1)
   {
@@ -173,7 +178,7 @@ int process_input(char* buff, struct vector *token, struct shell_tools tools)
   int ret = 0;
   if (ast != NULL)
   {
-    if (!strcmp(get_data(ht[VAR], "ast-print"), "1"))
+    if (!strcmp(get_data(tools.ht[VAR], "ast-print"), "1"))
       tree_print_dot(ast);
 
     for (size_t i = 0; i < v_size(ast->child); ++i)

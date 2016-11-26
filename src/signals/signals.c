@@ -21,7 +21,7 @@ static void sigint(int signum, siginfo_t* siginfo, void* data)
   {
     char* ps = get_PS();
     write(STDERR_FILENO, "\n", 1);
-    write(STDERR_FILENO, ps, my_strlen(ps));
+    print_prompt();
     rl_line_buffer[0] = ' ';
     rl_line_buffer[1] = '\0';
     rl_point = 0;

@@ -26,6 +26,8 @@ struct shell_tools
 */
 int main(int argc, char* argv[]);
 
+void print_prompt(void);
+
 int process_input(char* buff, struct vector *token, struct shell_tools tools);
 char* get_PS(struct hash_table *ht[]);
 /**
