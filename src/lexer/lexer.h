@@ -59,8 +59,6 @@ struct token
   char* s;
 };
 
-extern struct hash_table* ht[3];
-
 /**
  * \brief Fill a vector of token based on the input string
  * \param s The string to break into token

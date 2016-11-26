@@ -33,6 +33,6 @@ struct option
  * \param argv The arguments given
  * \return A structure option
 */
-struct option parse_options(int argc, char *argv[]);
+struct option parse_options(int argc, char *argv[], struct hash_table *ht[]);
 
 #endif /* !OPTION_PARSER_H */

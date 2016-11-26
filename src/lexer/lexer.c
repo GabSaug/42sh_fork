@@ -173,7 +173,6 @@ static size_t append_token(struct vector* v_token, char* start, char* end)
       for (size_t i = 0; i < s_size + 1; ++i)
         s[i] = start[i];
       s[s_size] = '\0';
-      //printf("tok : %s\n", s);
       new_token->s = s;
       if (!strcmp(new_token->s, "\n"))
       {

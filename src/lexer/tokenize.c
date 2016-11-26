@@ -49,9 +49,6 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
 {
   int count = 0;
   size_t i = 0;
-  //int nb_char_intro = 1;
-  //int in_intro = 1;
-  //printf("char = %c\n", d);
   while (s[i] != b)
     ++i;
   for (int j = 0; j < nb_char_intro; ++i, ++j)
@@ -59,7 +56,6 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
   *start = s + i;
   for (; s[i] && count > 0; ++i)
   {
-    //printf("%c, count = %i\n", s[i], count);
     if (s[i] == b)
       count++;
     else if (s[i] == d)
@@ -208,4 +204,3 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
   }
   return exp;
 }
-

@@ -3,9 +3,7 @@
 #include "execute.h"
 #include "my_string.h"
 
-extern struct hash_table* ht[3];
-
-int execute_command(struct tree* ast)
+int execute_command(struct tree* ast, struct hash_table *ht[])
 {
   struct tree* child = v_get(ast->child, 0);
   if (child->nts == SIMPLE_COMMAND)
@@ -47,7 +45,8 @@ static int execute_bin(char** argv)
   }
 }
 
-static char** generate_command(struct tree *ast, size_t index_start)
+static char** generate_command(struct tree *ast, size_t index_start,
+                               struct hash_table *ht[])
 {
   struct vector* v_args = v_create();
   for (size_t j = index_start; j < v_size(ast->child); j++)
@@ -56,7 +55,7 @@ static char** generate_command(struct tree *ast, size_t index_start)
     son = v_get(son->child, 0);
     if (son->nts != REDIRECTION)
     {
-      struct vector* v_arg_tmp = expand(my_strdup(son->token->s), 0);
+      struct vector* v_arg_tmp = expand(my_strdup(son->token->s), 0, ht);
       if (!v_arg_tmp)
         v_destroy(v_args, free);
       if (!v_arg_tmp)
@@ -85,7 +84,7 @@ static int execute_prog(char** argv)
     return execute_bin(argv);
 }
 
-static int execute_assignment(struct tree* assignment)
+static int execute_assignment(struct tree* assignment, struct hash_table *ht[])
 {
   char* s = assignment->token->s;
   char* equal = strchr(s, '=');
@@ -98,7 +97,7 @@ static int execute_assignment(struct tree* assignment)
 }
 
 static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
-                        int res)
+                        int res, struct hash_table *ht[])
 {
   if (i == v_size(ast->child)) // Only prefix (assignment_word)
   {
@@ -108,7 +107,7 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
       struct tree* child = v_get(prefix->child, 0);
       if (child->nts == REDIRECTION)
         continue;
-      res = execute_assignment(child);
+      res = execute_assignment(child, ht);
     }
   }
   else // only element (word)
@@ -116,7 +115,7 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
     char** argv = generate_command(ast, i);
     if (argv)
     {
-      res = execute_prog(argv);
+      res = execute_prog(argv, ht);
       for (size_t i = 0; argv[i]; ++i)
         free(argv[i]);
       free(argv);
@@ -146,7 +145,7 @@ static void close_dup(int std_in, int std_out, int std_err)
   close(std_err);
 }
 
-int execute_simple_command(struct tree *ast)
+int execute_simple_command(struct tree *ast, struct hash_table *ht[])
 {
   int res = 0;
   struct vector *to_close = NULL;
@@ -160,8 +159,7 @@ int execute_simple_command(struct tree *ast)
   for (i = 0; i < v_size(ast->child); ++i)
   {
     struct tree* element = v_get(ast->child, i); // i is offset of +1
-    /*if (element->nts != ELEMENT)
-      continue;*/
+
     struct tree* child = v_get(element->child, 0);
     if (child->nts == 0) // its a word or assignment_word
     {
@@ -170,7 +168,7 @@ int execute_simple_command(struct tree *ast)
         break;
     }
   }
-  res = execute_args(ast, i, to_close, res);
+  res = execute_args(ast, i, to_close, res, ht);
   close_dup(std_in, std_out, std_err);
   return res;
 }

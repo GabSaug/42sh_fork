@@ -9,7 +9,14 @@
  * \file main.h
 */
 
+#include "hash_table.h"
 #include "vector.h"
+
+struct shell_tools
+{
+  struct hash_table *ht[3];
+  struct option option;
+};
 
 /**
  *  \brief The main function

@@ -9,7 +9,6 @@
 
 #include "option_parser.h"
 #include "vector.h"
-#include "hash_table.h"
 #include "lexer.h"
 #include "parser.h"
 #include "tree.h"
@@ -23,18 +22,16 @@
 static int process_file(struct option option);
 static int process_interactive(void);
 
-extern int g_in_readline;
-
-struct hash_table* ht[3] = { NULL, NULL, NULL };
 static struct rule** rules = NULL;
 static struct vector* v_token = NULL;
 static struct tree* ast = NULL;
-static char* buff = NULL;
 
 static int processing = 0;
 static int tty;
 static int pid;
 struct option option = { 0 };
+
+extern int g_in_readline;
 
 static FILE* get_null_file(void)
 {
@@ -48,22 +45,24 @@ int main(int argc, char* argv[])
   g_in_readline = 0;
   atexit(exit_42sh);
   set_sigacts();
-  ht[VAR] = create_hash(256);
-  ht[FUN] = create_hash(256);
-  ht[ALIAS] = create_hash(256);
+  struct shell_tools tools;
+  tools.ht[VAR] = create_hash(256);
+  tools.ht[FUN] = create_hash(256);
+  tools.ht[ALIAS] = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
-  option = parse_options(argc, argv);
+  tools.option = parse_options(argc, argv, tools.ht);
+
   rules = init_all_rules();
   tty = isatty(STDIN_FILENO);
   pid = getpid();
   if (!tty)
     rl_outstream = get_null_file();
-  if (option.input_mode == INTERACTIVE)
+  if (tools.option.input_mode == INTERACTIVE)
     return process_interactive();
-  else if (option.input_mode == COMMAND_LINE)
-    return process_input(option.input, v_token);
+  else if (tools.option.input_mode == COMMAND_LINE)
+    return process_input(tools, v_token);
   else
-    return process_file(option);
+    return process_file(tools);
 }
 
 static void write_history_log(char* s)
@@ -94,7 +93,7 @@ static int process_interactive(void)
     if (tty)
       write(STDERR_FILENO, prompt, my_strlen(prompt));
     g_in_readline = 1;
-    buff = readline(prompt);
+    char *buff = readline(prompt);
     g_in_readline = 0;
     if (!buff)
     {
@@ -111,19 +110,19 @@ static int process_interactive(void)
   return ret;
 }
 
-static int process_file(struct option option)
+static int process_file(struct shell_tools tools)
 {
   int ret = 0;
-  int fd = open(option.input, O_RDONLY | O_CLOEXEC);
+  int fd = open(tools.option.input, O_RDONLY | O_CLOEXEC);
   if (fd == -1)
   {
     warn("Error to open file");
     return 1;
   }
   struct stat stat_buf;
-  if (stat(option.input, &stat_buf) == -1)
+  if (stat(tools.option.input, &stat_buf) == -1)
   {
-    warn("Impossible to read stat from %s", option.input);
+    warn("Impossible to read stat from %s", tools.option.input);
     return 1;
   }
   size_t size_file = stat_buf.st_size;
@@ -134,7 +133,8 @@ static int process_file(struct option option)
   return ret;
 }
 
-static int run_ast(struct tree *ast, struct vector *token)
+static int run_ast(struct tree *ast, struct vector *token,
+                   struct shell_tools tools)
 {
   int ret = 0;
   if (ast == NULL)
@@ -144,17 +144,12 @@ static int run_ast(struct tree *ast, struct vector *token)
   }
   else
   {
-    //tree_print(ast);
-    ret = execute(ast);
+    ret = execute(ast, tools.ht);
     char* ret_itoa = my_malloc(sizeof (char) * 50);
     sprintf(ret_itoa, "%i", ret);
     add_hash(ht[VAR], "?", ret_itoa);
     free(ret_itoa);
-    //printf("returned %i\n", execute(ast, ht));
-    //struct vector* v_fun = v_create();
-    //tree_destroy_ast_extract_fun(ast, v_fun);
     tree_destroy(ast);
-    //v_destroy(v_fun, tree_destroy_fun);
   }
 
   return ret;
@@ -163,18 +158,15 @@ static int run_ast(struct tree *ast, struct vector *token)
 int process_input(char* buff, struct vector *token)
 {
   processing = 1;
-  //printf("buff = %s\n", buff);
   token = v_create();
   if (!lexer(buff, token))
   {
-    //printf("lexer failure\n");
     v_destroy(token, token_destroy);
     token = NULL;
     return 1;
   }
   typer(token);
-  //v_print(token);
-  //printf("lexer success\n");
+
   int fit_level = 0;
   ast = parse(rules, token, &fit_level);
   if (!strcmp(get_data(ht[VAR], "ast-print"), "1"))
@@ -200,15 +192,15 @@ char* get_PS(void)
   return ps1;
 }
 
-void exit_42sh(void)
+void exit_42sh(struct shell_tools tools)
 {
   if (!tty)
     fclose(rl_outstream);
-  else if (option.input_mode == INTERACTIVE && getpid() == pid)
+  else if (tools.option.input_mode == INTERACTIVE && getpid() == pid)
     printf("exit\n");
-  destroy_hash(ht[VAR]);
-  destroy_hash(ht[FUN]);
-  destroy_hash(ht[ALIAS]);
+  destroy_hash(tools.ht[VAR]);
+  destroy_hash(tools.ht[FUN]);
+  destroy_hash(tools.ht[ALIAS]);
   rules_destroy(rules);
   if (processing)
   {

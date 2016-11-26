@@ -13,7 +13,7 @@ static struct tree *search_command(struct tree *ast, size_t *index)
 }
 
 static void fork_pipe(struct tree *child, int inout[],
-                      int inout2[])
+                      int inout2[], struct hash_table *ht[])
 {
   int pid = fork();
   if (!pid)
@@ -23,7 +23,7 @@ static void fork_pipe(struct tree *child, int inout[],
     dup2(inout2[1], 1);
     close(inout2[0]);
 
-    exit(execute_command(child));
+    exit(execute_command(child, ht));
   }
   int child_stat = 0;
   waitpid(pid, &child_stat, 0);
@@ -31,7 +31,8 @@ static void fork_pipe(struct tree *child, int inout[],
   close(inout[0]);
 }
 
-static int staircase(struct tree *ast, int inout[], size_t index, size_t size)
+static int staircase(struct tree *ast, int inout[], size_t index, size_t size,
+                     struct hash_table *ht[])
 {
   struct tree *child = search_command(ast, &index);
 
@@ -43,8 +44,8 @@ static int staircase(struct tree *ast, int inout[], size_t index, size_t size)
     if (status == -1)
         err(1, "Can not pipe command");
 
-    fork_pipe(child, inout, inout2);
-    res = staircase(ast, inout2, index + 1, size);
+    fork_pipe(child, inout, inout2, ht);
+    res = staircase(ast, inout2, index + 1, size, ht);
   }
   else
   {
@@ -62,7 +63,8 @@ static int staircase(struct tree *ast, int inout[], size_t index, size_t size)
   return res;
 }
 
-static void fork_first_pipe(struct tree *ast, int inout[], size_t index)
+static void fork_first_pipe(struct tree *ast, int inout[], size_t index,
+                            struct hash_table *ht[])
 {
   int pid = fork();
   if (!pid)
@@ -70,14 +72,14 @@ static void fork_first_pipe(struct tree *ast, int inout[], size_t index)
     // child
     dup2(inout[1], 1);
     close(inout[0]);
-    exit(execute_command(v_get(ast->child, index)));
+    exit(execute_command(v_get(ast->child, index), ht));
   }
   int child_stat = 0;
   waitpid(pid, &child_stat, 0);
   close(inout[1]);
 }
 
-int execute_pipeline(struct tree *ast)
+int execute_pipeline(struct tree *ast, struct hash_table *ht[])
 {
   if (!ast)
     return 1;
@@ -94,11 +96,11 @@ int execute_pipeline(struct tree *ast)
     if (status == -1)
         err(1, "Can not pipe command");
 
-    fork_first_pipe(ast, inout, index);
-    res = staircase(ast, inout, index + 1, size);
+    fork_first_pipe(ast, inout, index, ht);
+    res = staircase(ast, inout, index + 1, size, ht);
   }
   else
-    res = execute_command(v_get(ast->child, index));
+    res = execute_command(v_get(ast->child, index), ht);
 
   return index > 0 ? !res : res;
 }

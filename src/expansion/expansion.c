@@ -10,8 +10,6 @@
 #include "arithmetic.h"
 #include "my_malloc.h"
 
-extern struct hash_table* ht[2];
-
 static char* tilde_expansion(char* s);
 static char* parameter_expansion(char* s);
 static char* remove_quote(char* s);
@@ -57,15 +55,8 @@ struct vector* expand(char* input, int in_ari_exp)
     i_input += exp.size - 1;
   }
   str_append(output, input + start, i_input - start, 0);
-  //output[i_output] = '\0';
 
-  //char* tilde_s = tilde_expansion(s);
   free(input);
-  /*if (!output)
-  {
-    output = my_malloc(1);
-    output[0] = '\0';
-  }*/
 
   struct vector* v = v_create();
   v_append(v, output->s);

@@ -4,7 +4,7 @@ extern struct hash_table* ht[2];
 
 static struct option opt(int argc, char *argv[], struct option options);
 
-static void set_o(int o, char *str)
+static void set_o(int o, char *str, struct hash_table *ht[])
 {
   char *names[] =
   {
@@ -26,7 +26,8 @@ static void set_o(int o, char *str)
   add_hash(ht[VAR], str, val);
 }
 
-static struct option opt2(int argc, char *argv[], struct option options)
+static struct option opt2(int argc, char *argv[], struct option options,
+                          struct hash_table *ht[])
 {
   if (!strcmp(argv[1], "--norc"))
   {
@@ -40,7 +41,7 @@ static struct option opt2(int argc, char *argv[], struct option options)
   }
   else if (!strcmp(argv[1], "-O") || !strcmp(argv[1], "+O"))
   {
-    set_o(argv[1][0] == '+', argv[2]);
+    set_o(argv[1][0] == '+', argv[2], ht);
     return opt(argc - 2, argv + 2, options);
   }
   else if (argv[1][0] && argv[1][0] == '-')
@@ -53,7 +54,8 @@ static struct option opt2(int argc, char *argv[], struct option options)
   }
 }
 
-static struct option opt(int argc, char *argv[], struct option options)
+static struct option opt(int argc, char *argv[], struct option options,
+                         struct hash_table *ht[])
 {
   if (argc > 1)
   {
@@ -71,7 +73,7 @@ static struct option opt(int argc, char *argv[], struct option options)
       exit(0);
     }
     else
-      return opt2(argc, argv, options);
+      return opt2(argc, argv, options, ht);
   }
 
   add_hash(ht[VAR], "expand_aliases", "1");
@@ -79,7 +81,7 @@ static struct option opt(int argc, char *argv[], struct option options)
   return options;
 }
 
-static void set_env(void)
+static void set_env(struct hash_table *ht[])
 {
   char *var[] =
   {
@@ -92,8 +94,6 @@ static void set_env(void)
     char *data = getenv(var[i]);
     if (data)
       add_hash(ht[VAR], var[i], data);
-    //else
-      //printf("var %s not found\n", var[i]);
   }
 
   add_hash(ht[VAR], "IFS", " \t\n");
@@ -102,7 +102,7 @@ static void set_env(void)
   add_hash(ht[VAR], "PS4", "+ ");
 }
 
-static void init_opt(void)
+static void init_opt(struct hash_table *ht[])
 {
   char *opts[] =
   {
@@ -116,12 +116,12 @@ static void init_opt(void)
   add_hash(ht[VAR], "sourcepath", "1");
 }
 
-struct option parse_options(int argc, char *argv[])
+struct option parse_options(int argc, char *argv[], struct hash_table *ht[])
 {
-  set_env();
-  init_opt();
+  set_env(ht);
+  init_opt(ht);
   struct option options;
   options.norc = 0;
   options.input = NULL;
-  return opt(argc, argv, options);
+  return opt(argc, argv, options, ht);
 }
