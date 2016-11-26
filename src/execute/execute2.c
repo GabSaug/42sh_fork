@@ -63,6 +63,9 @@ static char** generate_command(struct tree *ast, size_t index_start)
         v_destroy(v_args, free);
         return NULL;
       }
+      char* alias = get_data(ht[ALIAS], v_get(v_arg_tmp, 0));
+      if (j == index_start && alias)
+        v_set(v_arg_tmp, 0, my_strdup(alias));
       v_concat(v_args, v_arg_tmp);
       v_destroy(v_arg_tmp, NULL);
     }
