@@ -100,7 +100,16 @@ static long int compute(long int operand1, enum a_exp_type op,
     return operand1 / operand2;
   }
   else if (op == POW)
+  {
+    if (operand2 < 0)
+    {
+      *success = 0;
+      warnx("%li**%li: exponent less than zero (error token is \"%li\")", operand1,
+            operand2, operand2);
+      return 0;
+    }
     return my_pow(operand1, operand2);
+  }
   return 0;
 }
 
@@ -318,7 +327,10 @@ static int a_eval(struct vector* v_tok, long int* res)
     }
   }
   while (s_operator)
-    pop_and_eval(&s_operator, &s_result);
+  {
+    if (!pop_and_eval(&s_operator, &s_result))
+      return 0;
+  }
   if (stack_r_size(s_result) != 1)
   {
     warnx("Expansion error: operator missing");

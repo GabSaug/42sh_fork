@@ -34,6 +34,12 @@ static char* buff = NULL;
 static int processing = 0;
 static int tty;
 
+static FILE* get_null_file(void)
+{
+  FILE* f = fopen("/dev/null", "a");
+  return f;
+}
+
 int main(int argc, char* argv[])
 {
   rl_already_prompted = 1;
@@ -47,6 +53,8 @@ int main(int argc, char* argv[])
   struct option option = parse_options(argc, argv);
   rules = init_all_rules();
   tty = isatty(STDIN_FILENO);
+  if (!tty)
+    rl_outstream = get_null_file();
   if (option.input_mode == INTERACTIVE)
     return process_interactive();
   else if (option.input_mode == COMMAND_LINE)
@@ -185,6 +193,8 @@ char* get_PS(void)
 
 void exit_42sh(void)
 {
+  if (!tty)
+    fclose(rl_outstream);
   destroy_hash(ht[VAR]);
   destroy_hash(ht[FUN]);
   destroy_hash(ht[ALIAS]);
