@@ -50,7 +50,6 @@ static int execute_bin(char** argv)
 static char** generate_command(struct tree *ast, size_t index_start)
 {
   struct vector* v_args = v_create();
-
   for (size_t j = index_start; j < v_size(ast->child); j++)
   {
     struct tree *son = v_get(ast->child, j);
@@ -59,10 +58,9 @@ static char** generate_command(struct tree *ast, size_t index_start)
     {
       struct vector* v_arg_tmp = expand(my_strdup(son->token->s), 0);
       if (!v_arg_tmp)
-      {
         v_destroy(v_args, free);
+      if (!v_arg_tmp)
         return NULL;
-      }
       char* alias = get_data(ht[ALIAS], v_get(v_arg_tmp, 0));
       if (j == index_start && alias)
         v_set(v_arg_tmp, 0, my_strdup(alias));
@@ -75,7 +73,6 @@ static char** generate_command(struct tree *ast, size_t index_start)
     args[i] = v_get(v_args, i);
   args[v_size(v_args)] = NULL;
   v_destroy(v_args, NULL);
-
   return args;
 }
 

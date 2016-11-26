@@ -33,6 +33,7 @@ static char* buff = NULL;
 
 static int processing = 0;
 static int tty;
+static int pid;
 struct option option = { 0 };
 
 static FILE* get_null_file(void)
@@ -54,6 +55,7 @@ int main(int argc, char* argv[])
   option = parse_options(argc, argv);
   rules = init_all_rules();
   tty = isatty(STDIN_FILENO);
+  pid = getpid();
   if (!tty)
     rl_outstream = get_null_file();
   if (option.input_mode == INTERACTIVE)
@@ -195,7 +197,7 @@ void exit_42sh(void)
 {
   if (!tty)
     fclose(rl_outstream);
-  else if (option.input_mode == INTERACTIVE)
+  else if (option.input_mode == INTERACTIVE && getpid() == pid)
     printf("exit\n");
   destroy_hash(ht[VAR]);
   destroy_hash(ht[FUN]);
