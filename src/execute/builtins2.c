@@ -87,7 +87,7 @@ static void print_alias(struct elt_hash *e)
   if (!e)
     return;
   char *tmp = e->data;
-  printf("alias %s=%s\n", e->key, tmp);
+  printf("alias %s='%s'\n", e->key, tmp);
   print_alias(e->next);
 }
 
@@ -102,7 +102,7 @@ static int print_one_alias(char *tmp, size_t j)
   {
     char *to_disp = get_data(ht[ALIAS], tmp);
     if (to_disp)
-      printf("alias %s=%s\n", tmp, to_disp);
+      printf("alias %s='%s'\n", tmp, to_disp);
     else
     {
       warnx("alias: %s: not found", tmp);
