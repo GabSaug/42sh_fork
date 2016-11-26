@@ -12,85 +12,8 @@
 #include "my_math.h"
 #include "tokenize.h"
 
-static const int size_operators = 11;
-static char* operators[11] =
-{
-  "+",
-  "-",
-  "*",
-  "/",
-  "**",
-  "&",
-  "|",
-  "(",
-  ")",
-  "~",
-  "^"
-};
-
-static int is_in_op(char c)
-{
-  return c == '+' || c == '-' || c == '*' || c == '/' || c == '(' || c == ')'
-         || c == '&' || c == '|' || c == '~';
-}
-
-static int is_in_exp(char c)
-{
-  return c == '$' || c == '_' || c == '`' || (c >= 'a' && c <= 'z')
-         || (c >= 'A' && c <= 'Z') || c == '"' || c == '\'';
-}
-
-static inline int is_unary(char op)
-{
-  return op == UPLUS || op == UMINUS || op == TILDE;
-}
-
-static int priority(enum a_exp_type op)
-{
-  if (op == OP_BRAKET || op == CL_BRAKET)
-    return 0;
-  else if (op == UPLUS || op == UMINUS || op == TILDE)
-    return 9;
-  else if (op == POW)
-    return 8;
-  else if (op == TIMES || op == DIV)
-    return 7;
-  else if (op == PLUS || op == MINUS)
-    return 6;
-  else if (op == BW_AND)
-    return 5;
-  else if (op == BW_XOR)
-    return 4;
-  else if (op == BW_OR)
-    return 3;
-  return 0;
-}
-
-static long int compute_simple_op(long int operand1, enum a_exp_type op,
-                                  long int operand2)
-{
-  if (op == UPLUS)
-    return operand2;
-  else if (op == UMINUS)
-    return -operand2;
-  else if (op == TILDE)
-    return ~operand2;
-  else if (op == BW_AND)
-    return operand1 & operand2;
-  else if (op == BW_OR)
-    return operand1 | operand2;
-  else if (op == BW_XOR)
-    return operand1 ^ operand2;
-  else if (op == PLUS)
-    return operand1 + operand2;
-  else if (op == MINUS)
-    return operand1 - operand2;
-  else if (op == TIMES)
-    return operand1 * operand2;
-  return 0;
-}
 static long int compute(long int operand1, enum a_exp_type op,
-                        long int operand2, int* success)
+                 long int operand2, int* success)
 {
   *success = 1;
   if (op == DIV)
@@ -147,49 +70,7 @@ static int pop_and_eval(stack_operator **ptr_operator,
   return 1;
 }
 
-static int match_op(char* str)
-{
-  int op_num = -1;
-  for (int i = 0; i < size_operators && op_num == -1; i++)
-  {
-    if (my_strcmp(operators[i], str))
-      op_num = i;
-  }
-  return op_num;
-}
-
-static struct a_token* create_tok(char* str)
-{
-//  printf("\t\t\t\t[%s]\n", str);
-  int op_num = match_op(str);
-  char* endptr;
-  long int num;
-  if (op_num == -1)
-  {
-    num = strtol(str, &endptr, 10);
-    if (*endptr)
-      num = 0;
-  }
-  struct a_token* token = my_malloc(sizeof (struct a_token));
-  token->type = op_num;
-  token->val = num;
-  return token;
-}
-
-static void a_v_append(struct vector* v, struct a_token* tok)
-{
-  size_t size = v_size(v);
-  struct a_token* prev = v_get(v, size - 1);
-  if (size > 0 && tok->type == TIMES && prev->type == TIMES)
-  {
-    prev->type = POW;
-    free(tok);
-  }
-  else
-    v_append(v, tok);
-}
-
-static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
+int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
 {
   char* str = exp + start;
   char end_c = exp[end];
@@ -208,7 +89,7 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
 //        printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
         if (str[0] == '\0')
           a_v_append(v_tok, create_tok("0"));
-        else 
+        else
           a_v_append(v_tok, create_tok(str));
       }
       v_destroy(v_new_str, free);
@@ -238,8 +119,8 @@ static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
   return i;
 }
 
-static int lexer_loop(char* exp, ssize_t* start_tok, int* in_tok,
-                      struct vector* v_tok, size_t* i)
+int lexer_loop(char* exp, ssize_t* start_tok, int* in_tok,
+               struct vector* v_tok, size_t* i)
 {
   if (*in_tok)
   {
@@ -266,29 +147,6 @@ static int lexer_loop(char* exp, ssize_t* start_tok, int* in_tok,
         return 0;
     }
   return 1;
-}
-
-static struct vector* a_lexer(char* exp)
-{
-  struct vector* v_tok = v_create();
-  ssize_t start_tok = 0;
-  int in_tok = 0;
-  size_t i;
-  for (i = 0; i < my_strlen(exp); i++)
-    if (!lexer_loop(exp, &start_tok, &in_tok, v_tok, &i))
-      return NULL;
-  if (exp[i - 1] && !(exp[i - 1] == ' ' || exp[i - 1] == '\n'
-      || exp[i - 1] == '\t'))
-    add_tok(v_tok, exp, start_tok, i);
-  return v_tok;
-}
-
-static int is_operator(enum a_exp_type op)
-{
-  return op == PLUS || op == MINUS || op == TIMES
-         || op == DIV || op == UPLUS || op == UMINUS
-         || op == POW || op == BW_AND || op == BW_OR
-         || op == TILDE || op == BW_XOR;
 }
 
 static int eval_looop(struct a_token* tok, int* unary,
@@ -319,8 +177,8 @@ static int eval_looop(struct a_token* tok, int* unary,
   return 1;
 }
 
-static int eval_loop(struct a_token* tok, int* unary, int* last_num,
-                     stack_operator** s_operator, stack_result** s_result)
+int eval_loop(struct a_token* tok, int* unary, int* last_num,
+              stack_operator** s_operator, stack_result** s_result)
 {
   if (*unary)
   {

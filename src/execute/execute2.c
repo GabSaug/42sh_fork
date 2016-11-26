@@ -136,6 +136,16 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
   return res;
 }
 
+static void close_dup(int std_in, int std_out, int std_err)
+{
+  dup2(std_in, 0);
+  close(std_in);
+  dup2(std_out, 1);
+  close(std_out);
+  dup2(std_err, 2);
+  close(std_err);
+}
+
 int execute_simple_command(struct tree *ast)
 {
   int res = 0;
@@ -146,7 +156,6 @@ int execute_simple_command(struct tree *ast)
   to_close = managed_redirections(ast);
   if (!to_close)
     return 1;
-
   size_t i = 0;
   for (i = 0; i < v_size(ast->child); ++i)
   {
@@ -157,19 +166,11 @@ int execute_simple_command(struct tree *ast)
     if (child->nts == 0) // its a word or assignment_word
     {
       struct token* token = child->token;
-      if (!(strchr(token->s, '=') > token->s && !is_digit(token->s[0]))) // Is a WORD
+      if (!(strchr(token->s, '=') > token->s && !is_digit(token->s[0]))) //WORD
         break;
     }
   }
-
   res = execute_args(ast, i, to_close, res);
-
-  dup2(std_in, 0);
-  close(std_in);
-  dup2(std_out, 1);
-  close(std_out);
-  dup2(std_err, 2);
-  close(std_err);
-
+  close_dup(std_in, std_out, std_err);
   return res;
 }
