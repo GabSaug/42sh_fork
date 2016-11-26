@@ -29,8 +29,15 @@ struct vector* expand(char* input, int in_ari_exp)
     if (exp.type == ARI)
     {
       str_append(output, input + start, i_input - start, 0);
-      str_append(output, arithmetic_expansion(my_strndup(exp.content_start,
-                                                   exp.content_size)), -1, 1);
+      char* ret = arithmetic_expansion(my_strndup(exp.content_start,
+                                                  exp.content_size));
+      if (!ret)
+      {
+        str_destroy(output, 1);
+        free(input);
+        return NULL;
+      }
+      str_append(output, ret, -1, 1);
       start = i_input + exp.size;
       i_input = start - 1;
     }

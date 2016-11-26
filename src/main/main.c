@@ -138,6 +138,10 @@ static int run_ast(struct tree *ast, struct vector *token)
     if (!strcmp(get_data(ht[VAR], "ast-print"), "1"))
       tree_print_dot(ast);
     ret = execute(ast);
+    char* ret_itoa = my_malloc(sizeof (char) * 50);
+    sprintf(ret_itoa, "%i", ret);
+    add_hash(ht[VAR], "?", ret_itoa);
+    free(ret_itoa);
     //printf("returned %i\n", execute(ast, ht));
     //struct vector* v_fun = v_create();
     //tree_destroy_ast_extract_fun(ast, v_fun);

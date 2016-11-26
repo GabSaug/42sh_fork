@@ -58,6 +58,11 @@ static char** generate_command(struct tree *ast, size_t index_start)
     if (son->nts != REDIRECTION)
     {
       struct vector* v_arg_tmp = expand(my_strdup(son->token->s), 0);
+      if (!v_arg_tmp)
+      {
+        v_destroy(v_args, free);
+        return NULL;
+      }
       v_concat(v_args, v_arg_tmp);
       v_destroy(v_arg_tmp, NULL);
     }
@@ -107,10 +112,15 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
   else // only element (word)
   {
     char** argv = generate_command(ast, i);
-    res = execute_prog(argv);
-    for (size_t i = 0; argv[i]; ++i)
-      free(argv[i]);
-    free(argv);
+    if (argv)
+    {
+      res = execute_prog(argv);
+      for (size_t i = 0; argv[i]; ++i)
+        free(argv[i]);
+      free(argv);
+    }
+    else
+      res = 1;
   }
   if (to_close)
   {

@@ -154,49 +154,34 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
   };
 
   exp.type = is_prefix_arr(s, exp_intro);
-  if (exp.type != -1)
+  if (exp.type != NO_EXPANSION)
   {
     //exp.type = index_exp_type > CMD ? index_exp_type - 1 : index_exp_type;
     if (exp.type == NORMAL)
     {
       exp.content_size = tokenize_exp_normal(s + 1);
+      if (exp.content_size == 0)
+        exp.type = NO_EXPANSION;
       exp.size = exp.content_size + 1;
-      //printf("exp.size = %zu\n", exp.size);
       exp.content_start = s + 1;
-      //exp.end = exp.start + 2;
-      //exp.end = exp.start + normal_size;
     }
     else if (exp.type < SQ)
     {
-      //exp.start = s + strlen(exp_intro[index_exp_type]);
       size_t other_size = tokenize_exp_other(s, exp_begin[exp.type],
-          exp_end[exp.type], &exp.content_start, &exp.content_size, (exp.type == ARI) + 1);
-      //printf("other_size = %zu\n", other_size);
-      //printf("s = ^%.*s$\n", (int)(exp.content_size), exp.content_start);
-      //exp.end = exp.start + other_size - exp_intro[index_exp_type];
-      //exp.size = 2 * (exp.start - s) + other_size;
+          exp_end[exp.type], &exp.content_start, &exp.content_size,
+          (exp.type == ARI) + 1);
+      if (other_size == 0)
+        exp.type = NO_EXPANSION;
       if (exp.type == CMD2)
         exp.type = CMD;
-      if (other_size <= 0)
-      {
-        exp.type = NO_EXPANSION;
-        return exp;
-      }
       exp.size = other_size + 1;
     }
     else // quote
     {
       size_t quote_size = tokenize_exp_quote(s, &exp.content_start,
           &exp.content_size);
-      //printf("other_size = %zu\n", other_size);
-      //printf("s = ^%.*s$\n", (int)(exp.content_size), exp.content_start);
-      //exp.end = exp.start + other_size - exp_intro[index_exp_type];
-      //exp.size = 2 * (exp.start - s) + other_size;
-      if (quote_size <= 0)
-      {
+      if (quote_size == 0)
         exp.type = NO_EXPANSION;
-        return exp;
-      }
       exp.size = quote_size + 1;
     }
   }
@@ -204,8 +189,16 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
   {
     exp.type = NORMAL;
     exp.content_size = tokenize_exp_normal(s);
+    if (exp.content_size == 0)
+      exp.type = NO_EXPANSION;
     exp.size = exp.content_size;
     exp.content_start = s;
+  }
+  if (exp.type == NO_EXPANSION)
+  {
+    exp.type = NO_EXPANSION;
+    exp.size = 0;
+    exp.content_start = NULL;
   }
   return exp;
 }

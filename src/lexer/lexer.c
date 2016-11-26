@@ -83,10 +83,7 @@ static int apply_rule(struct vector* v_token, char quoted[],
   {
     struct expansion exp = tokenize_expansion(s + *i, 0);
     if (exp.type == NO_EXPANSION)
-    {
-      warnx("This expansion is not handle : %s\n", s + *i);
       return 0;
-    }
     //printf("size_exp = %zu\n", size_exp);
     *i += exp.size - 1;
     return 0;
