@@ -92,14 +92,6 @@ int update_quote(char c, char quoted[])
   return 0;
 }
 
-int is_quoted(char quoted[3])
-{
-  for (int i = 0; i < 3; i++)
-    if (quoted[i])
-      return 1;
-  return 0;
-}
-
 char* escape_quote(char* input)
 {
   struct str* output = str_create();
@@ -113,4 +105,3 @@ char* escape_quote(char* input)
   str_destroy(output, 0);
   return res;
 }
-

@@ -13,6 +13,11 @@ enum quote_type
   SINGLE_QUOTE,
   DOUBLE_QUOTE
 };
+
+int is_upper_case(char c);
+int is_lower_case(char c);
+char* escape_quote(char* input);
+
 /**
  * \brief Determine if the string could be the begining of one of the string in
  * the array of string
@@ -96,6 +101,5 @@ int is_prefix_arr(char* str, char s_list[][10]);
 
 int update_quote(char c, char quoted[]);
 int is_quoted(char quoted[3]);
-char* escape_quote(char* input);
 
 #endif /* !MY_STRING_H */
