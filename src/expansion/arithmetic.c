@@ -144,7 +144,7 @@ static int match_op(char* str)
 
 static struct a_token* create_tok(char* str)
 {
-//  printf("\t\t\t\t[%s]\n", str);
+  printf("\t\t\t\t[%s]\n", str);
   int op_num = match_op(str);
   char* endptr;
   long int num;
@@ -184,7 +184,7 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
     {
       struct vector* v_new_str;
       char* str2 = my_strdup(str);
-//      printf("Ci-après la string envoyée à expand : [%s]\n", str2);
+      printf("Ci-après la string envoyée à expand : [%s]\n", str2);
       v_new_str = expand(str2, 1);
       for (size_t i = 0; i < v_size(v_new_str); i++)
       {
@@ -208,14 +208,11 @@ static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 {
   if (is_in_exp(exp[i]))
   {
-//    printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
+    printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
     size_t new_pos = tokenize_expansion(exp + i, 1).size;
-//    printf("New pos = %zu\n", new_pos);
+    printf("New pos = %zu\n", new_pos);
     if (new_pos == 0)
-    {
-      warnx("error");
       return -1;
-    }
     else
     {
       add_tok(v_tok, exp, i, i + new_pos);
