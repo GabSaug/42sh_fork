@@ -1,10 +1,10 @@
 #ifndef HASH_TABLE_H
 # define HASH_TABLE_H
 
-#define _DEFAULT_SOURCE
+#define _GNU_SOURCE
 #include <string.h>
 #include <stdlib.h>
-#undef _DEFAULT_SOURCE
+#undef _GUN_SOURCE
 
 #include "my_string.h"
 

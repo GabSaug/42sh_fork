@@ -185,7 +185,7 @@ int process_input(char* buff, struct vector *token, struct shell_tools tools)
     {
       //printf("input %zu\n", i);
       struct tree* input = v_get(ast->child, i);
-      ret = run_ast(input, token);
+      ret = run_ast(input, token, tools);
     }
 
     tree_destroy(ast);

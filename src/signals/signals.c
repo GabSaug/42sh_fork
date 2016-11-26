@@ -1,13 +1,14 @@
-#define _GNU_SOURCE
+#include "signals.h"
 
+# define _GNU_SOURCE
 #include <signal.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <err.h>
 #include <stdio.h>
 #include <readline/readline.h>
+# undef _GNU_SOURCE
 
-#include "signals.h"
 #include "main.h"
 #include "my_string.h"
 
@@ -19,7 +20,6 @@ static void sigint(int signum, siginfo_t* siginfo, void* data)
     puts("");
   else
   {
-    char* ps = get_PS();
     write(STDERR_FILENO, "\n", 1);
     print_prompt();
     rl_line_buffer[0] = ' ';

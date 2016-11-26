@@ -2,9 +2,10 @@
 
 extern struct hash_table* ht[2];
 
-static struct option opt(int argc, char *argv[], struct option options);
+static struct option opt(int argc, char *argv[], struct option options,
+                         struct hash_table *ht[]);
 
-static void set_o(int o, char *str, struct hash_table *ht[])
+static void set_o(int o, char* str, struct hash_table* ht[])
 {
   char *names[] =
   {
