@@ -137,7 +137,7 @@ static char* parameter_expansion(char* param_name)
 static ssize_t next_unquoted_slash(char* s)
 {
   char quoted[3] = { 0 };
-  size_t i; 
+  size_t i;
   for (i = 0; s[i]; ++i)
   {
     update_quote(s[i], quoted);

@@ -66,10 +66,9 @@ static int priority(enum a_exp_type op)
   return 0;
 }
 
-static long int compute(long int operand1, enum a_exp_type op,
-                        long int operand2, int* success)
+static long int compute_simple_op(long int operand1, enum a_exp_type op,
+                                  long int operand2)
 {
-  *success = 1;
   if (op == UPLUS)
     return operand2;
   else if (op == UMINUS)
@@ -88,7 +87,13 @@ static long int compute(long int operand1, enum a_exp_type op,
     return operand1 - operand2;
   else if (op == TIMES)
     return operand1 * operand2;
-  else if (op == DIV)
+  return 0;
+}
+static long int compute(long int operand1, enum a_exp_type op,
+                        long int operand2, int* success)
+{
+  *success = 1;
+  if (op == DIV)
   {
     if (operand2 == 0)
     {
@@ -104,16 +109,18 @@ static long int compute(long int operand1, enum a_exp_type op,
     if (operand2 < 0)
     {
       *success = 0;
-      warnx("%li**%li: exponent less than zero (error token is \"%li\")", operand1,
-            operand2, operand2);
+      warnx("%li**%li: exponent less than zero (error token is \"%li\")",
+            operand1, operand2, operand2);
       return 0;
     }
     return my_pow(operand1, operand2);
   }
-  return 0;
+  else
+    return compute_simple_op(operand1, op, operand2);
 }
 
-static int pop_and_eval(stack_operator **ptr_operator, stack_result **ptr_result)
+static int pop_and_eval(stack_operator **ptr_operator,
+                        stack_result **ptr_result)
 {
   if (!(*ptr_result))
   {
@@ -201,7 +208,7 @@ static int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
 //        printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
         if (str[0] == '\0')
           a_v_append(v_tok, create_tok("0"));
-        else  
+        else 
           a_v_append(v_tok, create_tok(str));
       }
       v_destroy(v_new_str, free);
@@ -217,9 +224,9 @@ static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 {
   if (is_in_exp(exp[i]))
   {
-//    printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
+//printf("Ci-après la string envoyée à tokenize_expansion : [%s]\n", exp + i);
     size_t new_pos = tokenize_expansion(exp + i, 1).size;
-//    printf("New pos = %zu\n", new_pos);
+//printf("New pos = %zu\n", new_pos);
     if (new_pos == 0)
       return -1;
     else
@@ -231,6 +238,36 @@ static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
   return i;
 }
 
+static int lexer_loop(char* exp, ssize_t* start_tok, int* in_tok,
+                      struct vector* v_tok, size_t* i)
+{
+  if (*in_tok)
+  {
+    if (exp[*i] == ' ' || exp[*i] == '\n' || exp[*i] == '\t')
+    {
+      *in_tok = 0;
+      add_tok(v_tok, exp, *start_tok, *i);
+    }
+    else if (*i != 0 && ((is_in_op(exp[*i]) && !is_in_op(exp[*i - 1]))
+             || is_in_op(exp[*i - 1]) || is_in_exp(exp[*i])))
+    {
+      add_tok(v_tok, exp, *start_tok, *i);
+      *i = *start_tok = new_start_tok(v_tok, exp, *i);
+      if (*start_tok == -1)
+        return 0;
+    }
+  }
+  else
+    if (!(exp[*i] == ' ' || exp[*i] == '\n' || exp[*i] == '\t'))
+    {
+      *in_tok = 1;
+      *i = *start_tok = new_start_tok(v_tok, exp, *i);
+      if (*start_tok == -1)
+        return 0;
+    }
+  return 1;
+}
+
 static struct vector* a_lexer(char* exp)
 {
   struct vector* v_tok = v_create();
@@ -238,93 +275,86 @@ static struct vector* a_lexer(char* exp)
   int in_tok = 0;
   size_t i;
   for (i = 0; i < my_strlen(exp); i++)
-  {
-    if (in_tok)
-    {
-      if (exp[i] == ' ' || exp[i] == '\n' || exp[i] == '\t')
-      {
-        in_tok = 0;
-        add_tok(v_tok, exp, start_tok, i);
-      }
-      else if (i != 0 && ((is_in_op(exp[i]) && !is_in_op(exp[i - 1]))
-               || is_in_op(exp[i - 1]) || is_in_exp(exp[i])))
-      {
-        add_tok(v_tok, exp, start_tok, i);
-        i = start_tok = new_start_tok(v_tok, exp, i);
-        if (start_tok == -1)
-          return NULL;
-      }
-    }
-    else
-      if (!(exp[i] == ' ' || exp[i] == '\n' || exp[i] == '\t'))
-      {
-        in_tok = 1;
-        i = start_tok = new_start_tok(v_tok, exp, i);
-        if (start_tok == -1)
-          return NULL;
-      }
-  }
-  if (exp[i - 1] && !(exp[i - 1] == ' ' || exp[i - 1] == '\n' || exp[i - 1] == '\t'))
-  {
+    if (!lexer_loop(exp, &start_tok, &in_tok, v_tok, &i))
+      return NULL;
+  if (exp[i - 1] && !(exp[i - 1] == ' ' || exp[i - 1] == '\n'
+      || exp[i - 1] == '\t'))
     add_tok(v_tok, exp, start_tok, i);
-  }
   return v_tok;
+}
+
+static int is_operator(enum a_exp_type op)
+{
+  return op == PLUS || op == MINUS || op == TIMES
+         || op == DIV || op == UPLUS || op == UMINUS
+         || op == POW || op == BW_AND || op == BW_OR
+         || op == TILDE || op == BW_XOR;
+}
+
+static int eval_looop(struct a_token* tok, int* unary,
+                     stack_operator** s_operator, stack_result** s_result)
+{
+  if (tok->type == OP_BRAKET)
+  {
+    stack_o_push(s_operator, OP_BRAKET);
+    *unary = 1;
+  }
+  else if (is_operator(tok->type))
+  {
+    while (*s_operator && priority(tok->type)
+           <= priority(stack_o_peek(*s_operator)))
+      if (!pop_and_eval(s_operator, s_result))
+        return 0;
+    stack_o_push(s_operator, tok->type);
+    *unary = 1;
+  }
+  else if (tok->type == CL_BRAKET)
+  {
+    while (*s_operator && stack_o_peek(*s_operator) != OP_BRAKET)
+      if (!pop_and_eval(s_operator, s_result))
+        return 0;
+    stack_o_pop(s_operator);
+    *unary = 0;
+  }
+  return 1;
+}
+
+static int eval_loop(struct a_token* tok, int* unary, int* last_num,
+                     stack_operator** s_operator, stack_result** s_result)
+{
+  if (*unary)
+  {
+    if (tok->type == MINUS)
+      tok->type = UMINUS;
+    else if (tok->type == PLUS)
+      tok->type = UPLUS;
+  }
+  if (tok->type == ID)
+  {
+    if (*last_num == 1)
+    {
+      warnx("Expansion error: operator missing");
+      return 0;
+    }
+    *last_num = 1;
+    stack_r_push(s_result, tok->val);
+    *unary = 0;
+  }
+  else
+    *last_num = 0;
+  return eval_looop(tok, unary, s_operator, s_result);
 }
 
 static int a_eval(struct vector* v_tok, long int* res)
 {
-  stack_operator *s_operator = NULL;
-  stack_result *s_result = NULL;
+  stack_operator* s_operator = NULL;
+  stack_result* s_result = NULL;
   int unary = 1;
   int last_num = 0;
   for (size_t i = 0; v_get(v_tok, i); ++i)
   {
-  //  printf("token %zu\n", i);
-    struct a_token* tok = v_get(v_tok, i);
-    if (unary)
-    {
-      if (tok->type == MINUS)
-        tok->type = UMINUS;
-      else if (tok->type == PLUS)
-        tok->type = UPLUS;
-    }
-    if (tok->type == ID)
-    {
-      if (last_num == 1)
-      {
-        warnx("Expansion error: operator missing");
-        return 0;
-      }
-      last_num = 1;
-      stack_r_push(&s_result, tok->val);
-      unary = 0;
-    }
-    else
-      last_num = 0;
-    if (tok->type == OP_BRAKET)
-    {
-      stack_o_push(&s_operator, OP_BRAKET);
-      unary = 1;
-    }
-    else if (tok->type == PLUS || tok->type == MINUS || tok->type == TIMES
-             || tok->type == DIV || tok->type == UPLUS || tok->type == UMINUS
-             || tok->type == POW || tok->type == BW_AND || tok->type == BW_OR
-             || tok->type == TILDE || tok->type == BW_XOR)
-    {
-      while (s_operator && priority(tok->type) <= priority(stack_o_peek(s_operator)))
-        if (!pop_and_eval(&s_operator, &s_result))
-          return 0;
-      stack_o_push(&s_operator, tok->type);
-      unary = 1;
-    }
-    else if (tok->type == CL_BRAKET)
-    {
-      while (s_operator && stack_o_peek(s_operator) != OP_BRAKET)
-        if (!pop_and_eval(&s_operator, &s_result))
-          return 0;
-      stack_o_pop(&s_operator);
-      unary = 0;
-    }
+    if (!eval_loop(v_get(v_tok, i), &unary, &last_num, &s_operator, &s_result))
+      return 0;
   }
   while (s_operator)
   {

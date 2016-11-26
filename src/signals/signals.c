@@ -30,7 +30,7 @@ static void sigint(int signum, siginfo_t* siginfo, void* data)
   data = data;
   signum = signum;
   siginfo = siginfo;
-} 
+}
 
 void set_sigacts(void)
 {
