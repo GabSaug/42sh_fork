@@ -146,26 +146,24 @@ static int process_file(struct shell_tools* tools)
   return ret;
 }
 
-static int run_ast(struct shell_tools* tools)
+static int process_input2(struct shell_tools *tools)
 {
   int ret = 0;
-  for (size_t i = 0; i < v_size(tools->ast->child); ++i)
+  if (tools->ast != NULL)
   {
-    struct tree* input = v_get(tools->ast->child, i);
-    if (input == NULL)
-    {
-      warnx("Grammar error");
-      ret = 1;
-    }
-    else
-    {
-      ret = execute(input, tools->ht);
-      char* ret_itoa = my_malloc(sizeof (char) * 50);
-      sprintf(ret_itoa, "%i", ret);
-      add_hash(tools->ht[VAR], "?", ret_itoa);
-      free(ret_itoa);
-    }
+    if (!strcmp(get_data(tools->ht[VAR], "ast-print"), "1"))
+      tree_print_dot(tools->ast);
+
+    ret = run_ast(tools);
+
+    tree_destroy(tools->ast);
   }
+  else
+  {
+    warnx("Grammar error");
+    ret = 1;
+  }
+
   return ret;
 }
 
@@ -183,21 +181,7 @@ int process_input(struct shell_tools* tools)
 
   int fit_level = 0;
   tools->ast = parse(rules, tools->v_token, &fit_level);
-  int ret = 0;
-  if (tools->ast != NULL)
-  {
-    if (!strcmp(get_data(tools->ht[VAR], "ast-print"), "1"))
-      tree_print_dot(tools->ast);
-
-    ret = run_ast(tools);
-
-    tree_destroy(tools->ast);
-  }
-  else
-  {
-    warnx("Grammar error");
-    ret = 1;
-  }
+  int ret = process_input2(tools);
 
   v_destroy(tools->v_token, token_destroy);
   tools->v_token = NULL;
