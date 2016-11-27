@@ -90,6 +90,26 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
   return s[i] ? i : 0;
 }
 
+static size_t tokenize_exp_b_quote(char *s, char** start, size_t *content_size)
+{
+  char quoted[3] = { 0 };
+  update_quote(s[0], quoted);
+  *start = s + 1;
+  size_t i;
+  for (i = 1; s[i]; ++i)
+  {
+    update_quote(s[i], quoted);
+    if (!is_quoted(quoted) && s[i] == '`')
+      break;
+  }
+  *content_size = (s + i) - *start;
+  if (is_quoted(quoted))
+  {
+    warnx("Unexpected EOF, expected %c;", s[0]);
+    return 0;
+  }
+  return i + 1;
+}
 
 static size_t tokenize_exp_quote(char *s, char** start, size_t *content_size)
 {
@@ -165,7 +185,7 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
       exp.size = exp.content_size + 1;
       exp.content_start = s + 1;
     }
-    else if (exp.type < SQ)
+    else if (exp.type < CMD2)
     {
       size_t other_size = tokenize_exp_other(s, exp_begin[exp.type],
           exp_end[exp.type], &exp.content_start, &exp.content_size,
@@ -175,6 +195,14 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
       if (exp.type == CMD2)
         exp.type = CMD;
       exp.size = other_size + 1;
+    }
+    else if (exp.type == CMD2)
+    {
+      size_t b_quote = tokenize_exp_b_quote(s, &exp.content_start, &exp.content_size);
+      if (b_quote == 0)
+        exp.type = NO_EXPANSION;
+      exp.type = CMD;
+      exp.size = b_quote;
     }
     else // quote
     {
