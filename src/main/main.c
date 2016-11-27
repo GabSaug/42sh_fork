@@ -122,6 +122,7 @@ static int process_interactive(struct shell_tools* tools)
 static int process_file(struct shell_tools* tools)
 {
   int ret = 0;
+  processing = 1;
   int fd = open(tools->option.input, O_RDONLY | O_CLOEXEC);
   if (fd == -1)
   {
@@ -138,7 +139,9 @@ static int process_file(struct shell_tools* tools)
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
   tools->option.input = file;
+  tools->option.input_size = size_file;
   ret = process_input(tools);
+  processing = 1;
   munmap(file, size_file);
   close(fd);
   return ret;
@@ -200,7 +203,8 @@ int process_input(struct shell_tools* tools)
 
   v_destroy(tools->v_token, token_destroy);
   tools->v_token = NULL;
-  processing = 0;
+  if (!tools->sub_shell)
+    processing = 0;
   return ret;
 }
 
@@ -219,12 +223,15 @@ void exit_42sh(void)
   destroy_hash(main_tools->ht[VAR]);
   destroy_hash(main_tools->ht[FUN]);
   destroy_hash(main_tools->ht[ALIAS]);
-  free(main_tools);
   rules_destroy(rules);
   if (processing)
   {
-    //v_destroy(v_token, token_destroy);
-    //tree_destroy(ast);
-    //free(buff);
+    v_destroy(main_tools->v_token, token_destroy);
+    tree_destroy(main_tools->ast);
+    if (main_tools->option.input_mode == INTERACTIVE)
+      free(main_tools->option.input);
+    else if (main_tools->option.input_mode == INPUT_FILE)
+      munmap(main_tools->option.input, main_tools->option.input_size);
   }
+  free(main_tools);
 }

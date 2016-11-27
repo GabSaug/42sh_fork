@@ -25,6 +25,7 @@ struct option
   int norc;
   enum input_mode input_mode;
   char* input;
+  size_t input_size;
 };
 
 /**
