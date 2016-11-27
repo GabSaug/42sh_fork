@@ -22,8 +22,6 @@ static int process_file(struct shell_tools* tools);
 static int process_interactive(struct shell_tools* tools);
 
 static struct rule** rules = NULL;
-static struct vector* v_token = NULL;
-static struct tree* ast = NULL;
 static char *buff;
 
 static int processing = 0;
@@ -54,6 +52,8 @@ int main(int argc, char* argv[])
   struct shell_tools *tools = my_malloc(sizeof (struct shell_tools));
   main_tools = tools;
   tools->sub_shell = 0;
+  tools->v_token = NULL;
+  tools->ast = NULL;
   tools->ht[VAR] = create_hash(256);
   tools->ht[FUN] = create_hash(256);
   tools->ht[ALIAS] = create_hash(256);
@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
   if (tools->option.input_mode == INTERACTIVE)
     return process_interactive(tools);
   else if (tools->option.input_mode == COMMAND_LINE)
-    return process_input(tools->option.input, v_token, tools);
+    return process_input(tools);
   else
     return process_file(tools);
 }
@@ -111,7 +111,8 @@ static int process_interactive(struct shell_tools* tools)
     {
       add_history(buff);
       write_history_log(buff);
-      ret = process_input(buff, v_token, tools);
+      tools->option.input = buff;
+      ret = process_input(tools);
     }
     free(buff);
   }
@@ -136,61 +137,60 @@ static int process_file(struct shell_tools* tools)
   }
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
-  ret = process_input(file, v_token, tools);
+  tools->option.input = file;
+  ret = process_input(tools);
   munmap(file, size_file);
   close(fd);
   return ret;
 }
 
-static int run_ast(struct tree *ast, struct vector *token,
-                   struct shell_tools* tools)
+static int run_ast(struct shell_tools* tools)
 {
   int ret = 0;
-  if (ast == NULL)
+  for (size_t i = 0; i < v_size(tools->ast->child); ++i)
   {
-    warnx("Grammar error");
-    ret = 1;
+    //printf("input %zu\n", i);
+    struct tree* input = v_get(tools->ast->child, i);
+    if (input == NULL)
+    {
+      warnx("Grammar error");
+      ret = 1;
+    }
+    else
+    {
+      ret = execute(input, tools->ht);
+      char* ret_itoa = my_malloc(sizeof (char) * 50);
+      sprintf(ret_itoa, "%i", ret);
+      add_hash(tools->ht[VAR], "?", ret_itoa);
+      free(ret_itoa);
+    }
   }
-  else
-  {
-    ret = execute(ast, tools->ht);
-    char* ret_itoa = my_malloc(sizeof (char) * 50);
-    sprintf(ret_itoa, "%i", ret);
-    add_hash(tools->ht[VAR], "?", ret_itoa);
-    free(ret_itoa);
-  }
-
   return ret;
 }
 
-int process_input(char* buff, struct vector *token, struct shell_tools* tools)
+int process_input(struct shell_tools* tools)
 {
   processing = 1;
-  token = v_create();
-  if (!lexer(buff, token))
+  tools->v_token = v_create();
+  if (!lexer(tools->option.input, tools->v_token))
   {
-    v_destroy(token, token_destroy);
-    token = NULL;
+    v_destroy(tools->v_token, token_destroy);
+    tools->v_token = NULL;
     return 1;
   }
-  typer(token);
+  typer(tools->v_token);
 
   int fit_level = 0;
-  ast = parse(rules, token, &fit_level);
+  tools->ast = parse(rules, tools->v_token, &fit_level);
   int ret = 0;
-  if (ast != NULL)
+  if (tools->ast != NULL)
   {
     if (!strcmp(get_data(tools->ht[VAR], "ast-print"), "1"))
-      tree_print_dot(ast);
+      tree_print_dot(tools->ast);
 
-    for (size_t i = 0; i < v_size(ast->child); ++i)
-    {
-      //printf("input %zu\n", i);
-      struct tree* input = v_get(ast->child, i);
-      ret = run_ast(input, token, tools);
-    }
+    ret = run_ast(tools);
 
-    tree_destroy(ast);
+    tree_destroy(tools->ast);
   }
   else
   {
@@ -198,8 +198,8 @@ int process_input(char* buff, struct vector *token, struct shell_tools* tools)
     ret = 1;
   }
 
-  v_destroy(token, token_destroy);
-  token = NULL;
+  v_destroy(tools->v_token, token_destroy);
+  tools->v_token = NULL;
   processing = 0;
   return ret;
 }
@@ -223,8 +223,8 @@ void exit_42sh(void)
   rules_destroy(rules);
   if (processing)
   {
-    v_destroy(v_token, token_destroy);
-    tree_destroy(ast);
-    free(buff);
+    //v_destroy(v_token, token_destroy);
+    //tree_destroy(ast);
+    //free(buff);
   }
 }
