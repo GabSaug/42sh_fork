@@ -2,7 +2,8 @@
 #include "builtins.h"
 #include "execute.h"
 
-static int change_opt(char *names[], char *argv[], char *set, size_t i)
+static int change_opt(char *names[], char *argv[], char *set, size_t i,
+                      struct hash_table *ht[])
 {
   while (argv[i])
   {
@@ -31,7 +32,7 @@ static int change_opt(char *names[], char *argv[], char *set, size_t i)
   return 0;
 }
 
-static int read_opt_shopt(char *argv[], char *names[])
+static int read_opt_shopt(char *argv[], char *names[], struct hash_table *ht[])
 {
   char *set = "    ";
   if (argv[1][0] && argv[1][0] == '-')
@@ -57,10 +58,11 @@ static int read_opt_shopt(char *argv[], char *names[])
     }
   }
 
-  return change_opt(names, argv, set, argv[1][0] && argv[1][0] == '-' ? 2 : 1);
+  return change_opt(names, argv, set, argv[1][0] && argv[1][0] == '-' ? 2 : 1,
+                    ht);
 }
 
-int builtin_shopt(char *argv[])
+int builtin_shopt(char *argv[], struct hash_table *ht[])
 {
   char *names[] =
   {
@@ -79,7 +81,7 @@ int builtin_shopt(char *argv[])
     return 0;
   }
   else
-    return read_opt_shopt(argv, names);
+    return read_opt_shopt(argv, names, ht);
 }
 
 static void print_alias(struct elt_hash *e)
@@ -91,7 +93,7 @@ static void print_alias(struct elt_hash *e)
   print_alias(e->next);
 }
 
-static int print_one_alias(char *tmp, size_t j)
+static int print_one_alias(char *tmp, size_t j, struct hash_table *ht[])
 {
   if (tmp[j])
   {
@@ -113,7 +115,7 @@ static int print_one_alias(char *tmp, size_t j)
   return 0;
 }
 
-int builtin_alias(char *argv[])
+int builtin_alias(char *argv[], struct hash_table *ht[])
 {
   if (!argv[1])
   {
@@ -128,7 +130,7 @@ int builtin_alias(char *argv[])
       size_t j = 0;
       for (j = 0; tmp[j] && tmp[j] != '='; j++)
         continue;
-      if (print_one_alias(tmp, j) == 1)
+      if (print_one_alias(tmp, j, ht) == 1)
         return 1;
     }
   }
@@ -136,7 +138,7 @@ int builtin_alias(char *argv[])
   return 0;
 }
 
-int builtin_unalias(char *argv[])
+int builtin_unalias(char *argv[], struct hash_table *ht[])
 {
   if (!argv[1])
   {

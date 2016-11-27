@@ -5,19 +5,19 @@
 #include "vector.h"
 #include "str.h"
 #include "string.h"
-#include "hash_table.h"
 #include "tokenize.h"
 #include "arithmetic.h"
 #include "my_malloc.h"
 
-static char* tilde_expansion(char* s);
-static char* parameter_expansion(char* s);
+static char* tilde_expansion(char* s, struct hash_table *ht[]);
+static char* parameter_expansion(char* s, struct hash_table *ht[]);
 static char* remove_quote(char* s);
-static struct vector* field_split(struct vector* v_input);
+static struct vector* field_split(struct vector* v_input,
+                                  struct hash_table *ht[]);
 
-struct vector* expand(char* input, int in_ari_exp)
+struct vector* expand(char* input, int in_ari_exp, struct hash_table *ht[])
 {
-  input = tilde_expansion(input);
+  input = tilde_expansion(input, ht);
   struct str* output = str_create();
   size_t start = 0;
   size_t i_input;
@@ -34,7 +34,7 @@ struct vector* expand(char* input, int in_ari_exp)
     {
       str_append(output, input + start, i_input - start, 0);
       char* ret = arithmetic_expansion(my_strndup(exp.content_start,
-                                                  exp.content_size));
+                                                  exp.content_size), ht);
       if (!ret)
       {
         str_destroy(output, 1);
@@ -49,7 +49,7 @@ struct vector* expand(char* input, int in_ari_exp)
     {
       str_append(output, input + start, i_input - start, 0);
       str_append(output, parameter_expansion(my_strndup(exp.content_start,
-                                                   exp.content_size)), -1, 1);
+                                                 exp.content_size), ht), -1, 1);
       start = i_input + exp.size;
     }
     i_input += exp.size - 1;
@@ -65,7 +65,7 @@ struct vector* expand(char* input, int in_ari_exp)
 
   //printf("v->size = %zu, s = %s\n", v->size, v_get(v, 0));
 
-  v = field_split(v);
+  v = field_split(v, ht);
 
   for (size_t i = 0; i < v_size(v); ++i)
     v_set(v, i, remove_quote(v_get(v, i)));
@@ -84,7 +84,8 @@ struct vector* expand(char* input, int in_ari_exp)
     field_split(v);*/
 }
 
-static struct vector* field_split(struct vector* v_input)
+static struct vector* field_split(struct vector* v_input,
+                                  struct hash_table *ht[])
 {
   char* ifs = get_data(ht[VAR], "IFS");
   if (!v_input || !ifs)
@@ -145,7 +146,7 @@ static char* remove_quote(char* s)
   return new;
 }
 
-static char* parameter_expansion(char* param_name)
+static char* parameter_expansion(char* param_name, struct hash_table *ht[])
 {
   //printf("param expansion; param_name= %s ", param_name);
 
@@ -177,7 +178,7 @@ static ssize_t next_unquoted_slash(char* s)
   return -1;
 }
 
-static char* tilde_expansion(char* input)
+static char* tilde_expansion(char* input, struct hash_table *ht[])
 {
   if (!input || input[0] != '~')
     return input;

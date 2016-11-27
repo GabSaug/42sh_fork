@@ -7,9 +7,9 @@ int execute_command(struct tree* ast, struct hash_table *ht[])
 {
   struct tree* child = v_get(ast->child, 0);
   if (child->nts == SIMPLE_COMMAND)
-    return execute_simple_command(child);
+    return execute_simple_command(child, ht);
   else if (child->nts == SHELL_COMMAND)
-    return execute_shell_command(child);
+    return execute_shell_command(child, ht);
   else
     return 1;
 }
@@ -89,7 +89,7 @@ static int execute_assignment(struct tree* assignment, struct hash_table *ht[])
   char* s = assignment->token->s;
   char* equal = strchr(s, '=');
   *equal = '\0';
-  char* expanded_value = expand_word(expand(my_strdup(equal + 1), 0));
+  char* expanded_value = expand_word(expand(my_strdup(equal + 1), 0, ht));
   //printf("key = %s$ data = %s$\n", s, equal + 1);
   add_hash(ht[VAR], s, expanded_value);
   free(expanded_value);
@@ -112,10 +112,10 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
   }
   else // only element (word)
   {
-    char** argv = generate_command(ast, i);
+    char** argv = generate_command(ast, i, ht);
     if (argv)
     {
-      res = execute_prog(argv, ht);
+      res = execute_prog(argv);
       for (size_t i = 0; argv[i]; ++i)
         free(argv[i]);
       free(argv);

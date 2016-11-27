@@ -57,8 +57,9 @@ static int unset_environ(char *argv[], size_t i)
   return res;
 }
 
-int builtin_export(char *argv[])
+int builtin_export(char *argv[], struct hash_table *ht[])
 {
+  ht = ht;
   if (!argv[1] || (strcmp(argv[1], "-p") == 0 && !argv[2]))
   {
     for (size_t i = 0; environ[i]; i++)
@@ -111,7 +112,7 @@ static int source_error(char *argv[], int *fd, struct stat *stat_buf)
   return 0;
 }
 
-int builtin_source(char *argv[])
+int builtin_source(char *argv[], struct hash_table *ht[3])
 {
   int fd = 0;
   struct stat stat_buf;
@@ -123,7 +124,12 @@ int builtin_source(char *argv[])
   size_t size_file = stat_buf.st_size;
   char* file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, fd, 0);
   struct vector *token = NULL;
-  res = process_input(file, token);
+
+  struct shell_tools tools;
+  for (size_t i = 0; i < 3; i++)
+    tools.ht[i] = ht[i];
+
+  res = process_input(file, token, tools);
   munmap(file, size_file);
   close(fd);
   return res;

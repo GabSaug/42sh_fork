@@ -5,11 +5,11 @@
 
 extern struct hash_table* ht[3];
 
-static int builtin_exit(char* argv[]);
-static int builtin_true(char* argv[]);
-static int builtin_false(char* argv[]);
-static int builtin_cd(char* argv[]);
-static int builtin_echo(char* argv[]);
+static int builtin_exit(char* argv[], struct hash_table *ht[]);
+static int builtin_true(char* argv[], struct hash_table *ht[]);
+static int builtin_false(char* argv[], struct hash_table *ht[]);
+static int builtin_cd(char* argv[], struct hash_table *ht[]);
+static int builtin_echo(char* argv[], struct hash_table *ht[]);
 
 static struct builtin_fun builtin_fun_array[] =
 {
@@ -43,7 +43,7 @@ int (*builtin_fun_match (char* s)) (char* argv[])
   return NULL;
 }
 
-static int builtin_exit(char* argv[])
+static int builtin_exit(char* argv[], struct hash_table *ht[])
 {
   char* ret_string = NULL;
   if (argv[1])
@@ -64,19 +64,21 @@ static int builtin_exit(char* argv[])
   exit(ret);
 }
 
-static int builtin_true(char* argv[])
+static int builtin_true(char* argv[], struct hash_table *ht[])
 {
+  ht = ht;
   argv = argv;
   return 0;
 }
 
-static int builtin_false(char* argv[])
+static int builtin_false(char* argv[], struct hash_table *ht[])
 {
+  ht = ht;
   argv = argv;
   return 1;
 }
 
-static int chdir_cd(char* argv[], char* directory)
+static int chdir_cd(char* argv[], char* directory, struct hash_table *ht[])
 {
   if (argv[1] == NULL)
   {
@@ -97,7 +99,7 @@ static int chdir_cd(char* argv[], char* directory)
   return 1;
 }
 
-static int builtin_cd(char* argv[])
+static int builtin_cd(char* argv[], struct hash_table *ht[])
 {
   if (argv[1] && !strcmp(argv[1], "-"))
   {
@@ -115,7 +117,7 @@ static int builtin_cd(char* argv[])
   }
   char* directory = argv[1];
   //Rule 1 and 2
-  if (chdir_cd(argv, directory) == 0)
+  if (chdir_cd(argv, directory, ht) == 0)
     return 0;
   warn("cd: %s", argv[1]);
   return 1;
@@ -224,7 +226,7 @@ static int builtin_echo_print(char* s, char opt_e)
   return 1;
 }
 
-static int builtin_echo(char* argv[])
+static int builtin_echo(char* argv[], struct hash_table *ht[])
 {
   char opt_n = 0;
   char opt_e = 0;

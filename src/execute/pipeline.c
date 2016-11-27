@@ -53,7 +53,7 @@ static int staircase(struct tree *ast, int inout[], size_t index, size_t size,
     if (!pid)
     {
       dup2(inout[0], 0);
-      exit(execute_command(child));
+      exit(execute_command(child, ht));
     }
     int child_stat = 0;
     waitpid(pid, &child_stat, 0);

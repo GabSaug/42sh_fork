@@ -78,7 +78,7 @@ char *expand_word(struct vector *exp)
 int execute_case(struct tree *ast, struct hash_table *ht[])
 {
   struct tree *var = v_get(ast->child, 1);
-  char *word = expand_word(expand(my_strdup(var->token->s), 0));
+  char *word = expand_word(expand(my_strdup(var->token->s), 0, ht));
   struct tree *son = v_get(ast->child, 3);
   if (son->nts == CASE_CLAUSE)
   {

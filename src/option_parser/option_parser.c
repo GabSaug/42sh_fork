@@ -33,17 +33,17 @@ static struct option opt2(int argc, char *argv[], struct option options,
   if (!strcmp(argv[1], "--norc"))
   {
     options.norc = 1;
-    return opt(argc - 1, argv + 1, options);
+    return opt(argc - 1, argv + 1, options, ht);
   }
   else if (!strcmp(argv[1], "--ast-print"))
   {
     add_hash(ht[VAR], "ast-print", "1");
-    return opt(argc - 1, argv + 1, options);
+    return opt(argc - 1, argv + 1, options, ht);
   }
   else if (!strcmp(argv[1], "-O") || !strcmp(argv[1], "+O"))
   {
     set_o(argv[1][0] == '+', argv[2], ht);
-    return opt(argc - 2, argv + 2, options);
+    return opt(argc - 2, argv + 2, options, ht);
   }
   else if (argv[1][0] && argv[1][0] == '-')
     errx(2, "%s: invalid option", argv[1]);

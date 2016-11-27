@@ -70,7 +70,8 @@ static int pop_and_eval(stack_operator **ptr_operator,
   return 1;
 }
 
-int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
+int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end,
+            struct hash_table *ht[])
 {
   char* str = exp + start;
   char end_c = exp[end];
@@ -82,7 +83,7 @@ int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
       struct vector* v_new_str;
       char* str2 = my_strdup(str);
 //      printf("Ci-après la string envoyée à expand : [%s]\n", str2);
-      v_new_str = expand(str2, 1);
+      v_new_str = expand(str2, 1, ht);
       for (size_t i = 0; i < v_size(v_new_str); i++)
       {
         char* str = v_get(v_new_str, i);
@@ -101,7 +102,8 @@ int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end)
   return 1;
 }
 
-static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
+static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i,
+                             struct hash_table *ht[])
 {
   if (is_in_exp(exp[i]))
   {
@@ -112,7 +114,7 @@ static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
       return -1;
     else
     {
-      add_tok(v_tok, exp, i, i + new_pos);
+      add_tok(v_tok, exp, i, i + new_pos, ht);
       return i + new_pos;
     }
   }
@@ -120,20 +122,20 @@ static ssize_t new_start_tok(struct vector* v_tok, char* exp, size_t i)
 }
 
 int lexer_loop(char* exp, ssize_t* start_tok, int* in_tok,
-               struct vector* v_tok, size_t* i)
+               struct vector* v_tok, size_t* i, struct hash_table *ht[])
 {
   if (*in_tok)
   {
     if (exp[*i] == ' ' || exp[*i] == '\n' || exp[*i] == '\t')
     {
       *in_tok = 0;
-      add_tok(v_tok, exp, *start_tok, *i);
+      add_tok(v_tok, exp, *start_tok, *i, ht);
     }
     else if (*i != 0 && ((is_in_op(exp[*i]) && !is_in_op(exp[*i - 1]))
              || is_in_op(exp[*i - 1]) || is_in_exp(exp[*i])))
     {
-      add_tok(v_tok, exp, *start_tok, *i);
-      *i = *start_tok = new_start_tok(v_tok, exp, *i);
+      add_tok(v_tok, exp, *start_tok, *i, ht);
+      *i = *start_tok = new_start_tok(v_tok, exp, *i, ht);
       if (*start_tok == -1)
         return 0;
     }
@@ -142,7 +144,7 @@ int lexer_loop(char* exp, ssize_t* start_tok, int* in_tok,
     if (!(exp[*i] == ' ' || exp[*i] == '\n' || exp[*i] == '\t'))
     {
       *in_tok = 1;
-      *i = *start_tok = new_start_tok(v_tok, exp, *i);
+      *i = *start_tok = new_start_tok(v_tok, exp, *i, ht);
       if (*start_tok == -1)
         return 0;
     }
@@ -238,7 +240,7 @@ static int a_eval(struct vector* v_tok, long int* res)
   return 1;
 }
 
-char* arithmetic_expansion(char* s)
+char* arithmetic_expansion(char* s, struct hash_table *ht[])
 {
   if (!my_strlen(s))
   {
@@ -248,7 +250,7 @@ char* arithmetic_expansion(char* s)
     res[1] = '\0';
     return res;
   }
-  struct vector* v_tok = a_lexer(s);
+  struct vector* v_tok = a_lexer(s, ht);
   if (!v_tok)
     return NULL;
   long int res;

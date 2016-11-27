@@ -132,18 +132,18 @@ void a_v_append(struct vector* v, struct a_token* tok)
     v_append(v, tok);
 }
 
-struct vector* a_lexer(char* exp)
+struct vector* a_lexer(char* exp, struct hash_table *ht[])
 {
   struct vector* v_tok = v_create();
   ssize_t start_tok = 0;
   int in_tok = 0;
   size_t i;
   for (i = 0; i < my_strlen(exp); i++)
-    if (!lexer_loop(exp, &start_tok, &in_tok, v_tok, &i))
+    if (!lexer_loop(exp, &start_tok, &in_tok, v_tok, &i, ht))
       return NULL;
   if (exp[i - 1] && !(exp[i - 1] == ' ' || exp[i - 1] == '\n'
       || exp[i - 1] == '\t'))
-    add_tok(v_tok, exp, start_tok, i);
+    add_tok(v_tok, exp, start_tok, i, ht);
   return v_tok;
 }
 
