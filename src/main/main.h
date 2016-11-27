@@ -42,6 +42,7 @@ int main(int argc, char* argv[]);
 void print_prompt(void);
 
 int process_input(struct shell_tools* tools);
+int run_ast(struct shell_tools* tools);
 char* get_PS(struct hash_table *ht[]);
 /**
  * \brief Free all resource before exiting
