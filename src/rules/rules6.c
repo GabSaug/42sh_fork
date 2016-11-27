@@ -127,6 +127,19 @@ static struct rule *init_rule_case_item_aux(void)
   return rule;
 }
 
+static struct rule *init_rule_new_line(void)
+{
+  struct rule *rule = my_malloc(sizeof (struct rule));
+  rule->nb_s_r = 1;
+  rule->s_r = my_malloc(sizeof (struct simple_rule));
+  // Rule 1
+  rule->s_r[0].nb_sym = 1;
+  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
+  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, 0, NL);
+
+  return rule;
+}
+
 struct rule **init_all_rules6(struct rule **rules)
 {
   rules[ELSE_CLAUSE] = init_rule_else_clause();
@@ -137,6 +150,7 @@ struct rule **init_all_rules6(struct rule **rules)
   rules[CASE_ITEM] = init_rule_case_item();
   rules[L_PAR_RULE] = init_rule_l_par();
   rules[CASE_ITEM_AUX] = init_rule_case_item_aux();
+  rules[NEW_LINE_RULE] = init_rule_new_line();
 
   return rules;
 }

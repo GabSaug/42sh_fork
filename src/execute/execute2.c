@@ -94,6 +94,7 @@ static int execute_assignment(struct tree* assignment, struct hash_table *ht[])
   //printf("key = %s$ data = %s$\n", s, equal + 1);
   add_hash(ht[VAR], s, expanded_value);
   free(expanded_value);
+  *equal = '=';
   return 0;
 }
 

@@ -160,19 +160,6 @@ static struct rule *init_rule_bool_op(void)
   return rule;
 }
 
-static struct rule *init_rule_new_line(void)
-{
-  struct rule *rule = my_malloc(sizeof (struct rule));
-  rule->nb_s_r = 1;
-  rule->s_r = my_malloc(sizeof (struct simple_rule));
-  // Rule 1
-  rule->s_r[0].nb_sym = 1;
-  rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol));
-  create_sym(rule->s_r[0].sym_arr, 1, MANDATORY, 0, NL);
-
-  return rule;
-}
-
 struct rule **init_all_rules2(struct rule **rules)
 {
   rules[SCRIPT] = init_rule_script();
@@ -184,7 +171,6 @@ struct rule **init_all_rules2(struct rule **rules)
   rules[AND_OR] = init_rule_and_or();
   rules[AND_OR_AUX] = init_rule_and_or_aux();
   rules[BOOL_OP] = init_rule_bool_op();
-  rules[NEW_LINE_RULE] = init_rule_new_line();
 
   return rules;
 }
