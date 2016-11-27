@@ -171,20 +171,8 @@ static int run_ast(struct shell_tools* tools)
   return ret;
 }
 
-int process_input(struct shell_tools* tools)
+static int process_input2(struct shell_tools* tools)
 {
-  processing = 1;
-  tools->v_token = v_create();
-  if (!lexer(tools->option.input, tools->v_token))
-  {
-    v_destroy(tools->v_token, token_destroy);
-    tools->v_token = NULL;
-    return 1;
-  }
-  typer(tools->v_token);
-
-  int fit_level = 0;
-  tools->ast = parse(rules, tools->v_token, &fit_level);
   int ret = 0;
   if (tools->ast != NULL)
   {
@@ -200,6 +188,25 @@ int process_input(struct shell_tools* tools)
     warnx("Grammar error");
     ret = 1;
   }
+
+  return ret;
+}
+
+int process_input(struct shell_tools* tools)
+{
+  processing = 1;
+  tools->v_token = v_create();
+  if (!lexer(tools->option.input, tools->v_token))
+  {
+    v_destroy(tools->v_token, token_destroy);
+    tools->v_token = NULL;
+    return 1;
+  }
+  typer(tools->v_token);
+
+  int fit_level = 0;
+  tools->ast = parse(rules, tools->v_token, &fit_level);
+  int ret = process_input2(tools);
 
   v_destroy(tools->v_token, token_destroy);
   tools->v_token = NULL;
