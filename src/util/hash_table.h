@@ -73,4 +73,11 @@ void *get_data(struct hash_table *ht, char *key);
 */
 int del_hash(struct hash_table *ht, char *key);
 
+/**
+ * \brief Copy a hash table
+ * \param ht The hash table to copy
+ * \return The copide hash table, or NULL if an error occured
+*/
+struct hash_table *cpy_hash(struct hash_table *ht);
+
 #endif

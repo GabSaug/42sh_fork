@@ -160,3 +160,22 @@ int del_hash(struct hash_table *ht, char *key)
     return 1;
   }
 }
+
+struct hash_table *cpy_hash(struct hash_table *ht)
+{
+  struct hash_table *res = create_hash(ht->capacity);
+  if (!res)
+    return NULL;
+
+  for (size_t i = 0; i < ht->capacity; i++)
+  {
+    struct elt_hash *tmp = ht->table[i];
+    while (tmp)
+    {
+      res = add_hash(res, tmp->key, tmp->data);
+      tmp = tmp->next;
+    }
+  }
+
+  return res;
+}
