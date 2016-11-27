@@ -14,7 +14,16 @@ enum quote_type
   DOUBLE_QUOTE
 };
 
+/**
+ *  \brief Return 1 if a character is upper case, 0 otherwise
+ *  \param exp The char to test
+*/
 int is_upper_case(char c);
+
+/**
+ *  \brief Return 1 if a character is lower case, 0 otherwise
+ *  \param exp The char to test
+*/
 int is_lower_case(char c);
 char* escape_quote(char* input);
 
@@ -88,7 +97,6 @@ char* my_strdup(char* s);
  * \return The duplicated string
 */
 char* my_strndup(char* s, size_t n);
-
 
 /**
  * \brief Calculate the size of a string

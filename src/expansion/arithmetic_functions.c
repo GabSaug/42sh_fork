@@ -40,7 +40,7 @@ int is_in_exp(char c)
          || (c >= 'A' && c <= 'Z') || c == '"' || c == '\'';
 }
 
-int is_unary(char op)
+int is_unary(enum a_exp_type op)
 {
   return op == UPLUS || op == UMINUS || op == TILDE;
 }
