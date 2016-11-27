@@ -20,6 +20,7 @@ static char g_special_parameter[] = "@*#?-$!0";
 size_t tokenize_exp_normal(char *s)
 {
   size_t i;
+  char quoted[3] = { 0 };
   if (!is_name_char(s[0]))
   {
     if (strchr(g_special_parameter, s[0]))
@@ -28,19 +29,23 @@ size_t tokenize_exp_normal(char *s)
   }
   if (is_digit(s[0]))
     return 1;
-  // for (i = 2 -> wtf ?
-  for (i = 1; s[i] && is_name_char(s[i]); ++i) // To modify
+  for (i = 1; s[i] && is_name_char(s[i]); ++i)
   {
-    if (s[i] == '\\' && s[i + 1])
-      i++;
-    else if (s[i] == '\'')
-      for (i++; s[i] && s[i] != '\'' && s[i - 1] != '\\'; ++i)
-        continue;
-    else if (s[i] == '\"')
-      for (i++; s[i] && s[i] != '\"' && s[i - 1] != '\\'; ++i)
-        continue;
+    for (; is_quoted(quoted); ++i)
+      update_quote(s[i], quoted);
   }
   return i;
+}
+
+static int check_end_pattern(char* s, size_t i, char d, int nb_char_intro)
+{
+  for (int j = 0; j < nb_char_intro; ++j)
+    if (s[i - j] !=  d)
+    {
+      warnx("End pattern not found");
+      return 0;
+    }
+  return 1;
 }
 
 // Modify so that $(( abc ) def ) triggers an error
@@ -51,37 +56,22 @@ static size_t tokenize_exp_other(char *s, char b, char d, char** start,
   size_t i = 0;
   while (s[i] != b)
     ++i;
-  for (int j = 0; j < nb_char_intro; ++i, ++j)
-    count++;
-  *start = s + i;
-  for (; s[i] && count > 0; ++i)
+  char quoted[3] = { 0 };
+  for (int j = 0; j < nb_char_intro; ++count, ++i, ++j)
+    update_quote(s[i], quoted);
+  for (*start = s + i; s[i] && count > 0; ++i)
   {
+    update_quote(s[i], quoted);
+    if (is_quoted(quoted))
+      continue;
     if (s[i] == b)
       count++;
     else if (s[i] == d)
-    {
-      count--;
-      if (count == 0)
+      if (--count == 0)
         break;
-    }
-
-    if (s[i] == '\\')
-      i++;
-    else if (s[i] == '\'' || s[i] == '\"')
-    {
-      char c = s[i];
-      for (i++; s[i] && s[i] != c; ++i) // add back_slash escape
-        continue;
-    }
   }
-  for (int j = 0; j < nb_char_intro; ++j)
-  {
-    if (s[i - j] !=  d)
-    {
-      warnx("End pattern not found");
-      return 0;
-    }
-  }
+  if (!check_end_pattern(s, i, d, nb_char_intro))
+    return 0;
 
   *content_size = (s+i) - *start - nb_char_intro + 1;
 
@@ -161,60 +151,43 @@ static char exp_end[] =
   '`',
 };
 
+static struct expansion tokenize_expansion_aux(struct expansion exp, char* s)
+{
+  size_t size;
+  if (exp.type == NORMAL)
+  {
+    exp.content_size = size = tokenize_exp_normal(s + 1);
+    exp.size = exp.content_size + 1;
+    exp.content_start = s + 1;
+  }
+  else if (exp.type < CMD2)
+  {
+    size = tokenize_exp_other(s, exp_begin[exp.type], exp_end[exp.type],
+        &exp.content_start, &exp.content_size, (exp.type == ARI) + 1);
+    exp.size = size + 1;
+  }
+  else if (exp.type == CMD2)
+  {
+    size = tokenize_exp_b_quote(s, &exp.content_start, &exp.content_size);
+    exp.type = CMD;
+    exp.size = size;
+  }
+  else // quote
+    exp.size = tokenize_exp_quote(s, &exp.content_start,
+        &exp.content_size);
+  if (size == 0)
+    exp.type = NO_EXPANSION;
+  return exp;
+}
 
 // Return the number of character in the expansion
 struct expansion tokenize_expansion(char* s, int in_ari_exp)
 {
-  struct expansion exp =
-  {
-    NO_EXPANSION,
-    0,
-    NULL,
-    0,
-  };
+  struct expansion exp;
 
   exp.type = is_prefix_arr(s, exp_intro);
   if (exp.type != NO_EXPANSION)
-  {
-    //exp.type = index_exp_type > CMD ? index_exp_type - 1 : index_exp_type;
-    if (exp.type == NORMAL)
-    {
-      exp.content_size = tokenize_exp_normal(s + 1);
-      if (exp.content_size == 0)
-        exp.type = NO_EXPANSION;
-      exp.size = exp.content_size + 1;
-      exp.content_start = s + 1;
-    }
-    else if (exp.type < CMD2)
-    {
-      size_t other_size = tokenize_exp_other(s, exp_begin[exp.type],
-          exp_end[exp.type], &exp.content_start, &exp.content_size,
-          (exp.type == ARI) + 1);
-      if (other_size == 0)
-        exp.type = NO_EXPANSION;
-      if (exp.type == CMD2)
-        exp.type = CMD;
-      exp.size = other_size + 1;
-    }
-    else if (exp.type == CMD2)
-    {
-      size_t b_quote = tokenize_exp_b_quote(s, &exp.content_start, &exp.content_size);
-      if (b_quote == 0)
-        exp.type = NO_EXPANSION;
-      exp.type = CMD;
-      exp.size = b_quote;
-    }
-    else // quote
-    {
-      size_t quote_size = tokenize_exp_quote(s, &exp.content_start,
-          &exp.content_size);
-      if (quote_size == 0)
-        exp.type = NO_EXPANSION;
-      exp.size = quote_size;
-      //printf ("^%.*s$\n", exp.content_size, exp.content_start);
-      //printf("content size = %zu\n", exp.content_size);
-    }
-  }
+    exp = tokenize_expansion_aux(exp, s);
   else if (in_ari_exp)
   {
     exp.type = NORMAL;
@@ -226,7 +199,6 @@ struct expansion tokenize_expansion(char* s, int in_ari_exp)
   }
   if (exp.type == NO_EXPANSION)
   {
-    exp.type = NO_EXPANSION;
     exp.size = 0;
     exp.content_start = NULL;
   }
