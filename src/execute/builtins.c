@@ -4,8 +4,6 @@
 #include "builtins.h"
 #include "hash_table.h"
 
-extern struct hash_table* ht[3];
-
 static int builtin_exit(char* argv[], struct hash_table *ht[]);
 static int builtin_true(char* argv[], struct hash_table *ht[]);
 static int builtin_false(char* argv[], struct hash_table *ht[]);
@@ -23,7 +21,8 @@ static struct builtin_fun builtin_fun_array[] =
   { "export", builtin_export },
   { "alias", builtin_alias },
   { "unalias", builtin_unalias },
-  { "source", builtin_source }
+  { "source", builtin_source },
+  { "courtois", builtin_courtois }
 };
 /*
   { "continue", builtin_echo },

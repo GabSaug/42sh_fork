@@ -49,4 +49,6 @@ int builtin_export(char *argv[], struct hash_table *ht[]);
 */
 int builtin_source(char *argv[], struct hash_table *ht[]);
 
+int builtin_courtois(char *argv[], struct hash_table *ht[]);
+
 #endif /* !BUILTINS_H */
