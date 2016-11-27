@@ -59,7 +59,7 @@ static int redir_type(int fd_ionum, enum terminal_symbol sign,
     return open_and_redir(fd_ionum == -1 ? 1 : fd_ionum, file_name,
                           O_WRONLY | O_APPEND);
   else if (sign == DLESS)
-    return - 1;// TODO
+    return - 1;// TODO Add HERE-document handling
   else if (sign == DLESSDASH)
     return - 1;// TODO
   else if (sign == GREATAND)

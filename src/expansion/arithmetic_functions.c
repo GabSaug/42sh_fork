@@ -103,7 +103,6 @@ int match_op(char* str)
 
 struct a_token* create_tok(char* str)
 {
-//  printf("\t\t\t\t[%s]\n", str);
   int op_num = match_op(str);
   char* endptr;
   long int num;

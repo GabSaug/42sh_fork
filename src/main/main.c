@@ -151,7 +151,6 @@ static int run_ast(struct shell_tools* tools)
   int ret = 0;
   for (size_t i = 0; i < v_size(tools->ast->child); ++i)
   {
-    //printf("input %zu\n", i);
     struct tree* input = v_get(tools->ast->child, i);
     if (input == NULL)
     {
