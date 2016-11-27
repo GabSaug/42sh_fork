@@ -127,7 +127,7 @@ int builtin_source(char *argv[], struct hash_table *ht[3])
   struct shell_tools tools;
   for (size_t i = 0; i < 3; i++)
     tools.ht[i] = ht[i];
- 
+
   tools.option.input = file;
   tools.v_token = NULL;
   res = process_input(&tools);
