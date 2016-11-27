@@ -84,14 +84,13 @@ int add_tok(struct vector* v_tok, char* exp, size_t start, size_t end,
       char* str2 = my_strdup(str);
 //      printf("Ci-après la string envoyée à expand : [%s]\n", str2);
       v_new_str = expand(str2, 1, ht);
+      if (v_size(v_new_str) == 0)
+        a_v_append(v_tok, create_tok("0"));
       for (size_t i = 0; i < v_size(v_new_str); i++)
       {
         char* str = v_get(v_new_str, i);
 //        printf("tok = [%s]      i = %zu\n", (char*) v_get(v_new_str, i), i);
-        if (str[0] == '\0')
-          a_v_append(v_tok, create_tok("0"));
-        else
-          a_v_append(v_tok, create_tok(str));
+        a_v_append(v_tok, create_tok(str));
       }
       v_destroy(v_new_str, free);
     }

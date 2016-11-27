@@ -110,6 +110,8 @@ struct a_token* create_tok(char* str)
   if (op_num == -1)
   {
     num = strtol(str, &endptr, 10);
+    for (; *endptr == ' '; endptr++)
+      continue;
     if (*endptr)
       num = 0;
   }
