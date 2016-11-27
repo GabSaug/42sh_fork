@@ -141,7 +141,7 @@ static int process_file(struct shell_tools* tools)
   tools->option.input = file;
   tools->option.input_size = size_file;
   ret = process_input(tools);
-  processing = 1;
+  processing = 0;
   munmap(file, size_file);
   close(fd);
   return ret;
