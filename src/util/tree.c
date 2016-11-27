@@ -61,11 +61,9 @@ static char ts2string[][20] =
 
 static unsigned num_dot;
 
-static void tree_print_dot_rec(struct tree* tree, FILE* file)
+static void tree_print_dot_rec_run(struct tree* tree, FILE* file)
 {
-  if (tree == NULL)
-    return;
-  unsigned num_node = num_dot;
+  unsigned n = num_dot;
   if (tree->token)
   {
     if (tree->token->id == WORD)
@@ -82,15 +80,21 @@ static void tree_print_dot_rec(struct tree* tree, FILE* file)
   }
   else
   {
-    fprintf(file, "%u [label=\"%s\" ; shape=box]\n", num_node,
-            nts2string[tree->nts]);
+    fprintf(file, "%u [label=\"%s\" ; shape=box]\n", n, nts2string[tree->nts]);
     for (size_t i = 0; i < tree->child->size; ++i)
     {
-      fprintf(file, "%u -> %u\n", num_node, ++num_dot);
-      tree_print_dot_rec(v_get(tree->child, i), file);
+      fprintf(file, "%u -> %u\n", n, ++num_dot);
+      tree_print_dot_rec_run(v_get(tree->child, i), file);
     }
     num_dot++;
   }
+}
+
+static void tree_print_dot_rec(struct tree* tree, FILE* file)
+{
+  if (tree == NULL)
+    return;
+  tree_print_dot_rec_run(tree, file);
 }
 
 void tree_print_dot(struct tree* tree)
