@@ -14,6 +14,7 @@ static char* parameter_expansion(char* s, struct hash_table *ht[]);
 static char* remove_quote(char* s);
 static struct vector* field_split(struct vector* v_input,
                                   struct hash_table *ht[]);
+static char* cmd_expansion(struct expansion);
 
 struct vector* expand(char* input, int in_ari_exp, struct hash_table *ht[])
 {
@@ -45,12 +46,16 @@ struct vector* expand(char* input, int in_ari_exp, struct hash_table *ht[])
       start = i_input + exp.size;
     }
     else if (exp.type == NORMAL || exp.type == BRACKET)
-      // in_ari_exp must be the last elseif
     {
       str_append(output, input + start, i_input - start, 0);
       str_append(output, parameter_expansion(my_strndup(exp.content_start,
                                                  exp.content_size), ht), -1, 1);
       start = i_input + exp.size;
+    }
+    else if (exp.type == CMD)
+    {
+      char* expanded_cmd = cmd_expansion(exp);
+      str_append(output, expanded_cmd, -1, 1);
     }
     i_input += exp.size - 1;
   }
@@ -82,6 +87,12 @@ struct vector* expand(char* input, int in_ari_exp, struct hash_table *ht[])
   char* IFS = get_data(ht[VAR], "IFS");
   if (IFS && IFS != '\0') // IFS is not null
     field_split(v);*/
+}
+
+static char* cmd_expansion(struct expansion exp)
+{
+  printf("cmd_expansion = %.*s\n", (int)exp.content_size, exp.content_start);
+  return NULL;
 }
 
 static struct vector* field_split(struct vector* v_input,
