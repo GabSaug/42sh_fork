@@ -24,7 +24,7 @@ static void split_for(char* ifs, struct vector* v_input,
           break;
       }
     }
-    if (start < j)
+    if (start < j || j == 0)
       v_append(v_output, my_strndup(s + start, j - start));
 }
 
