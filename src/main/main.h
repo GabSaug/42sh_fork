@@ -1,3 +1,13 @@
+/*! \mainpage 42sh Project Documentation
+ * \section install_sec Introduction
+ * This projet is a little shell which supports a part of the SCL<BR>
+ * (Shell Command Language).
+ *
+ *
+ * \section intro_authors Authors
+ * This project has been made by Julien Gautier, Arthur Remaud
+ * and Vincent Tourneur.
+*/
 #ifndef MAIN_H
 # define MAIN_H
 
