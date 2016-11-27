@@ -2,6 +2,7 @@
 
 #include "execute.h"
 #include "builtins.h"
+#include "hash_table.h"
 
 extern struct hash_table* ht[3];
 
@@ -31,7 +32,7 @@ static struct builtin_fun builtin_fun_array[] =
 };*/
 
 
-int (*builtin_fun_match (char* s)) (char* argv[])
+int (*builtin_fun_match (char* s)) (char* argv[], struct hash_table *ht[])
 {
   size_t len_array = sizeof (builtin_fun_array) / sizeof (*builtin_fun_array);
 
@@ -228,6 +229,7 @@ static int builtin_echo_print(char* s, char opt_e)
 
 static int builtin_echo(char* argv[], struct hash_table *ht[])
 {
+  ht = ht;
   char opt_n = 0;
   char opt_e = 0;
   if (argv[1])
@@ -239,11 +241,9 @@ static int builtin_echo(char* argv[], struct hash_table *ht[])
       return 0;
     }
     if (!strcmp(argv[1], "--version") && !argv[2])
-    {
       printf("%s", builtin_echo_version);
+    if (!strcmp(argv[1], "--version") && !argv[2])
       return 0;
-    }
-
     int i = 1;
     if (option_parser(argv, &i, &opt_n, &opt_e) == -1)
       return 0;
@@ -254,5 +254,5 @@ static int builtin_echo(char* argv[], struct hash_table *ht[])
   if (!opt_n)
     printf("\n");
   fflush(stdout);
- return 0;
+  return 0;
 }

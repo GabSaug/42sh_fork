@@ -75,11 +75,12 @@ static char** generate_command(struct tree *ast, size_t index_start,
   return args;
 }
 
-static int execute_prog(char** argv)
+static int execute_prog(char** argv, struct hash_table* ht[])
 {
-  int (*fun) (char** argv) = builtin_fun_match(argv[0]);
+  int (*fun) (char** argv, struct hash_table *ht[])
+    = builtin_fun_match(argv[0]);
   if (fun)
-    return fun(argv);
+    return fun(argv, ht);
   else
     return execute_bin(argv);
 }
@@ -115,7 +116,7 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
     char** argv = generate_command(ast, i, ht);
     if (argv)
     {
-      res = execute_prog(argv);
+      res = execute_prog(argv, ht);
       for (size_t i = 0; argv[i]; ++i)
         free(argv[i]);
       free(argv);

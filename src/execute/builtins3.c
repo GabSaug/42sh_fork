@@ -129,7 +129,7 @@ int builtin_source(char *argv[], struct hash_table *ht[3])
   for (size_t i = 0; i < 3; i++)
     tools.ht[i] = ht[i];
 
-  res = process_input(file, token, tools);
+  res = process_input(file, token, &tools);
   munmap(file, size_file);
   close(fd);
   return res;

@@ -8,7 +8,7 @@
 # include <sys/wait.h>
 # include <unistd.h>
 
-#include "expansion.h"
+# include "expansion.h"
 # include "hash_table.h"
 # include "tree.h"
 # include "vector.h"
@@ -20,8 +20,10 @@
 struct builtin_fun
 {
   char name[20];
-  int (*fun) (char* argv[]);
+  int (*fun) (char* argv[], struct hash_table *ht[]);
 };
+
+int (*builtin_fun_match (char* s)) (char* argv[], struct hash_table *ht[]);
 
 /**
  * \brief Execute the AST to run commands
@@ -69,7 +71,6 @@ int execute_simple_command(struct tree *ast, struct hash_table *ht[]);
  * \return The success or failure of execution
 */
 int execute_shell_command(struct tree *ast, struct hash_table *ht[]);
-int (*builtin_fun_match (char* s)) (char* argv[]);
 
 /**
  * \brief Get the element of the first child of the child of the AST

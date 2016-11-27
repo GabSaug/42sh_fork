@@ -18,8 +18,8 @@
 #include "signals.h"
 #include "str.h"
 
-static int process_file(struct shell_tools tools);
-static int process_interactive(struct shell_tools tools);
+static int process_file(struct shell_tools* tools);
+static int process_interactive(struct shell_tools* tools);
 
 static struct rule** rules = NULL;
 static struct vector* v_token = NULL;
@@ -29,10 +29,10 @@ static char *buff;
 static int processing = 0;
 static int tty;
 static int pid;
-struct option option = { 0 };
 extern int g_in_readline;
 
 static char* prompt = NULL;
+static struct shell_tools* main_tools = NULL;
 
 static FILE* get_null_file(void)
 {
@@ -51,22 +51,24 @@ int main(int argc, char* argv[])
   g_in_readline = 0;
   set_sigacts();
   atexit(exit_42sh);
-  struct shell_tools tools;
-  tools.ht[VAR] = create_hash(256);
-  tools.ht[FUN] = create_hash(256);
-  tools.ht[ALIAS] = create_hash(256);
+  struct shell_tools *tools = my_malloc(sizeof (struct shell_tools));
+  main_tools = tools;
+  tools->sub_shell = 0;
+  tools->ht[VAR] = create_hash(256);
+  tools->ht[FUN] = create_hash(256);
+  tools->ht[ALIAS] = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
-  tools.option = parse_options(argc, argv, tools.ht);
+  tools->option = parse_options(argc, argv, tools->ht);
   prompt = NULL;
   rules = init_all_rules();
   tty = isatty(STDIN_FILENO);
   pid = getpid();
   if (!tty)
     rl_outstream = get_null_file();
-  if (tools.option.input_mode == INTERACTIVE)
+  if (tools->option.input_mode == INTERACTIVE)
     return process_interactive(tools);
-  else if (tools.option.input_mode == COMMAND_LINE)
-    return process_input(tools.option.input, v_token, tools);
+  else if (tools->option.input_mode == COMMAND_LINE)
+    return process_input(tools->option.input, v_token, tools);
   else
     return process_file(tools);
 }
@@ -90,12 +92,12 @@ static void write_history_log(char* s)
   close(fd);
 }
 
-static int process_interactive(struct shell_tools tools)
+static int process_interactive(struct shell_tools* tools)
 {
   int ret = 0;
   while (1)
   {
-    prompt = get_PS(tools.ht);
+    prompt = get_PS(tools->ht);
     if (tty)
       print_prompt();
     g_in_readline = 1;
@@ -116,10 +118,10 @@ static int process_interactive(struct shell_tools tools)
   return ret;
 }
 
-static int process_file(struct shell_tools tools)
+static int process_file(struct shell_tools* tools)
 {
   int ret = 0;
-  int fd = open(tools.option.input, O_RDONLY | O_CLOEXEC);
+  int fd = open(tools->option.input, O_RDONLY | O_CLOEXEC);
   if (fd == -1)
   {
     warn("Error to open file");
@@ -127,9 +129,9 @@ static int process_file(struct shell_tools tools)
   }
 
   struct stat stat_buf;
-  if (stat(tools.option.input, &stat_buf) == -1)
+  if (stat(tools->option.input, &stat_buf) == -1)
   {
-    warn("Impossible to read stat from %s", tools.option.input);
+    warn("Impossible to read stat from %s", tools->option.input);
     return 1;
   }
   size_t size_file = stat_buf.st_size;
@@ -141,7 +143,7 @@ static int process_file(struct shell_tools tools)
 }
 
 static int run_ast(struct tree *ast, struct vector *token,
-                   struct shell_tools tools)
+                   struct shell_tools* tools)
 {
   int ret = 0;
   if (ast == NULL)
@@ -151,17 +153,17 @@ static int run_ast(struct tree *ast, struct vector *token,
   }
   else
   {
-    ret = execute(ast, tools.ht);
+    ret = execute(ast, tools->ht);
     char* ret_itoa = my_malloc(sizeof (char) * 50);
     sprintf(ret_itoa, "%i", ret);
-    add_hash(tools.ht[VAR], "?", ret_itoa);
+    add_hash(tools->ht[VAR], "?", ret_itoa);
     free(ret_itoa);
   }
 
   return ret;
 }
 
-int process_input(char* buff, struct vector *token, struct shell_tools tools)
+int process_input(char* buff, struct vector *token, struct shell_tools* tools)
 {
   processing = 1;
   token = v_create();
@@ -178,7 +180,7 @@ int process_input(char* buff, struct vector *token, struct shell_tools tools)
   int ret = 0;
   if (ast != NULL)
   {
-    if (!strcmp(get_data(tools.ht[VAR], "ast-print"), "1"))
+    if (!strcmp(get_data(tools->ht[VAR], "ast-print"), "1"))
       tree_print_dot(ast);
 
     for (size_t i = 0; i < v_size(ast->child); ++i)
@@ -212,11 +214,12 @@ void exit_42sh(void)
 {
   if (!tty)
     fclose(rl_outstream);
-  //else if (tools.option.input_mode == INTERACTIVE && getpid() == pid)
-  //  printf("exit\n");
-  //destroy_hash(tools.ht[VAR]);
-  //destroy_hash(tools.ht[FUN]);
-  //destroy_hash(tools.ht[ALIAS]);
+  else if (main_tools->option.input_mode == INTERACTIVE && getpid() == pid)
+    printf("exit\n");
+  destroy_hash(main_tools->ht[VAR]);
+  destroy_hash(main_tools->ht[FUN]);
+  destroy_hash(main_tools->ht[ALIAS]);
+  free(main_tools);
   rules_destroy(rules);
   if (processing)
   {

@@ -17,6 +17,7 @@ struct shell_tools
 {
   struct hash_table *ht[3];
   struct option option;
+  int sub_shell;
 };
 
 /**
@@ -28,11 +29,11 @@ int main(int argc, char* argv[]);
 
 void print_prompt(void);
 
-int process_input(char* buff, struct vector *token, struct shell_tools tools);
+int process_input(char* buff, struct vector *token, struct shell_tools* tools);
 char* get_PS(struct hash_table *ht[]);
 /**
  * \brief Free all resource before exiting
 */
-void exit_42sh();
+void exit_42sh(void);
 
 #endif /* !MAIN_H */
