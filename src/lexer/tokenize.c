@@ -153,7 +153,7 @@ static char exp_end[] =
 
 static struct expansion tokenize_expansion_aux(struct expansion exp, char* s)
 {
-  size_t size;
+  size_t size = 0;
   if (exp.type == NORMAL)
   {
     exp.content_size = size = tokenize_exp_normal(s + 1);
