@@ -98,11 +98,23 @@ static int execute_assignment(struct tree* assignment, struct hash_table *ht[])
   return 0;
 }
 
+static void close_and_destroy(struct vector* to_close)
+{
+  if (to_close)
+  {
+    for (size_t i = 0; i < v_size(to_close); i++)
+    {
+      int *fd = v_get(to_close, i);
+      close(*fd);
+    }
+    v_destroy(to_close, free);
+  }
+}
+
 static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
                         int res, struct hash_table *ht[])
 {
   if (i == v_size(ast->child)) // Only prefix (assignment_word)
-  {
     for (size_t j = 0; j < v_size(ast->child); ++j)
     {
       struct tree* prefix = v_get(ast->child, j);
@@ -111,7 +123,6 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
         continue;
       res = execute_assignment(child, ht);
     }
-  }
   else // only element (word)
   {
     char** argv = generate_command(ast, i, ht);
@@ -125,15 +136,7 @@ static int execute_args(struct tree *ast, size_t i, struct vector *to_close,
     else
       res = 1;
   }
-  if (to_close)
-  {
-    for (size_t i = 0; i < v_size(to_close); i++)
-    {
-      int *fd = v_get(to_close, i);
-      close(*fd);
-    }
-    v_destroy(to_close, free);
-  }
+  close_and_destroy(to_close);
   return res;
 }
 

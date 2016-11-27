@@ -48,7 +48,6 @@ int main(int argc, char* argv[])
   rl_already_prompted = 1;
   g_in_readline = 0;
   set_sigacts();
-  atexit(exit_42sh);
   struct shell_tools *tools = my_malloc(sizeof (struct shell_tools));
   main_tools = tools;
   tools->sub_shell = 0;
@@ -59,6 +58,7 @@ int main(int argc, char* argv[])
   tools->ht[ALIAS] = create_hash(256);
   // Remove backslash followed by <newline> cf. 2.2.1
   tools->option = parse_options(argc, argv, tools->ht);
+  atexit(exit_42sh);
   prompt = NULL;
   rules = init_all_rules();
   tty = isatty(STDIN_FILENO);
