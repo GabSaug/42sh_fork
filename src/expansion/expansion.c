@@ -110,7 +110,7 @@ static int cmd_exp2(struct shell_tools cmd_tools, int temp_out,
     }
     size_t size_file = stat_buf.st_size;
     file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, temp_out, 0);
-    str_append(output, file, size_file, 0); // -1 ?
+    str_append(output, file, size_file, 0);
     munmap(file, size_file);
   }
   return 1;
@@ -145,7 +145,7 @@ static int cmd_expansion(struct expansion exp, struct hash_table* ht[],
   close(std_out);
   dup2(std_err, 2);
   close(std_err);
-  for (size_t i = 0; i < NB_HT; ++i)
+  for (size_t i = 0; i < NB_HT; ++i) 
     destroy_hash(cmd_tools.ht[i]);
   return 1;
 }

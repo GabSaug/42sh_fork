@@ -143,7 +143,8 @@ static struct rule *init_rule_function(void)
   // Rule 1
   rule->s_r[0].nb_sym = 6;
   rule->s_r[0].sym_arr = my_malloc(sizeof (struct symbol) * 6);
-  create_sym(rule->s_r[0].sym_arr + 0, 1, OPTIONAL, 0, FUNCTION);//TODO add rule
+  create_sym(rule->s_r[0].sym_arr + 0, 1, OPTIONAL, 0, FUNCTION);
+  //TODO add rule so 'function' token is optional
   create_sym(rule->s_r[0].sym_arr + 1, 1, MANDATORY, 0, WORD);
   create_sym(rule->s_r[0].sym_arr + 2, 1, MANDATORY, 0, L_PAR);
   create_sym(rule->s_r[0].sym_arr + 3, 1, MANDATORY, 0, R_PAR);

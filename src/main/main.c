@@ -48,6 +48,7 @@ int main(int argc, char* argv[])
   rl_already_prompted = 1;
   g_in_readline = 0;
   set_sigacts();
+  atexit(exit_42sh);
   struct shell_tools *tools = my_malloc(sizeof (struct shell_tools));
   main_tools = tools;
   tools->sub_shell = 0;
@@ -56,9 +57,7 @@ int main(int argc, char* argv[])
   tools->ht[VAR] = create_hash(256);
   tools->ht[FUN] = create_hash(256);
   tools->ht[ALIAS] = create_hash(256);
-  // Remove backslash followed by <newline> cf. 2.2.1
   tools->option = parse_options(argc, argv, tools->ht);
-  atexit(exit_42sh);
   prompt = NULL;
   rules = init_all_rules();
   tty = isatty(STDIN_FILENO);
@@ -147,24 +146,27 @@ static int process_file(struct shell_tools* tools)
   return ret;
 }
 
-static int process_input2(struct shell_tools* tools)
+static int run_ast(struct shell_tools* tools)
 {
   int ret = 0;
-  if (tools->ast != NULL)
+  for (size_t i = 0; i < v_size(tools->ast->child); ++i)
   {
-    if (!strcmp(get_data(tools->ht[VAR], "ast-print"), "1"))
-      tree_print_dot(tools->ast);
-
-    ret = run_ast(tools);
-
-    tree_destroy(tools->ast);
+    //printf("input %zu\n", i);
+    struct tree* input = v_get(tools->ast->child, i);
+    if (input == NULL)
+    {
+      warnx("Grammar error");
+      ret = 1;
+    }
+    else
+    {
+      ret = execute(input, tools->ht);
+      char* ret_itoa = my_malloc(sizeof (char) * 50);
+      sprintf(ret_itoa, "%i", ret);
+      add_hash(tools->ht[VAR], "?", ret_itoa);
+      free(ret_itoa);
+    }
   }
-  else
-  {
-    warnx("Grammar error");
-    ret = 1;
-  }
-
   return ret;
 }
 
@@ -182,7 +184,21 @@ int process_input(struct shell_tools* tools)
 
   int fit_level = 0;
   tools->ast = parse(rules, tools->v_token, &fit_level);
-  int ret = process_input2(tools);
+  int ret = 0;
+  if (tools->ast != NULL)
+  {
+    if (!strcmp(get_data(tools->ht[VAR], "ast-print"), "1"))
+      tree_print_dot(tools->ast);
+
+    ret = run_ast(tools);
+
+    tree_destroy(tools->ast);
+  }
+  else
+  {
+    warnx("Grammar error");
+    ret = 1;
+  }
 
   v_destroy(tools->v_token, token_destroy);
   tools->v_token = NULL;
