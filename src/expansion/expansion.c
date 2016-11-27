@@ -1,5 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 
 #include "expansion.h"
 #include "vector.h"
@@ -8,13 +11,16 @@
 #include "tokenize.h"
 #include "arithmetic.h"
 #include "my_malloc.h"
+#include "option_parser.h"
+#include "my_string.h"
+#include "main.h"
 
 static char* tilde_expansion(char* s, struct hash_table *ht[]);
 static char* parameter_expansion(char* s, struct hash_table *ht[]);
 static char* remove_quote(char* s);
 static struct vector* field_split(struct vector* v_input,
                                   struct hash_table *ht[]);
-static char* cmd_expansion(struct expansion);
+static int cmd_expansion(struct expansion, struct hash_table* ht[], struct str* output);
 
 struct vector* expand(char* input, int in_ari_exp, struct hash_table *ht[])
 {
@@ -54,8 +60,8 @@ struct vector* expand(char* input, int in_ari_exp, struct hash_table *ht[])
     }
     else if (exp.type == CMD)
     {
-      char* expanded_cmd = cmd_expansion(exp);
-      str_append(output, expanded_cmd, -1, 1);
+      cmd_expansion(exp, ht, output);
+      start = i_input + exp.size;
     }
     i_input += exp.size - 1;
   }
@@ -89,10 +95,55 @@ struct vector* expand(char* input, int in_ari_exp, struct hash_table *ht[])
     field_split(v);*/
 }
 
-static char* cmd_expansion(struct expansion exp)
+static int cmd_expansion(struct expansion exp, struct hash_table* ht[], struct str* output)
 {
-  printf("cmd_expansion = %.*s\n", (int)exp.content_size, exp.content_start);
-  return NULL;
+  //printf("cmd_expansion = %.*s\n", (int)exp.content_size, exp.content_start);
+  struct shell_tools cmd_tools;
+  for (size_t i = 0; i < NB_HT; ++i)
+    cmd_tools.ht[i] = cpy_hash(ht[i]);
+  cmd_tools.option.input =  my_strndup(exp.content_start, exp.content_size);
+  cmd_tools.v_token = NULL;
+  cmd_tools.ast = NULL;
+  cmd_tools.sub_shell = 1;
+  
+  int std_in = dup(0);
+  int std_out = dup(1);
+  int std_err = dup(2);
+  int temp_out = open("temp_out", O_CLOEXEC | O_RDWR | O_CREAT | O_TRUNC, 0666);
+  int temp_err = open("temp_err", O_CLOEXEC | O_RDWR | O_CREAT | O_TRUNC, 0666);
+  if (dup2(temp_out, 1) == -1 || dup2(temp_err, 2) == -1)
+    err(1, "cmd_expansion");
+  
+  int ret = process_input(&cmd_tools);
+  char* file = NULL;
+  if (ret == 0)
+  {
+    struct stat stat_buf;
+    if (stat("temp_out", &stat_buf) == -1)
+    {
+      warn("Impossible to read stat from temp_out");
+      return 0;
+    }
+    size_t size_file = stat_buf.st_size;
+    file = mmap(NULL, size_file, PROT_READ, MAP_PRIVATE, temp_out, 0);
+    //dprintf(std_out, "file=%s\n", file);
+    str_append(output, file, size_file, 0); // -1 ?
+    //dprintf(std_out, "str = %s\n", output->s);
+    munmap(file, size_file);
+  }
+
+  close(temp_out);
+  close(temp_err);
+
+  dup2(std_in, 0);
+  close(std_in);
+  dup2(std_out, 1);
+  close(std_out);
+  dup2(std_err, 2);
+  close(std_err);
+  for (size_t i = 0; i < NB_HT; ++i) 
+    destroy_hash(cmd_tools.ht[i]);
+  return 1;
 }
 
 static struct vector* field_split(struct vector* v_input,
@@ -117,13 +168,16 @@ static struct vector* field_split(struct vector* v_input,
       if (dl)
       {
         v_append(v_output, my_strndup(s + start, j - start));
-        while (strchr(ifs, s[j]))
+        while (s[j] && strchr(ifs, s[j]))
           j++;
         start = j;
+        if (!s[j])
+          break;
         //j--;
       }
     }
-    v_append(v_output, my_strndup(s + start, j - start));
+    if (start < j)
+      v_append(v_output, my_strndup(s + start, j - start));
   }
   v_destroy(v_input, free);
   return v_output;
@@ -214,7 +268,7 @@ static char* tilde_expansion(char* input, struct hash_table *ht[])
 
   else
   {
-    printf("tilde expansion = %.*s\n", (int)(end_tp), input);
+    //printf("tilde expansion = %.*s\n", (int)(end_tp), input);
     return input;
 
   }
