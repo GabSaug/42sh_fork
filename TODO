@@ -26,7 +26,7 @@
           [X] Variables
           [X] Quoting removal
           [ ] Path
-          [ ] Arithmetic
+          [X] Arithmetic
           [ ] Aliases
           [ ] Path, level chalenge
      [ ] Builtin commands
