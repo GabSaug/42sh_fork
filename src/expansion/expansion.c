@@ -145,8 +145,8 @@ static int cmd_expansion(struct expansion exp, struct hash_table* ht[],
   close(std_out);
   dup2(std_err, 2);
   close(std_err);
-  for (size_t i = 0; i < NB_HT; ++i)
-    destroy_hash(cmd_tools.ht[i]);
+  for (size_t ii = 0; ii < NB_HT; ++ii)
+    destroy_hash(cmd_tools.ht[ii]);
   return 1;
 }
 
