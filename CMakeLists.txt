@@ -1,10 +1,10 @@
 cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_C_COMPILER "gcc")
-set(CMAKE_C_FLAGS "-Wall -Wextra -std=c99 -pedantic -g")
+set(CMAKE_C_FLAGS "-Wall -Wextra -std=c99 -pedantic -g -O0 -fno-inline")
 set(CMAKE_C_FLAGS_DEBUG "-g")
-set(CMAKE_C_FLAGS_RELEASE "-O2")
-set(BIN_NAME "42sh")
+set(CMAKE_C_FLAGS_RELEASE "-O0")
+set(BIN_NAME "bin/42sh")
 
 include_directories(src/main
                     src/signals
