@@ -64,9 +64,9 @@ char *expand_word(struct vector *exp)
   char *res = malloc(len + 1);
   res[0] = '\0';
 
-  for (size_t i = 0; i < v_size(exp); i++)
+  for (size_t ii = 0; ii < v_size(exp); ii++)
   {
-    char *tmp = v_get(exp, i);
+    char *tmp = v_get(exp, ii);
     res = strcat(res, tmp);
   }
 
